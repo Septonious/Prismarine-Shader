@@ -20,7 +20,7 @@ uniform int worldTime;
 
 uniform float blindFactor;
 uniform float rainStrength;
-uniform float shadowFade, voidFade;
+uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 
 uniform ivec2 eyeBrightnessSmooth;

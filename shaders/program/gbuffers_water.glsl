@@ -34,7 +34,6 @@ uniform float blindFactor, nightVision;
 uniform float far, near;
 uniform float frameTimeCounter;
 uniform float rainStrength;
-uniform float screenBrightness; 
 uniform float shadowFade, voidFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
@@ -269,11 +268,6 @@ void main() {
 		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
 		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
 		lightmap.x = max(lightmap.x, handlight);
-		#endif
-
-		#ifdef TOON_LIGHTMAP
-		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
 		#endif
 
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
@@ -513,19 +507,7 @@ void main() {
 
 		Fog(albedo.rgb, viewPos);
 
-		// if((isEyeInWater == 0 && water > 0.5) || (isEyeInWater == 1 && water < 0.5)) {
-		// 	float oDepth = texture2D(depthtex1, screenPos.xy).r;
-		// 	vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
-		// 	#ifdef TAA
-		// 	vec3 oViewPos = ToNDC(vec3(TAAJitter(oScreenPos.xy, -0.5), oScreenPos.z));
-		// 	#else
-		// 	vec3 oViewPos = ToNDC(oScreenPos);
-		// 	#endif
 
-		// 	vec4 waterFog = GetWaterFog(viewPos.xyz - oViewPos);
-		// 	albedo = mix(waterFog, vec4(albedo.rgb, 1.0), albedo.a);
-		// }
-		//albedo.a = fract(worldPos.x + cameraPosition.x);
 
 		#if ALPHA_BLEND == 0
 		albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
@@ -587,6 +569,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
 //Common Functions//
+#ifdef WAVING_LIQUID
 float WavingWater(vec3 worldPos) {
 	float fractY = fract(worldPos.y + cameraPosition.y + 0.005);
 		
@@ -596,6 +579,7 @@ float WavingWater(vec3 worldPos) {
 	
 	return 0.0;
 }
+#endif
 
 //Includes//
 #ifdef TAA

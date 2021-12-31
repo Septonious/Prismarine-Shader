@@ -31,8 +31,7 @@ uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
-uniform mat4 gbufferProjection, gbufferPreviousProjection, gbufferProjectionInverse;
-uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
+uniform mat4 gbufferModelViewInverse, gbufferPreviousModelView, gbufferProjection, gbufferProjectionInverse, gbufferPreviousProjection;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
@@ -124,9 +123,9 @@ float GetAmbientOcclusion(float z){
 		tw += wg;
 	}
 	ao /= tw;
-	if(tw < 0.0001) ao = texture2DLod(colortex4, texCoord, 2).r;
+
+	if (tw < 0.0001) ao = texture2DLod(colortex4, texCoord, 2).r;
 	
-	//return pow(texture2DLod(colortex4, texCoord, 2.0).r, AO_STRENGTH);
 	return pow(ao, AO_STRENGTH);
 }
 #endif
@@ -151,12 +150,6 @@ void GlowOutline(inout vec3 color){
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/atmospherics/fog.glsl"
-
-#ifdef OUTLINE_ENABLED
-#include "/lib/util/outlineOffset.glsl"
-#include "/lib/atmospherics/waterFog.glsl"
-#include "/lib/post/outline.glsl"
-#endif
 
 #if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
 #include "/lib/util/encode.glsl"
@@ -184,13 +177,6 @@ void main() {
 	vec4 screenPos = vec4(texCoord, z, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
-
-	#ifdef OUTLINE_ENABLED
-	vec4 outerOutline = vec4(0.0), innerOutline = vec4(0.0);
-	Outline(color.rgb, false, outerOutline, innerOutline);
-
-	color.rgb = mix(color.rgb, innerOutline.rgb, innerOutline.a);
-	#endif
 
 	if (z < 1.0) {
 		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
@@ -262,6 +248,7 @@ void main() {
 		#ifdef NETHER
 		color.rgb = netherCol.rgb * 0.04;
 		#endif
+
 		#if defined END && !defined LIGHT_SHAFT
 		float VoL = dot(normalize(viewPos.xyz), lightVec);
 		VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
@@ -269,24 +256,14 @@ void main() {
 		#endif
 
 		if (isEyeInWater == 2) {
-			#ifdef EMISSIVE_RECOLOR
-			color.rgb = pow(blocklightCol / BLOCKLIGHT_I, vec3(4.0)) * 2.0;
-			#else
 			color.rgb = vec3(1.0, 0.3, 0.01);
-			#endif
 		}
 
 		if (blindFactor > 0.0) color.rgb *= 1.0 - blindFactor;
 	}
 
-	#ifdef OUTLINE_ENABLED
-	color.rgb = mix(color.rgb, outerOutline.rgb, outerOutline.a);
-	#endif
-
-	#if MC_VERSION >= 10900
 	float isGlowing = texture2D(colortex3, texCoord).b;
 	if (isGlowing > 0.5) GlowOutline(color.rgb);
-	#endif
 
 	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;
 

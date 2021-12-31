@@ -5,15 +5,6 @@ uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
 #endif
 
-/*
-uniform sampler2D shadowtex0;
-
-#ifdef SHADOW_COLOR
-uniform sampler2D shadowtex1;
-uniform sampler2D shadowcolor0;
-#endif
-*/
-
 vec2 shadowOffsets[9] = vec2[9](
     vec2( 0.0, 0.0),
     vec2( 0.0, 1.0),
@@ -29,14 +20,6 @@ vec2 shadowOffsets[9] = vec2[9](
 float biasDistribution[10] = float[10](
     0.0, 0.057, 0.118, 0.184, 0.255, 0.333, 0.423, 0.529, 0.667, 1.0
 );
-
-/*
-float texture2DShadow(sampler2D shadowtex, vec3 shadowPos) {
-    float shadow = texture2D(shadowtex,shadowPos.st).x;
-    shadow = clamp((shadow-shadowPos.z)*65536.0,0.0,1.0);
-    return shadow;
-}
-*/
 
 vec3 DistortShadow(vec3 worldPos, float distortFactor) {
 	worldPos.xy /= distortFactor;

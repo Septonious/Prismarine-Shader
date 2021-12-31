@@ -35,7 +35,6 @@ uniform int worldTime;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
-uniform float screenBrightness; 
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
@@ -138,17 +137,20 @@ void main() {
 	albedo.rgb = mix(albedo.rgb, entityColor.rgb, entityColor.a);
 	
 	float lightningBolt = float(entityId == 10101);
-	if(lightningBolt > 0.5) {
+	if (lightningBolt > 0.5) {
 		#ifdef OVERWORLD
 		albedo.rgb = weatherCol.rgb / weatherCol.a;
 		albedo.rgb *= albedo.rgb * albedo.rgb;
 		#endif
+
 		#ifdef NETHER
 		albedo.rgb = sqrt(netherCol.rgb / netherCol.a);
 		#endif
+
 		#ifdef END
 		albedo.rgb = endCol.rgb / endCol.a;
 		#endif
+
 		albedo.a = 1.0;
 	}
 
@@ -194,11 +196,6 @@ void main() {
 		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
 		lightmap.x = max(lightmap.x, handlight);
 		#endif
-
-		#ifdef TOON_LIGHTMAP
-		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
-		#endif
 		
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 
@@ -223,10 +220,12 @@ void main() {
 		#endif
 
 		float doParallax = 0.0;
+		
 		#ifdef SELF_SHADOW
 		#ifdef OVERWORLD
 		doParallax = float(lightmap.y > 0.0 && NoL > 0.0);
 		#endif
+
 		#ifdef END
 		doParallax = float(NoL > 0.0);
 		#endif

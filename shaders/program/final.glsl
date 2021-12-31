@@ -63,10 +63,6 @@ void SharpenFilter(inout vec3 color, vec2 coord) {
 //Program//
 void main() {
     vec2 newTexCoord = texCoord;
-	#ifdef RETRO_FILTER
-    vec2 view = vec2(viewWidth, viewHeight) * 0.5;
-	newTexCoord = floor(newTexCoord * view) / view;
-	#endif
 
 	vec3 color = texture2DLod(colortex1, newTexCoord, 0).rgb;
 	

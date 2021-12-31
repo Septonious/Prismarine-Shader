@@ -18,7 +18,7 @@ uniform float viewWidth, viewHeight, aspectRatio;
 uniform sampler2D colortex1;
 
 //Optifine Constants//
-#ifdef LIGHTSHAFT
+#ifdef LIGHT_SHAFT
 const bool colortex1MipmapEnabled = true;
 #endif
 

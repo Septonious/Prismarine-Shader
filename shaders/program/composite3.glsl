@@ -109,22 +109,12 @@ vec3 DepthOfField(vec3 color, float z) {
 	return dof;
 }
 
-//Includes//
-#ifdef OUTLINE_OUTER
-#include "/lib/util/outlineOffset.glsl"
-#include "/lib/util/outlineDepth.glsl"
-#endif
-
 //Program//
 void main() {
 	vec3 color = texture2DLod(colortex0, texCoord, 0.0).rgb;
 	
 	#ifdef DOF
 	float z = texture2D(depthtex1, texCoord.st).x;
-
-	#ifdef OUTLINE_OUTER
-	DepthOutline(z);
-	#endif
 
 	color = DepthOfField(color, z);
 	#endif

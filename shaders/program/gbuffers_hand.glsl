@@ -37,7 +37,6 @@ uniform int worldTime;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
-uniform float screenBrightness; 
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
@@ -139,12 +138,7 @@ void main() {
 	#endif
 
 	if (albedo.a > 0.001) {
-		#ifdef TOON_LIGHTMAP
-		vec2 lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
-		#else
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-		#endif
 		lightmap.x = max(lightmap.x, GetHandItem(213));
 
 		float emissive = (GetHandItem(50) + GetHandItem(89) + GetHandItem(213));
@@ -189,22 +183,7 @@ void main() {
 		lightmap.x = max(lightmap.x, handlight);
 		#endif
 
-		#ifdef TOON_LIGHTMAP
-		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
-		#endif
-
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
-
-		float doRecolor = GetHandItem(89) + GetHandItem(213);
-
-		float ec = GetLuminance(albedo.rgb) * 1.7;
-		#ifdef EMISSIVE_RECOLOR
-		if (doRecolor > 0.5) {
-			albedo.rgb = blocklightCol * pow(ec, 1.5) / (BLOCKLIGHT_I * BLOCKLIGHT_I);
-			albedo.rgb /= 0.7 * albedo.rgb + 0.7;
-		}
-		#endif
 
 		#ifdef WHITE_WORLD
 		albedo.rgb = vec3(0.35);

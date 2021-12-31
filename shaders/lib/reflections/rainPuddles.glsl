@@ -37,8 +37,6 @@ float GetRipple(vec3 worldPos, vec2 offset) {
     ripple = sin(min(ripple * 6.0 * 3.1415, 3.0 * 3.1415)) * pow(1.0 - fract(rippleTime), 2.0);
     val += ripple * 0.3;
 
-    //if(pposfr.x < 0.01 || pposfr.y < 0.01) val += 0.85;
-
 	return val;
 }
 

@@ -13,12 +13,12 @@ https://bitslablab.com
 varying vec2 texCoord;
 
 //Uniforms//
-uniform float viewWidth, viewHeight, aspectRatio;
+uniform float viewWidth, viewHeight;
 
 uniform vec3 cameraPosition, previousCameraPosition;
 
 uniform mat4 gbufferPreviousProjection, gbufferProjectionInverse;
-uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
+uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
 
 uniform sampler2D colortex0;
 uniform sampler2D depthtex1;
@@ -67,11 +67,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 //Includes//
 #include "/lib/util/dither.glsl"
 
-#ifdef OUTLINE_OUTER
-#include "/lib/util/outlineOffset.glsl"
-#include "/lib/util/outlineDepth.glsl"
-#endif
-
 //Program//
 void main() {
     vec3 color = texture2DLod(colortex0, texCoord, 0.0).rgb;
@@ -79,10 +74,6 @@ void main() {
 	#ifdef MOTION_BLUR
 	float z = texture2D(depthtex1, texCoord.st).x;
 	float dither = Bayer64(gl_FragCoord.xy);
-
-	#ifdef OUTLINE_OUTER
-	DepthOutline(z);
-	#endif
 
 	color = MotionBlur(color, z, dither);
 	#endif

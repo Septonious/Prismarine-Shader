@@ -26,7 +26,6 @@ uniform float blindFactor, nightVision;
 uniform float far, near;
 uniform float frameTimeCounter;
 uniform float rainStrength;
-uniform float screenBrightness; 
 uniform float shadowFade, voidFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
@@ -110,11 +109,6 @@ void main() {
 		lightmap.x = max(lightmap.x, handlight);
 		#endif
 
-		#ifdef TOON_LIGHTMAP
-		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
-		#endif
-
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 
 		#ifdef WHITE_WORLD
@@ -122,7 +116,6 @@ void main() {
 		#endif
 
 		float NoL = 1.0;
-		//NoL = clamp(dot(normal, lightVec) * 1.01 - 0.01, 0.0, 1.0);
 
 		float NoU = clamp(dot(normal, upVec), -1.0, 1.0);
 		float NoE = clamp(dot(normal, eastVec), -1.0, 1.0);

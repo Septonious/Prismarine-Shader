@@ -35,7 +35,6 @@ uniform int worldTime;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
-uniform float screenBrightness; 
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
@@ -193,11 +192,6 @@ void main() {
 		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
 		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
 		lightmap.x = max(lightmap.x, handlight);
-		#endif
-
-		#ifdef TOON_LIGHTMAP
-		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
 		#endif
 		
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));

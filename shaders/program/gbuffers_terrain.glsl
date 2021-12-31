@@ -186,25 +186,7 @@ void main() {
 		lightmap.x = max(lightmap.x, handlight);
 		#endif
 
-		#ifdef TOON_LIGHTMAP
-		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
-		#endif
-
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
-
-		#ifdef EMISSIVE_RECOLOR
-		float ec = GetLuminance(albedo.rgb) * 1.7;
-		if (recolor > 0.5) {
-			albedo.rgb = blocklightCol * pow(ec, 1.5) / (BLOCKLIGHT_I * BLOCKLIGHT_I);
-			albedo.rgb /= 0.7 * albedo.rgb + 0.7;
-		}
-		if (lava > 0.5) {
-			albedo.rgb = pow(blocklightCol * ec / BLOCKLIGHT_I, vec3(2.0));
-			albedo.rgb /= 0.5 * albedo.rgb + 0.5;
-		}
-		#else
-		#endif
 
 		#ifdef WHITE_WORLD
 		albedo.rgb = vec3(0.35);
@@ -244,9 +226,11 @@ void main() {
 		float doParallax = 0.0;
 		#ifdef SELF_SHADOW
 		float pNoL = dot(outNormal, lightVec);
+
 		#ifdef OVERWORLD
 		doParallax = float(lightmap.y > 0.0 && pNoL > 0.0);
 		#endif
+		
 		#ifdef END
 		doParallax = float(pNoL > 0.0);
 		#endif

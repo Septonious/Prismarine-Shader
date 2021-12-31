@@ -27,9 +27,6 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     #endif
 
     vec3 sky = skyCol * baseGradient / (SKY_I * SKY_I);
-    #ifdef SKY_VANILLA
-    sky = mix(sky, fogCol * baseGradient, pow(1.0 - max(VoU, 0.0), 4.0));
-    #endif
     sky = sky / sqrt(sky * sky + 1.0) * exposure * sunVisibility * (SKY_I * SKY_I);
 
     float sunMix = (VoL * 0.5 + 0.5) * pow(clamp(1.0 - VoU, 0.0, 1.0), 2.0 - sunVisibility) *

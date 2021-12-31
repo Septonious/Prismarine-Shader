@@ -27,14 +27,9 @@ uniform sampler2D colortex2;
 uniform sampler2D depthtex1;
 
 //Optifine Constants//
-#ifdef LIGHTSHAFT
+#ifdef LIGHT_SHAFT
 const bool colortex1MipmapEnabled = true;
 #endif
-
-//Common Functions//
-float GetLuminance(vec3 color) {
-	return dot(color, vec3(0.299, 0.587, 0.114));
-}
 
 //Includes//
 #include "/lib/antialiasing/taa.glsl"
