@@ -37,7 +37,7 @@ vec4 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
                 #if defined NETHER_SMOKE
                 float noise = getFogSample(wpos.xyz, 40.0, 256.0);
                 #elif defined END_SMOKE
-                float noise = getFogSample(wpos.xyz, 60.0, 128.0);
+                float noise = getFogSample(wpos.xyz, 50.0, 256.0);
                 #endif
 
                 #if defined NETHER_SMOKE

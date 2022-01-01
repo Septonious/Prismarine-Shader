@@ -39,7 +39,7 @@ Please don't edit anything from Undefine section and onwards.
 //#define VOLUMETRIC_CLOUDS
   #define NETHER_SMOKE
   #define END_SMOKE
-//#define LIGHTSHAFT_CLOUDY_NOISE
+  #define LIGHTSHAFT_CLOUDY_NOISE
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

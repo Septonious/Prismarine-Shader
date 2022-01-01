@@ -16,7 +16,7 @@ varying vec2 texCoord;
 uniform sampler2D colortex1;
 
 uniform float viewWidth, viewHeight;
-uniform float aspectRatio, frameTimeCounter;
+uniform float aspectRatio;
 
 //Optifine Constants//
 /*
@@ -75,7 +75,7 @@ void main() {
 	color += texture2DLod(colortex1, mix(newTexCoord, vec2(0.5), caScale * caStrength * 0.5), 0).rgb * vec3(0.0,0.5,0.5);
 	color += texture2DLod(colortex1, mix(newTexCoord, vec2(0.5), caScale* caStrength), 0).rgb * vec3(0.0,0.0,1.0);
 
-	color /= vec3(1.5,2.0,1.5);
+	color /= vec3(1.5, 2.0, 1.5);
 	#endif
 	
 	#ifdef TAA

@@ -53,8 +53,8 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 							waterColor.rgb / (waterColor.a * waterColor.a),
 							pow(waterAlpha, 0.25));
 		
-		for(int i = 0; i < 7; i++) {
-			float minDist = exp2(i + dither) - 0.95;
+		for(int i = 0; i < 8; i++) {
+			float minDist = 8.0 * (exp2(i + dither) - 0.95);
 
 			if (depth1 < minDist || minDist >= maxDist || (depth0 < minDist && color == vec3(0.0))) {
 				break;
@@ -77,11 +77,17 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 					}
 				}
 				#endif
+
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
 				else if (isEyeInWater == 1.0) shadow *= watercol * 0.01 * (1.0 + eBS);
 				
+				#ifdef LIGHTSHAFT_CLOUDY_NOISE
+				float noise = getFogSample(worldposition.xyz + cameraPosition.xyz, 60.0, 128.0);
+				shadow *= noise;
+				#endif
+
 				vl += shadow;
 			}
 		}
