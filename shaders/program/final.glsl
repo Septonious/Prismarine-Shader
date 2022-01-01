@@ -39,24 +39,41 @@ const float drynessHalflife = 50.0;
 const float wetnessHalflife = 300.0;
 
 //Common Functions//
-#ifdef TAA
-vec2 sharpenOffsets[4] = vec2[4](
-	vec2( 1.0,  0.0),
-	vec2( 0.0,  1.0),
-	vec2(-1.0,  0.0),
-	vec2( 0.0, -1.0)
-);
+#if defined CAS || defined TAA
+void ContrastAdaptiveSharpening(out vec3 outColor, in vec2 texCoord){
+    vec2 uv = texCoord * MC_RENDER_QUALITY;
+  
+    vec3 originalColor = texture2D(colortex1, uv).rgb;
 
-void SharpenFilter(inout vec3 color, vec2 coord) {
-	float mult = MC_RENDER_QUALITY * 0.0625;
-	vec2 view = 1.0 / vec2(viewWidth, viewHeight);
+    float maxGreen = originalColor.g;
+    float minGreen = originalColor.g;
 
-	color *= MC_RENDER_QUALITY * 0.25 + 1.0;
+    vec4 uvoff = vec4(1.0, 0.0, 1.0, -1.0) / vec4(vec2(viewWidth, viewWidth), vec2(viewHeight, viewHeight));
+    vec3 modifiedColor = vec3(0.0);
+    vec3 newColor = texture2D(colortex1, uv + uvoff.yw).rgb;
+    maxGreen = max(maxGreen, newColor.g);
+    minGreen = min(minGreen, newColor.g);
+    modifiedColor = newColor;
+    	 newColor = texture2D(colortex1, uv + uvoff.xy).rgb;
+    maxGreen = max(maxGreen, newColor.g);
+    minGreen = min(minGreen, newColor.g);
+    modifiedColor += newColor;
+    	 newColor = texture2D(colortex1, uv + uvoff.yz).rgb;
+    maxGreen = max(maxGreen, newColor.g);
+    minGreen = min(minGreen, newColor.g);
+    modifiedColor += newColor;
+    	 newColor = texture2D(colortex1, uv - uvoff.xy).rgb;
+    maxGreen = max(maxGreen, newColor.g);
+    minGreen = min(minGreen, newColor.g);
+    modifiedColor += newColor;
+    float adaptiveSharpening = 0.0;
+    maxGreen = max(0.0, maxGreen);
 
-	for(int i = 0; i < 4; i++) {
-		vec2 offset = sharpenOffsets[i] * view;
-		color -= texture2DLod(colortex1, coord + offset, 0).rgb * mult;
-	}
+    adaptiveSharpening = minGreen / maxGreen;
+
+    adaptiveSharpening = sqrt(max(0.0, adaptiveSharpening));
+    adaptiveSharpening *= mix(-0.125, -0.2, 0.75);
+    outColor = (originalColor + modifiedColor * adaptiveSharpening) / (1.0 + 4.0 * adaptiveSharpening);
 }
 #endif
 
@@ -78,8 +95,8 @@ void main() {
 	color /= vec3(1.5, 2.0, 1.5);
 	#endif
 	
-	#ifdef TAA
-	SharpenFilter(color, newTexCoord);
+	#if defined TAA || defined CAS
+	ContrastAdpativeSharpening(color, newTexCoord);
 	#endif
 
 	gl_FragColor = vec4(color, 1.0);
