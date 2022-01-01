@@ -133,7 +133,7 @@ void BlindFog(inout vec3 color, vec3 viewPos) {
 
 vec3 denseFogColor[2] = vec3[2](
 	vec3(1.0, 0.3, 0.01),
-	vec3(0.1, 0.16, 0.2)
+	vec3(0.1, 0.16, 0.2) * clamp(timeBrightness, 0.25, 1.0)
 );
 
 void DenseFog(inout vec3 color, vec3 viewPos) {
