@@ -16,26 +16,26 @@ vec4 GetWorldSpace(float shadowdepth, vec2 texCoord) {
 	return wpos;
 }
 
+#if defined LIGHTSHAFT_CLOUDY_NOISE || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
 float InterleavedGradientNoiseVL() {
 	float n = 52.9829189 * fract(0.06711056 * gl_FragCoord.x + 0.00583715 * gl_FragCoord.y);
 
 	return fract(n);
 }
 
-#if defined LIGHTSHAFT_CLOUDY_NOISE || defined NETHER_SMOKE || defined END_SMOKE
-float getFogNoise(vec3 pos) {
-	pos /= 12.0;
-	pos.xz *= 0.25;
+float getCloudNoise(vec3 pos){
+	pos *= 0.50;
+	pos.xz *= 0.40;
 
 	vec3 u = floor(pos);
 	vec3 v = fract(pos);
+	v = v * v * (3.0 - 2.0 * v);
 
-	v = (v * v) * (3.0 - 2.0 * v);
 	vec2 uv = u.xz + v.xz + u.y * 16.0;
 
 	vec2 coord = uv / 64.0;
-	float a = texture2DLod(noisetex, coord, 2.0).r * 1.2;
-	float b = texture2DLod(noisetex, coord + 0.25, 2.0).r * 1.2;
+	float a = texture2D(noisetex, coord).r;
+	float b = texture2D(noisetex, coord + 0.25).r;
 		
 	return mix(a, b, v.y);
 }
@@ -44,24 +44,22 @@ float getFogSample(vec3 pos, float height, float verticalThickness){
 	float sampleHeight = pow(abs(height - pos.y) / verticalThickness, 2.0);
 	vec3 wind = vec3(frametime, 0.0, 0.0);
 
-	#ifdef OVERWORLD
-	pos *= 0.75;
+	pos *= 0.50;
+
+	#ifdef NETHER
+	wind.r *= 3.0;
 	#endif
 
-	float noise = getFogNoise(pos * 1.000 - wind * 0.50);
-		  noise+= getFogNoise(pos * 0.500 + wind * 2.00);
-          noise+= getFogNoise(pos * 0.250 - wind * 0.25);
-          noise+= getFogNoise(pos * 0.125 + wind * 1.00);
+	float noise = getCloudNoise(pos * 1.000 - wind * 0.2);
+		  noise+= getCloudNoise(pos * 0.500 + wind * 0.3);
+          noise+= getCloudNoise(pos * 0.250 - wind * 0.1);
+          noise+= getCloudNoise(pos * 0.125 + wind * 0.4);
 
-	#ifdef END
-	noise *= 1.1;
+	#ifdef NETHER
+	noise *= 0.8;
 	#endif
 
-	#ifdef OVERWORLD
-	noise *= 1.25;
-	#endif
-
-	noise = clamp(noise * 0.75 - (1.0 + sampleHeight), 0.0, 1.0);
+	noise = clamp(noise * 0.65 - (1.0 + sampleHeight), 0.0, 1.0);
 
 	return noise;
 }

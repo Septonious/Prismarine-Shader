@@ -42,6 +42,7 @@ uniform sampler2D depthtex0;
 
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferProjectionInverse;
 
 uniform sampler2D colortex1;
 uniform sampler2D depthtex1;
@@ -51,10 +52,7 @@ uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
 #endif
 
-uniform mat4 gbufferProjectionInverse;
-
 #ifdef LIGHT_SHAFT
-uniform mat4 gbufferProjection;
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 

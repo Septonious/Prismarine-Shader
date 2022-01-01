@@ -17,20 +17,24 @@ varying vec3 sunVec, upVec;
 #endif
 
 //Uniforms//
+#ifdef LIGHT_SHAFT
 uniform int isEyeInWater;
 
-#ifdef LIGHT_SHAFT
 uniform float blindFactor;
 uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 #endif
 
-uniform ivec2 eyeBrightnessSmooth;
-
 uniform sampler2D colortex0;
 
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+uniform ivec2 eyeBrightnessSmooth;
+
+#ifdef BLUR_FILTERING
+uniform float viewWidth, viewHeight;
+#endif
+
 uniform sampler2D colortex1;
 #endif
 
@@ -40,15 +44,20 @@ const bool colortex1MipmapEnabled = true;
 #endif
 
 //Common Variables//
-float eBS = eyeBrightnessSmooth.y / 240.0;
-
 #ifdef LIGHT_SHAFT
+float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 #endif
 
 //Includes//
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+#ifdef BLUR_FILTERING
+#include "/lib/filters/blur.glsl"
+#endif
+
 #ifdef LIGHT_SHAFT
 #include "/lib/color/lightColor.glsl"
+#endif
 #endif
 
 //Program//
@@ -56,7 +65,11 @@ void main() {
     vec4 color = texture2D(colortex0, texCoord.xy);
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+	#ifdef BLUR_FILTERING
+	vec4 vl = GaussianBlur(colortex1, texCoord.xy);
+	#else
 	vec4 vl = texture2DLod(colortex1, texCoord.xy, 1.0);
+	#endif
 	vl.rgb *= vl.rgb;
 	#endif
 

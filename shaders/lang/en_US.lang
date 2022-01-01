@@ -69,9 +69,9 @@ screen.WAVING=Waving Blocks
 screen.CURVATURE=Curvature
 
 #Settings
-option.ABOUT=Prismarine shader, rewrite stage 5
-option.ABOUT.comment=github.com/Septonious/Prismarine-Shader
-value.ABOUT.0=by Septonious
+option.ABOUT=Prismarine Shader
+option.ABOUT.comment=https://www.curseforge.com/minecraft/customization/prismarine-shader/
+value.ABOUT.0=By Septonious
 
 #Lighting
 option.shadowMapResolution=Shadowmap Quality
@@ -241,10 +241,11 @@ option.NORMAL_PLANTS.comment=Adjusts plant shading. §e[*]§rDisable this if non
 
 #Atmospherics
 option.CLOUDS=Clouds
-option.CLOUDS.comment=Enables clouds. §a[+]§rDefault clouds benefits from TAA. §e[*]§rVanilla clouds requires vanilla cloud setting set to default or on.
+option.CLOUDS.comment=Enables clouds. §e[+]§rPlanar clouds have a low performance impact. §e[*]§rVanilla clouds requires vanilla cloud setting set to default or on. §c[+]§rPlanar clouds have a high performance impact.
 value.CLOUDS.0=§cOFF
-value.CLOUDS.1=Default
+value.CLOUDS.1=Planar
 value.CLOUDS.2=Vanilla
+value.CLOUDS.3=volumetric
 
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
@@ -268,7 +269,7 @@ value.DISTANT_FADE_STYLE.0=Spherical
 value.DISTANT_FADE_STYLE.1=Cylindrical
 
 option.WEATHER_PERBIOME=Per Biome Weather
-option.WEATHER_PERBIOME.comment=Use varied weather color for different biomes. §c[-]§rMay not work under unknown conditions.
+option.WEATHER_PERBIOME.comment=Use varied weather color for different biomes.
 
 option.UNDERGROUND_SKY=Underground Sky Fix
 option.UNDERGROUND_SKY.comment=Hides the sky when the player is in dark area and under sea level (Y: 62). §c[-]§rNot suitable for low superflat worlds.

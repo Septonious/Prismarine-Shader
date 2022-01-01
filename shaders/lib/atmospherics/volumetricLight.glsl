@@ -13,7 +13,7 @@ vec4 GetShadowSpace(vec4 wpos) {
 	
 	float distb = sqrt(wpos.x * wpos.x + wpos.y * wpos.y);
 	float distortFactor = 1.0 - shadowMapBias + distb * shadowMapBias;
-	wpos = DistortShadow(wpos,distortFactor);
+	wpos = DistortShadow(wpos, distortFactor);
 	
 	return wpos;
 }
@@ -38,7 +38,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75);
-	visibility *= 16.0 * (1.0 - rainStrength) * (1.0 - moonVisibility) * (1.0 - timeBrightness);
+	visibility *= 8.0 * (1.0 - rainStrength) * (1.0 - moonVisibility) * (1.0 - timeBrightness);
 	#endif
 
 	if (visibility > 0.0) {

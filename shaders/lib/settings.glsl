@@ -37,6 +37,7 @@ Please don't edit anything from Undefine section and onwards.
   #define NETHER_SMOKE
   #define END_SMOKE
   #define LIGHTSHAFT_CLOUDY_NOISE
+  #define BLUR_FILTERING
 
   #define END_NEBULA
   #define OVERWORLD_NEBULA
@@ -117,7 +118,7 @@ Please don't edit anything from Undefine section and onwards.
   #define ALPHA_BLEND 0 //[0 1]
 
 //Atmospherics//
-  #define CLOUDS 1 //[0 1 2]
+  #define CLOUDS 1 //[0 1 2 3]
   #define STARS
   #define SKY_DESATURATION
 //#define AURORA
