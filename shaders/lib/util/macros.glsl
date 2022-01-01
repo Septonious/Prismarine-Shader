@@ -1,15 +1,15 @@
 #define pow2(x) x*x
 #define pow6(x) x*x*x*x*x*x
-#define pow4(x) pow2(x) * pow2(x)
-#define pow8(x) pow2(x) * pow4(x)
-#define pow12(x) pow2(x) * pow6(x)
-#define pow16(x) pow2(x) * pow8(x)
-#define pow24(x) pow2(x) * pow12(x)
-#define pow32(x) pow2(x) * pow16(x)
-#define pow64(x) pow2(x) * pow32(x)
-#define pow128(x) pow2(x) * pow64(x)
-#define pow256(x) pow2(x) * pow128(x)
-#define pow512(x) pow2(x) * pow256(x)
+#define pow4(x) pow2(pow2(x))
+#define pow8(x) pow2(pow4(x))
+#define pow12(x) pow2(pow6(x))
+#define pow16(x) pow2(pow8(x))
+#define pow24(x) pow2(pow12(x))
+#define pow32(x) pow2(pow16(x))
+#define pow64(x) pow2(pow32(x))
+#define pow128(x) pow2(pow64(x))
+#define pow256(x) pow2(pow128(x))
+#define pow512(x) pow2(pow256(x))
 
 #define sum3(x) x+x+x
 #define sum4(x) x+x+x+x
