@@ -42,11 +42,12 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 void main() {
     vec4 color = texture2D(colortex0, texCoord.xy);
 	
+	#ifdef LIGHT_SHAFT
 	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
 	vl *= vl;
 
 	#ifdef OVERWORLD
-    vl *= lightCol * 0.25;
+    vl *= lightCol * 0.1;
 	#endif
 
 	#ifdef END
@@ -57,6 +58,7 @@ void main() {
 		  (1.0 - blindFactor);
 	
 	color.rgb += vl;
+	#endif
 	
 	/*DRAWBUFFERS:0*/
 	gl_FragData[0] = color;

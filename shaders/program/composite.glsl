@@ -81,6 +81,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 void main() {
     vec4 color = texture2D(colortex0, texCoord);
     vec3 translucent = texture2D(colortex1,texCoord).rgb;
+
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
 
@@ -98,19 +99,17 @@ void main() {
 		color.rgb = mix(sqrt(color.rgb), sqrt(waterFog.rgb), waterFog.a);
 		color.rgb *= color.rgb;
 	}
-	
+
 	#ifdef LIGHT_SHAFT
 	float dither = Bayer64(gl_FragCoord.xy);
 	vec3 vl = GetLightShafts(z0, z1, translucent, dither);
+	#else
+	vec3 vl = vec3(0.0);
 	#endif
 	
-    /* DRAWBUFFERS:0 */
+    /* DRAWBUFFERS:01 */
 	gl_FragData[0] = color;
-
-	#ifdef LIGHT_SHAFT
-	/* DRAWBUFFERS:01 */
 	gl_FragData[1] = vec4(vl, 1.0);
-	#endif
 	
     #ifdef REFLECTION_PREVIOUS
 	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;
