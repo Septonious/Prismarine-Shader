@@ -409,7 +409,11 @@ void main() {
 
 				#ifdef OVERWORLD
 				#ifdef AURORA
-				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
+				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8);
+				#endif
+
+				#ifdef OVERWORLD_NEBULA
+				skyReflection.rgb += DrawNebula(skyRefPos.xyz * 100.0);
 				#endif
 
 				#if CLOUDS == 1
@@ -464,9 +468,13 @@ void main() {
 					skyReflection = GetSkyColor(skyRefPos, true);
 					
 					#ifdef AURORA
-					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
+					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8);
 					#endif
-					
+
+					#ifdef OVERWORLD_NEBULA
+					skyReflection.rgb += DrawNebula(skyRefPos.xyz * 100.0);
+					#endif
+
 					#if CLOUDS == 1
 					vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
 					skyReflection = mix(skyReflection, cloud.rgb, cloud.a);

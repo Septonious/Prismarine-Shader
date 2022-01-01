@@ -157,7 +157,7 @@ void GlowOutline(inout vec3 color){
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/materialDeferred.glsl"
 #include "/lib/reflections/roughReflections.glsl"
-#ifdef OVERWORLD
+#if (defined OVERWORLD && CLOUDS == 1) || defined END_NEBULA || defined OVERWORLD_NEBULA
 #include "/lib/atmospherics/clouds.glsl"
 #endif
 #endif
@@ -205,7 +205,11 @@ void main() {
 				#endif
 
 				#ifdef AURORA
-				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12) * cloudMixRate;
+				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8) * cloudMixRate;
+				#endif
+
+				#ifdef OVERWORLD_NEBULA
+				skyReflection.rgb += DrawNebula(skyRefPos.xyz * 100.0);
 				#endif
 
 				#if CLOUDS == 1
@@ -225,11 +229,17 @@ void main() {
 					skyOcclusion
 				);
 				#endif
+
 				#ifdef NETHER
 				skyReflection = netherCol.rgb * 0.04;
 				#endif
+
 				#ifdef END
 				skyReflection = endCol.rgb * 0.025;
+
+				#ifdef END_NEBULA
+				skyReflection.rgb += DrawNebula(viewPos.xyz);
+				#endif
 				#endif
 			}
 
