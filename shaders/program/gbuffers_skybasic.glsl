@@ -60,7 +60,7 @@ void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor)
 	float sun = pow(abs(VoL), 800.0 * isMoon + 800.0) * (1.0 - sqrt(rainStrength));
 
 	vec3 sunMoonCol = mix(moonColor * moonVisibility, sunColor * sunVisibility, float(VoL > 0.0));
-	color += sun * sunMoonCol * 32.0;
+	color += sun * sunMoonCol;
 }
 
 void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
@@ -73,25 +73,23 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75) * (1.0 - rainStrength * eBS * 0.875);
 	visibility *= shadowFade * LIGHT_SHAFT_STRENGTH;
-	//visibility *= voidFade;
+
 	#if MC_VERSION >= 11800
 	visibility *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else
 	visibility *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
 	#endif
 
-	#ifdef LIGHT_SHAFT
-	if (isEyeInWater == 1) color += 0.25 * lightCol * visibility;
-	#else
 	color += 0.25 * lightCol * visibility * (1.0 + 0.25 * isEyeInWater);
-	#endif
 }
 
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
+#if (defined OVERWORLD && CLOUDS == 1) || defined END_NEBULA || defined OVERWORLD_NEBULA
 #include "/lib/atmospherics/clouds.glsl"
+#endif
 #include "/lib/atmospherics/sky.glsl"
 
 //Program//
@@ -117,9 +115,13 @@ void main() {
 	float dither = Bayer64(gl_FragCoord.xy);
 
 	#ifdef AURORA
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
+	albedo.rgb += DrawAurora(viewPos.xyz, dither, 8);
 	#endif
 	
+	#ifdef OVERWORLD_NEBULA
+	albedo.rgb += DrawNebula(viewPos.xyz);
+	#endif
+
 	#if CLOUDS == 1
 	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);

@@ -34,8 +34,8 @@ float getFogNoise(vec3 pos) {
 	vec2 uv = u.xz + v.xz + u.y * 16.0;
 
 	vec2 coord = uv / 64.0;
-	float a = texture2DLod(noisetex, coord, 2.0).r * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-	float b = texture2DLod(noisetex, coord + 0.25, 2.0).r * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+	float a = texture2DLod(noisetex, coord, 2.0).r * 1.2;
+	float b = texture2DLod(noisetex, coord + 0.25, 2.0).r * 1.2;
 		
 	return mix(a, b, v.y);
 }
@@ -43,6 +43,10 @@ float getFogNoise(vec3 pos) {
 float getFogSample(vec3 pos, float height, float verticalThickness){
 	float sampleHeight = pow(abs(height - pos.y) / verticalThickness, 2.0);
 	vec3 wind = vec3(frametime, 0.0, 0.0);
+
+	#ifdef OVERWORLD
+	pos *= 0.75;
+	#endif
 
 	float noise = getFogNoise(pos * 1.000 - wind * 0.50);
 		  noise+= getFogNoise(pos * 0.500 + wind * 2.00);

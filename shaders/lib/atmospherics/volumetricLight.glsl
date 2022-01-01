@@ -38,12 +38,10 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75);
-	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility);
+	visibility *= 16.0 * (1.0 - rainStrength) * (1.0 - moonVisibility) * (1.0 - timeBrightness);
 	#endif
 
 	if (visibility > 0.0) {
-		float maxDist = 512.0;
-		
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
 		vec4 worldposition = vec4(0.0);
@@ -53,10 +51,10 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 							waterColor.rgb / (waterColor.a * waterColor.a),
 							pow(waterAlpha, 0.25));
 		
-		for(int i = 0; i < 8; i++) {
-			float minDist = 8.0 * (exp2(i + dither) - 0.95);
+		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
+			float minDist = LIGHTSHAFT_MIN_DISTANCE * (exp2(i + dither) - 0.95);
 
-			if (depth1 < minDist || minDist >= maxDist || (depth0 < minDist && color == vec3(0.0))) {
+			if (depth1 < minDist || minDist >= LIGHTSHAFT_MAX_DISTANCE || (depth0 < minDist && color == vec3(0.0))) {
 				break;
 			}
 
@@ -84,7 +82,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				else if (isEyeInWater == 1.0) shadow *= watercol * 0.01 * (1.0 + eBS);
 				
 				#ifdef LIGHTSHAFT_CLOUDY_NOISE
-				float noise = getFogSample(worldposition.xyz + cameraPosition.xyz, 60.0, 128.0);
+				float noise = getFogSample(worldposition.xyz + cameraPosition.xyz, LIGHTSHAFT_HEIGHT, 48.0);
 				shadow *= noise;
 				#endif
 

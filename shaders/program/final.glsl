@@ -40,7 +40,7 @@ const float wetnessHalflife = 300.0;
 
 //Common Functions//
 #if defined CAS || defined TAA
-void ContrastAdaptiveSharpening(out vec3 outColor, in vec2 texCoord){
+void ContrastAdaptiveSharpening(inout vec3 outColor){
     vec2 uv = texCoord * MC_RENDER_QUALITY;
   
     vec3 originalColor = texture2D(colortex1, uv).rgb;
@@ -72,7 +72,7 @@ void ContrastAdaptiveSharpening(out vec3 outColor, in vec2 texCoord){
     adaptiveSharpening = minGreen / maxGreen;
 
     adaptiveSharpening = sqrt(max(0.0, adaptiveSharpening));
-    adaptiveSharpening *= mix(-0.125, -0.2, 0.75);
+    adaptiveSharpening *= mix(-0.125, -0.2, 0.5);
     outColor = (originalColor + modifiedColor * adaptiveSharpening) / (1.0 + 4.0 * adaptiveSharpening);
 }
 #endif
@@ -81,7 +81,7 @@ void ContrastAdaptiveSharpening(out vec3 outColor, in vec2 texCoord){
 void main() {
     vec2 newTexCoord = texCoord;
 
-	vec3 color = texture2DLod(colortex1, newTexCoord, 0).rgb;
+	vec3 color = texture2DLod(colortex1, newTexCoord, 0.0).rgb;
 	
 	#if CHROMATIC_ABERRATION > 0
 	float caStrength = 0.004 * CHROMATIC_ABERRATION;
@@ -96,7 +96,7 @@ void main() {
 	#endif
 	
 	#if defined TAA || defined CAS
-	ContrastAdpativeSharpening(color, newTexCoord);
+	ContrastAdaptiveSharpening(color.rgb);
 	#endif
 
 	gl_FragColor = vec4(color, 1.0);

@@ -1,15 +1,21 @@
-float CloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep, float sunCoverage) {
-	float noiseA = texture2D(noisetex, coord * 0.25 + wind).r;
-	float noiseB = texture2D(noisetex, coord * 0.45 - wind * 2.0).b;
+void erodeCoord(inout vec2 coord, in float currentStep, in float erosionStrength){
+	coord += cos(mix(vec2(cos(currentStep * 1.00), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.0), sin(currentStep * 4.00)), currentStep) * erosionStrength);
+}
 
-	float noiseCoverage = abs(currentStep - 0.125) * (currentStep > 0.125 ? 1.14 : 8.0);
-	noiseCoverage = noiseCoverage * noiseCoverage * 4.0;
-	
-	float noise = mix(noiseA * 20.0 + noiseB - noiseCoverage, 21.0, 0.33 * rainStrength);
-	float multiplier = CLOUD_THICKNESS * sampleStep * (1.0 - 0.75 * rainStrength);
+#if CLOUDS == 1 && defined OVERWORLD
+float CloudSample(vec2 coord, vec2 wind, float sampleStep) {
+	float noise = texture2D(noisetex, coord * 1.0000 + wind * 0.90).r * 1.00;
+		  noise+= texture2D(noisetex, coord * 0.5000 + wind * 0.80).r * 2.00;
+		  noise+= texture2D(noisetex, coord * 0.2500 + wind * 0.60).r * 3.00;
+		  noise+= texture2D(noisetex, coord * 0.1250 + wind * 0.50).r * 4.00;
+		  noise+= texture2D(noisetex, coord * 0.0750 + wind * 0.40).r * 5.00;
+		  noise+= texture2D(noisetex, coord * 0.0375 + wind * 0.30).r * 6.00;
 
-	noise = max(noise - (sunCoverage * 3.0 + CLOUD_AMOUNT), 0.0) * multiplier;
-	noise = noise / sqrt(noise * noise + 0.8);
+	noise *= 1.0 + rainStrength * 0.15;
+	float multiplier = CLOUD_THICKNESS * sampleStep;
+
+	noise = max(noise - CLOUD_AMOUNT, 0.0) * multiplier;
+	noise = noise / sqrt(noise * noise + 0.75);
 
 	return noise;
 }
@@ -18,19 +24,14 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	#ifdef TAA
 	dither = fract(16.0 * frameTimeCounter + dither);
 	#endif
-
-	int samples = 8;
 	
 	float cloud = 0.0, cloudLighting = 0.0;
 
-	float sampleStep = 1.0 / samples;
-	float currentStep = dither * sampleStep;
+	float currentStep = dither * 0.5;
 	
 	vec3 nViewPos = normalize(viewPos);
 	float VoU = dot(nViewPos, upVec);
 	float VoL = dot(nViewPos, lightVec);
-	
-	float sunCoverage = pow(clamp(abs(VoL) * 2.0 - 1.0, 0.0, 1.0), 12.0) * (1.0 - rainStrength);
 
 	vec2 wind = vec2(
 		frametime * CLOUD_SPEED * 0.0005,
@@ -39,40 +40,38 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 
 	vec3 cloudColor = vec3(0.0);
 
-	if (VoU > 0.025) {
-		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
+	vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 
-		float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-		float halfVoLSqr = halfVoL * halfVoL;
-		float scattering = pow(halfVoL, 6.0);
-		float noiseLightFactor = (2.0 - 1.5 * VoL * shadowFade) * CLOUD_THICKNESS * 0.5;
+	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
+	float halfVoLSqr = halfVoL * halfVoL;
+	float scattering = pow6(halfVoL);
+	float noiseLightFactor = (2.0 - 1.5 * VoL * shadowFade) * CLOUD_THICKNESS * 0.5;
 
-		for(int i = 0; i < samples; i++) {
-			if (cloud > 0.99) break;
-			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + currentStep * 4.0) / wpos.y) * 0.004;
-			vec2 coord = cameraPosition.xz * 0.00025 + planeCoord.xz;
+	for (int i = 0; i < 2; i++) {
+		vec3 planeCoord = wpos * ((CLOUD_HEIGHT + currentStep * 4.0) / wpos.y) * 0.005;
+		vec2 coord = cameraPosition.xz * 0.00025 + planeCoord.xz;
+		erodeCoord(coord, currentStep, 0.05);
 
-			float noise = CloudSample(coord, wind, currentStep, sampleStep, sunCoverage);
+		float noise = CloudSample(coord, wind, 0.5);
 
-			float sampleLighting = pow(currentStep, 1.125 * halfVoLSqr + 0.875) * 0.8 + 0.2;
-			sampleLighting *= 1.0 - pow(noise, noiseLightFactor);
+		float sampleLighting = pow(currentStep, 1.125 * halfVoLSqr + 0.875) * 0.8 + 0.2;
+		sampleLighting *= 1.0 - pow(noise, noiseLightFactor);
 
-			cloudLighting = mix(cloudLighting, sampleLighting, noise * (1.0 - cloud * cloud));
-			cloud = mix(cloud, 1.0, noise);
+		cloudLighting = mix(cloudLighting, sampleLighting, noise * (1.0 - cloud * cloud));
+		cloud = mix(cloud, 1.0, noise);
 
-			currentStep += sampleStep;
-		}	
-		cloudLighting = mix(cloudLighting, 1.0, (1.0 - cloud * cloud) * scattering * 0.5);
-		cloudColor = mix(
-			ambientCol * (0.35 * sunVisibility + 0.5),
-			lightCol * (0.85 + 1.15 * scattering),
-			cloudLighting
-		);
-		cloudColor *= 1.0 - 0.6 * rainStrength;
-		cloud *= clamp(1.0 - exp(-20.0 * VoU + 0.5), 0.0, 1.0) * (1.0 - 0.6 * rainStrength);
-	}
+		currentStep += 0.5;
+	}	
+	cloudLighting = mix(cloudLighting, 1.0, (1.0 - cloud * cloud) * scattering * 0.5);
+	cloudColor = mix(
+		ambientCol * (0.5 * sunVisibility + 0.5),
+		lightCol * (0.85 + 1.15 * scattering),
+		cloudLighting
+	);
+	cloudColor *= 1.0 - 0.6 * rainStrength;
+	cloud *= clamp(1.0 - exp(-24.0 * VoU + 0.5), 0.0, 1.0) * (1.0 - 0.6 * rainStrength);
 	cloudColor *= CLOUD_BRIGHTNESS * (0.5 - 0.25 * (1.0 - sunVisibility) * (1.0 - rainStrength));
-	// cloudColor *= voidFade;
+
 	#if MC_VERSION >= 11800
 	cloudColor *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else
@@ -85,6 +84,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	
 	return vec4(cloudColor, cloud * cloud * CLOUD_OPACITY);
 }
+#endif
 
 float GetNoise(vec2 pos) {
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
@@ -107,7 +107,7 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 		star *= GetNoise(coord.xy + 0.23);
 	}
 	star = clamp(star - 0.8125, 0.0, 1.0) * multiplier;
-	//star *= voidFade;
+
 	#if MC_VERSION >= 11800
 	star *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else
@@ -118,7 +118,7 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	star *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 	#endif
 		
-	color += star * pow(lightNight, vec3(0.8));
+	color += star * lightNight;
 }
 
 #ifdef AURORA
@@ -178,7 +178,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 			currentStep += sampleStep;
 		}
 	}
-	// visibility *= voidFade;
+
 	#if MC_VERSION >= 11800
 	visibility *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else
@@ -190,5 +190,99 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	#endif
 
 	return aurora * visibility;
+}
+#endif
+
+#if defined END_NEBULA || defined OVERWORLD_NEBULA
+#include "/lib/color/nebulaColor.glsl"
+
+float nebulaSample(vec2 coord, vec2 wind, float VoU) {
+	float noise = texture2D(noisetex, coord * 1.0000 - wind * 0.25).b * 2.5;
+		  noise-= texture2D(noisetex, coord * 0.5000 + wind * 0.20).b * 1.5;
+		  noise+= texture2D(noisetex, coord * 0.2500 - wind * 0.15).b * 3.0;
+		  noise+= texture2D(noisetex, coord * 0.1250 + wind * 0.10).b * 3.5;
+
+	noise *= NEBULA_AMOUNT;
+	
+	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.5), 0.0);
+
+	return noise;
+}
+
+vec3 DrawNebula(vec3 viewPos) {
+	int samples = 2;
+
+	float dither = Bayer64(gl_FragCoord.xy) * 0.4;
+	float VoU = dot(normalize(viewPos.xyz), upVec);
+
+	#ifdef END
+	VoU = abs(VoU);
+	#endif
+
+	float visFactor = 1.0;
+
+	#ifdef OVERWORLD
+	float auroraVisibility = 0.0;
+
+	#ifdef NEBULA_AURORA_CHECK
+	#if defined AURORA && defined WEATHER_PERBIOME
+	auroraVisibility = isCold * isCold;
+	#endif
+	#endif
+
+	visFactor = (moonVisibility - rainStrength) * (moonVisibility - auroraVisibility) * (1.0 - auroraVisibility);
+	#endif
+
+	float sampleStep = 1.0 / samples;
+	float currentStep = dither * sampleStep;
+
+	vec2 wind = vec2(
+		frametime * NEBULA_SPEED * 0.000125,
+		sin(frametime * NEBULA_SPEED * 0.05) * 0.00125
+	);
+
+	vec3 nebula = vec3(0.0);
+	vec3 nebulaColor = vec3(0.0);
+
+	#ifdef END
+	if (visFactor > 0){
+	#else
+	if (visFactor > 0 && VoU > 0){
+	#endif
+		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
+		for(int i = 0; i < samples; i++) {
+			#ifdef END
+			vec3 planeCoord = wpos * (16.0 + currentStep * -8.0) * 0.001 * NEBULA_STRETCHING;
+			#else
+			vec3 planeCoord = wpos * ((6.0 + currentStep * -2.0) / wpos.y) * 0.005 * NEBULA_STRETCHING;
+			#endif
+
+			vec2 coord = (cameraPosition.xz * 0.00001 + planeCoord.xz);
+
+			#ifdef END
+			coord += vec2(coord.y, -coord.x) * 1.00 * NEBULA_DISTORTION;
+			#endif
+
+			erodeCoord(coord, currentStep, 0.1);
+			erodeCoord(coord, currentStep, 0.2);
+
+			float noise = nebulaSample(coord, wind, VoU);
+				 noise *= texture2D(noisetex, coord * 0.25 + wind * 0.25).b;
+				 noise *= texture2D(noisetex, coord + wind * 16.0).b + 0.75;
+				 noise = noise * noise * 2.0 * sampleStep;
+				 noise *= max(sqrt(1.0 - length(planeCoord.xz) * 4.0), 0.0);
+
+			#if defined END
+			nebulaColor = mix(endCol.rgb, endCol.rgb * 1.25, currentStep);
+			#elif defined OVERWORLD
+			nebulaColor = mix(nebulaLowCol, nebulaHighCol, currentStep);
+			#endif
+
+			nebula += noise * nebulaColor * exp2(-4.0 * i * sampleStep);
+			currentStep += sampleStep;
+		}
+	}
+
+	return nebula * NEBULA_BRIGHTNESS * visFactor;
 }
 #endif
