@@ -35,8 +35,8 @@ void main() {
 	if (disable > 0.5 || albedo.a < 0.01) discard;
 
     #ifdef SHADOW_COLOR
-	albedo.rgb = mix(vec3(1.0), albedo.rgb, 1.0 - pow(1.0 - albedo.a, 3.0));
-	albedo.rgb *= 1.0 - pow(albedo.a, 64.0);
+	albedo.rgb = mix(vec3(1.0), albedo.rgb, 1.0 - pow(1.0 - albedo.a, 8.0));
+	albedo.rgb *= 1.0 - pow(albedo.a, 128.0);
 	#else
 	if ((premult > 0.5 && albedo.a < 0.98)) albedo.a = 0.0;
 	#endif
