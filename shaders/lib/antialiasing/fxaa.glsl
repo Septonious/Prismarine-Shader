@@ -58,16 +58,14 @@ vec3 FXAA311(vec3 color) {
 		if (is1Steepest) {
 			stepLength = - stepLength;
 			lumaLocalAverage = 0.5 * (luma1 + lumaCenter);
-		} else {
+		} else
 			lumaLocalAverage = 0.5 * (luma2 + lumaCenter);
-		}
 		
 		vec2 currentUv = texCoord;
-		if (isHorizontal) {
+		if (isHorizontal)
 			currentUv.y += stepLength * 0.5;
-		} else {
+		else
 			currentUv.x += stepLength * 0.5;
-		}
 		
 		vec2 offset = isHorizontal ? vec2(view.x, 0.0) : vec2(0.0, view.y);
 		
@@ -83,12 +81,11 @@ vec3 FXAA311(vec3 color) {
 		bool reached2 = abs(lumaEnd2) >= gradientScaled;
 		bool reachedBoth = reached1 && reached2;
 		
-		if (!reached1) {
+		if (!reached1)
 			uv1 -= offset;
-		}
-		if (!reached2) {
+
+		if (!reached2)
 			uv2 += offset;
-		}
 		
 		if (!reachedBoth) {
 			for(int i = 2; i < iterations; i++) {
@@ -105,12 +102,11 @@ vec3 FXAA311(vec3 color) {
 				reached2 = abs(lumaEnd2) >= gradientScaled;
 				reachedBoth = reached1 && reached2;
 
-				if (!reached1) {
+				if (!reached1)
 					uv1 -= offset * quality[i];
-				}
-				if (!reached2) {
+					
+				if (!reached2)
 					uv2 += offset * quality[i];
-				}
 				
 				if (reachedBoth) break;
 			}
@@ -142,11 +138,10 @@ vec3 FXAA311(vec3 color) {
 		
 		// Compute the final UV coordinates.
 		vec2 finalUv = texCoord;
-		if (isHorizontal) {
+		if (isHorizontal)
 			finalUv.y += finalOffset * stepLength;
-		} else {
+		else
 			finalUv.x += finalOffset * stepLength;
-		}
 
 		color = texture2DLod(colortex1, finalUv, 0.0).rgb;
 	}

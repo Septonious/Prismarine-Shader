@@ -84,9 +84,8 @@ vec4 TemporalAA(inout vec3 color, float tempData) {
 	vec3 tempColor = texture2DLod(colortex2, prvCoord, 0).gba;
 	vec2 view = vec2(viewWidth, viewHeight);
 
-	if(tempColor == vec3(0.0)){
+	if(tempColor == vec3(0.0))
 		return vec4(tempData, color);
-	}
 	
 	tempColor = NeighbourhoodClamping(color, tempColor, 1.0 / view);
 	
