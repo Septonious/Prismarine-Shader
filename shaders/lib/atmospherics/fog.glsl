@@ -4,52 +4,51 @@ vec3 GetFogColor(vec3 viewPos) {
 	float lViewPos = length(viewPos) / 64.0;
 	lViewPos = 1.0 - exp(-lViewPos * lViewPos);
 
-    float VoU = clamp(dot(nViewPos,  upVec), -1.0, 1.0);
-    float VoL = clamp(dot(nViewPos, sunVec), -1.0, 1.0);
+	float VoU = clamp(dot(nViewPos,  upVec), -1.0, 1.0);
+	float VoL = clamp(dot(nViewPos, sunVec), -1.0, 1.0);
 
 	float density = 0.4;
-    float nightDensity = 0.65;
-    float weatherDensity = 1.5;
-    float groundDensity = 0.08 * (4.0 - 3.0 * sunVisibility) *
-                          (10.0 * rainStrength * rainStrength + 1.0);
+	float nightDensity = 0.65;
+	float weatherDensity = 1.5;
+	float groundDensity = 0.08 * (4.0 - 3.0 * sunVisibility) * (10.0 * rainStrength * rainStrength + 1.0);
     
-    float exposure = exp2(timeBrightness * 0.75 - 1.00);
-    float nightExposure = exp2(-3.5);
+    	float exposure = exp2(timeBrightness * 0.75 - 1.00);
+    	float nightExposure = exp2(-3.5);
 
 	float baseGradient = exp(-(VoU * 0.5 + 0.5) * 0.5 / density);
 
 	float groundVoU = clamp(-VoU * 0.5 + 0.5, 0.0, 1.0);
-    float ground = 1.0 - exp(-groundDensity / groundVoU);
+    	float ground = 1.0 - exp(-groundDensity / groundVoU);
 
-    vec3 fog = fogCol * baseGradient / (SKY_I * SKY_I);
-    fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * (SKY_I * SKY_I);
+    	vec3 fog = fogCol * baseGradient / (SKY_I * SKY_I);
+    	fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * (SKY_I * SKY_I);
 
 	float sunMix = (VoL * 0.5 + 0.5) * pow(clamp(1.0 - VoU, 0.0, 1.0), 2.0 - sunVisibility) *
                    pow(1.0 - timeBrightness * 0.6, 3.0);
-    float horizonMix = pow(1.0 - abs(VoU), 2.5) * 0.125 * (1.0 - timeBrightness * 0.5);
-    float lightMix = (1.0 - (1.0 - sunMix) * (1.0 - horizonMix)) * lViewPos;
+    	float horizonMix = pow(1.0 - abs(VoU), 2.5) * 0.125 * (1.0 - timeBrightness * 0.5);
+    	float lightMix = (1.0 - (1.0 - sunMix) * (1.0 - horizonMix)) * lViewPos;
 
 	vec3 lightFog = pow(lightSun, vec3(4.0 - sunVisibility)) * baseGradient;
 	lightFog = lightFog / (1.0 + lightFog * rainStrength);
 
-    fog = mix(
-        sqrt(fog * (1.0 - lightMix)), 
-        sqrt(lightFog), 
-        lightMix
-    );
-    fog *= fog;
+    	fog = mix(
+        	sqrt(fog * (1.0 - lightMix)), 
+        	sqrt(lightFog), 
+        	lightMix
+    	);
+    	fog *= fog;
 
 	float nightGradient = exp(-(VoU * 0.5 + 0.5) * 0.35 / nightDensity);
-    vec3 nightFog = lightNight * lightNight * nightGradient * nightExposure;
-    fog = mix(nightFog, fog, sunVisibility * sunVisibility);
+   	vec3 nightFog = lightNight * lightNight * nightGradient * nightExposure;
+    	fog = mix(nightFog, fog, sunVisibility * sunVisibility);
 
-    float rainGradient = exp(-(VoU * 0.5 + 0.5) * 0.125 / weatherDensity);
-    vec3 weatherFog = weatherCol.rgb * weatherCol.rgb;
-    weatherFog *= GetLuminance(ambientCol / (weatherFog)) * (0.2 * sunVisibility + 0.2);
-    fog = mix(fog, weatherFog * rainGradient, rainStrength);
+    	float rainGradient = exp(-(VoU * 0.5 + 0.5) * 0.125 / weatherDensity);
+   	vec3 weatherFog = weatherCol.rgb * weatherCol.rgb;
+    	weatherFog *= GetLuminance(ambientCol / (weatherFog)) * (0.2 * sunVisibility + 0.2);
+    	fog = mix(fog, weatherFog * rainGradient, rainStrength);
 	fog = mix(minLightCol * 0.5, fog * eBS, eBS);
 
-    //fog *= voidFade;
+    	//fog *= voidFade;
 	#if MC_VERSION >= 11800
 	fog *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else
