@@ -3,9 +3,9 @@ BSL Shaders v8 Series by Capt Tatsu
 https://bitslablab.com 
 */ 
 
-#version 120 
+#version 130 
 
-#define END
+#define NETHER
 #define VSH
 
-#include "/program/gbuffers_skybasic.glsl"
+#include "/program/composite1.glsl"

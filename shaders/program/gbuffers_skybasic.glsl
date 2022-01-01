@@ -96,7 +96,6 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 
 //Program//
 void main() {
-	#ifdef OVERWORLD
 	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
@@ -133,11 +132,6 @@ void main() {
 	#if ALPHA_BLEND == 0
 	albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
 	albedo.rgb = albedo.rgb + dither / vec3(64.0);
-	#endif
-	#endif
-	
-	#ifdef END
-	vec3 albedo = vec3(0.0);
 	#endif
 	
     /* DRAWBUFFERS:0 */

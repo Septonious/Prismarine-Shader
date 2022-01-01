@@ -1,27 +1,9 @@
-float GetLogarithmicDepth(float dist) {
-	return (far * (dist - near)) / (dist * (far - near));
-}
-
-float GetLinearDepth2(float depth) {
-    return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
-}
-
 vec4 DistortShadow(vec4 shadowpos, float distortFactor) {
 	shadowpos.xy *= 1.0 / distortFactor;
 	shadowpos.z = shadowpos.z * 0.2;
 	shadowpos = shadowpos * 0.5 + 0.5;
 
 	return shadowpos;
-}
-
-vec4 GetWorldSpace(float shadowdepth, vec2 texCoord) {
-	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord, shadowdepth, 1.0) * 2.0 - 1.0);
-	viewPos /= viewPos.w;
-
-	vec4 wpos = gbufferModelViewInverse * viewPos;
-	wpos /= wpos.w;
-	
-	return wpos;
 }
 
 vec4 GetShadowSpace(vec4 wpos) {
@@ -104,7 +86,6 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 			}
 		}
 		
-		//vl *= voidFade;
 		#if MC_VERSION >= 11800
 		vl *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 		#else

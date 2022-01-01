@@ -4,7 +4,10 @@ uniform vec3 fogColor;
 
 vec4 GetWaterFog(vec3 viewPos) {
     float clampEyeBrightness = clamp(eBS, 0.1, 1.0);
+
+    #if defined OVERWORLD || defined END
     float clampTimeBrightness = pow2(clamp(timeBrightness, 0.25, 1.0));
+    #endif
 
     float fog = length(viewPos) / waterFogRange;
     fog = 1.0 - exp(-3.0 * fog);

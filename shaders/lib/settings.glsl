@@ -28,9 +28,17 @@ Please don't edit anything from Undefine section and onwards.
 
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
 
+  #define LIGHTSHAFT_SAMPLES 4 //[1 2 3 4 5 6 7 8]
+  #define LIGHTSHAFT_MAX_DISTANCE 1024.0 //[128.0 256.0 512.0 1024.0]
+  #define LIGHTSHAFT_MIN_DISTANCE 24.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0 21.0 22.0 23.0 24.0 25.0 26.0 27.0 28.0 29.0 30.0 31.0 32.0]
+  #define LIGHTSHAFT_HEIGHT 80 //[5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100]
+  #define LIGHTSHAFT_AMOUNT 1.15 //[0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25]
+  #define LIGHTSHAFT_VERTICAL_THICKNESS 32 //[8 12 16 24 32 48]
+  #define LIGHTSHAFT_HORIZONTAL_THICKNESS 0.65 //[0.60 0.625 0.65 0.675 0.70]
+
 //#define VOLUMETRIC_CLOUDS
-//#define NETHER_SMOKE
-//#define END_SMOKE
+  #define NETHER_SMOKE
+  #define END_SMOKE
 //#define LIGHTSHAFT_CLOUDY_NOISE
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,8 +107,8 @@ Please don't edit anything from Undefine section and onwards.
   #define DISTANT_FADE_STYLE 0 //[0 1]
   #define WEATHER_PERBIOME
 //#define UNDERGROUND_SKY
-  #define LIGHT_SHAFT
-  #define LIGHT_SHAFT_STRENGTH 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
+//#define LIGHT_SHAFT
+  #define LIGHT_SHAFT_STRENGTH 0.75 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
   #define FOG_DENSITY 1.00 //[0.00 0.25 0.50 0.75 1.00 1.50 2.00 2.50 3.00 3.50 4.00]
   #define WEATHER
   #define WEATHER_OPACITY 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
@@ -354,6 +362,7 @@ Please don't edit anything from Undefine section and onwards.
   #ifdef NETHER
   #undef END_SMOKE
   #undef VOLUMETRIC_CLOUDS
+  #undef LIGHTSHAFT_CLOUDY_NOISE
   #undef LIGHT_SHAFT
   #undef LENS_FLARE
   #undef SKY_VANILLA
@@ -361,11 +370,17 @@ Please don't edit anything from Undefine section and onwards.
   #endif
 
   #ifdef END
+  #undef LIGHTSHAFT_CLOUDY_NOISE
   #undef LIGHT_SHAFT
   #undef VOLUMETRIC_CLOUDS
   #undef NETHER_SMOKE
   #undef LENS_FLARE
   #undef REFLECTION_RAIN
+  #endif
+
+  #ifdef OVERWORLD
+  #undef NETHER_SMOKE
+  #undef END_SMOKE
   #endif
 
 //Normal Skip for 1.15 - 1.16 G7
