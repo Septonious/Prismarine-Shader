@@ -27,7 +27,7 @@ uniform sampler2D colortex2;
 uniform sampler2D depthtex1;
 
 //Optifine Constants//
-#ifdef LIGHT_SHAFT
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 const bool colortex1MipmapEnabled = true;
 #endif
 

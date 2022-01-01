@@ -39,11 +39,13 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75);
 	visibility *= 8.0 * (1.0 - rainStrength) * (1.0 - moonVisibility) * (1.0 - timeBrightness);
+	visibility *= clamp(cameraPosition.y * 0.01, 0.0, 1.0);
 	#endif
 
 	if (visibility > 0.0) {
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
+
 		vec4 worldposition = vec4(0.0);
 		vec4 shadowposition = vec4(0.0);
 		
@@ -52,7 +54,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 							pow(waterAlpha, 0.25));
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
-			float minDist = LIGHTSHAFT_MIN_DISTANCE * (exp2(i + dither) - 0.95);
+			float minDist = LIGHTSHAFT_MIN_DISTANCE * (i + dither);
 
 			if (depth1 < minDist || minDist >= LIGHTSHAFT_MAX_DISTANCE || (depth0 < minDist && color == vec3(0.0))) {
 				break;

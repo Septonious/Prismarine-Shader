@@ -18,7 +18,7 @@ uniform float viewWidth, viewHeight, aspectRatio;
 uniform sampler2D colortex1;
 
 //Optifine Constants//
-#ifdef LIGHT_SHAFT
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 const bool colortex1MipmapEnabled = true;
 #endif
 

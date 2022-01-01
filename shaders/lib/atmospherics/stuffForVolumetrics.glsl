@@ -56,10 +56,10 @@ float getFogSample(vec3 pos, float height, float verticalThickness){
           noise+= getCloudNoise(pos * 0.125 + wind * 0.4);
 
 	#ifdef NETHER
-	noise *= 0.8;
+	noise *= 0.9;
 	#endif
 
-	noise = clamp(noise * 0.65 - (1.0 + sampleHeight), 0.0, 1.0);
+	noise = clamp(noise * 0.6 - (1.0 + sampleHeight), 0.0, 1.0);
 
 	return noise;
 }

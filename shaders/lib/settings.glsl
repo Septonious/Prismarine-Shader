@@ -30,8 +30,8 @@ Please don't edit anything from Undefine section and onwards.
 
   #define LIGHTSHAFT_SAMPLES 4 //[1 2 3 4 5 6 7 8]
   #define LIGHTSHAFT_MAX_DISTANCE 512.0 //[128.0 256.0 512.0 1024.0]
-  #define LIGHTSHAFT_MIN_DISTANCE 8.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0 21.0 22.0 23.0 24.0 25.0 26.0 27.0 28.0 29.0 30.0 31.0 32.0]
-  #define LIGHTSHAFT_HEIGHT 70 //[5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100]
+  #define LIGHTSHAFT_MIN_DISTANCE 12.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0 21.0 22.0 23.0 24.0 25.0 26.0 27.0 28.0 29.0 30.0 31.0 32.0]
+  #define LIGHTSHAFT_HEIGHT 90 //[5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100]
 
 //#define VOLUMETRIC_CLOUDS
   #define NETHER_SMOKE
@@ -403,6 +403,10 @@ Please don't edit anything from Undefine section and onwards.
   #undef NETHER_SMOKE
   #undef END_SMOKE
   #undef END_NEBULA
+  #endif
+
+  #if !defined LIGHT_SHAFT && !defined END_SMOKE && !defined NETHER_SMOKE
+  #undef BLUR_FILTERING
   #endif
 
 //Normal Skip for 1.15 - 1.16 G7

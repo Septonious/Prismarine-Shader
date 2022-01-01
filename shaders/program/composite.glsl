@@ -40,9 +40,10 @@ uniform vec3 cameraPosition;
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
 
+uniform mat4 gbufferProjectionInverse;
+
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 uniform mat4 gbufferModelViewInverse;
-uniform mat4 gbufferProjectionInverse;
 
 uniform sampler2D colortex1;
 uniform sampler2D depthtex1;
