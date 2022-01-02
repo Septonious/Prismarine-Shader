@@ -16,6 +16,22 @@ varying vec2 texCoord;
 
 varying vec4 color;
 
+#ifdef WATER_CAUSTICS
+varying vec4 position;
+uniform sampler2D noisetex;
+uniform vec3 cameraPosition;
+uniform float frameTimeCounter, timeBrightness;
+
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter * ANIMATION_SPEED;
+#endif
+
+#include "/lib/color/waterColor.glsl"
+#include "/lib/lighting/caustics.glsl"
+#endif
+
 //Uniforms//
 uniform int blockEntityId;
 
@@ -40,6 +56,14 @@ void main() {
 	#else
 	if ((premult > 0.5 && albedo.a < 0.98)) albedo.a = 0.0;
 	#endif
+
+	#ifdef WATER_CAUSTICS
+	if (mat > 2.98 && mat < 3.02){
+		waterColor.g *= 1.25;
+		albedo.rgb = waterColor.rgb;
+		albedo.rgb = getCaustics(position.xyz + cameraPosition.xyz) * albedo.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness);
+	}
+	#endif
 	
 	gl_FragData[0] = albedo;
 }
@@ -54,7 +78,7 @@ varying float mat;
 
 varying vec2 texCoord;
 
-varying vec4 color;
+varying vec4 color, position;
 
 //Uniforms//
 uniform int worldTime;
@@ -91,11 +115,16 @@ void main() {
 
 	color = gl_Color;
 	
-	mat = 0;
-	if (mc_Entity.x == 10301 || mc_Entity.x == 10302) mat = 1;
-	if (mc_Entity.x == 10300 || mc_Entity.x == 10303 || mc_Entity.x == 10204) mat = 2;
+	mat = 0.0;
+	if (mc_Entity.x == 10301 || mc_Entity.x == 10302) mat = 1.0;
+	if (mc_Entity.x == 10204) mat = 2.0;
+	#ifdef WATER_CAUSTICS
+	if (mc_Entity.x == 10300 || mc_Entity.x == 10303) mat = 3.0;
+	#else
+	if (mc_Entity.x == 10300 || mc_Entity.x == 10303) mat = 2.0;
+	#endif
 	
-	vec4 position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
+	position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 	
 	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
 	position.xyz = WavingBlocks(position.xyz, istopv);

@@ -1,4 +1,5 @@
-void getIntegratedEmission(inout float emissive, inout float giEmissive, in float mat){
+#ifdef FSH
+void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2 lightmap, in vec4 albedo, in vec3 worldPos){
 	float newEmissive = 0.0;
 	float jitter = 1.0 - sin(frameTimeCounter + cos(frameTimeCounter)) * BLOCKLIGHT_FLICKERING_STRENGTH;
 
@@ -7,10 +8,10 @@ void getIntegratedEmission(inout float emissive, inout float giEmissive, in floa
         float ore = max(max(stoneDif - 0.175, 0.0), 0.0);
         newEmissive = sqrt(ore) * GLOW_STRENGTH * 0.25;
 		giEmissive = sqrt(ore) * GLOW_STRENGTH * jitter;
-    } else if (mat > 100.9 && mat < 101.1){ // Crying Obsidian and Respawn Anchor
+    } else if (mat > 100.9 && mat < 101.1) { // Crying Obsidian and Respawn Anchor
 		newEmissive = (albedo.b - albedo.r) * albedo.r * GLOW_STRENGTH;
         newEmissive *= newEmissive * newEmissive * GLOW_STRENGTH * jitter;
-	} else if (mat > 101.9 && mat < 102.1){
+	} else if (mat > 101.9 && mat < 102.1) { // Command Block
         vec3 comPos = fract(worldPos.xyz + cameraPosition.xyz);
              comPos = abs(comPos - vec3(0.5));
 
@@ -42,7 +43,7 @@ void getIntegratedEmission(inout float emissive, inout float giEmissive, in floa
 		newEmissive = float(length(albedo.rgb) > 0.975) * 0.25 * GLOW_STRENGTH * jitter;
 	} else if (mat > 109.9 && mat < 110.1) { // Glow Lichen
 		newEmissive = (1.0 - lightmap.y) * float(albedo.r > albedo.g || albedo.r > albedo.b) * 3.0;
-	} else if (mat > 110.9 && mat < 111.1) {
+	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
 		newEmissive = float(albedo.r > albedo.g && albedo.r > albedo.b) * 0.2 * GLOW_STRENGTH;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
 		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.5 * GLOW_STRENGTH;
@@ -66,5 +67,30 @@ void getIntegratedEmission(inout float emissive, inout float giEmissive, in floa
 	}
 	#endif
 
-	emissive += newEmissive;
+	emission += newEmissive;
 }
+#endif
+
+#ifdef VSH
+void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
+	isPlant = 0.0;
+	if (mc_Entity.x == 20000) mat = 100.0;
+	if (mc_Entity.x == 20001) mat = 101.0;
+	if (mc_Entity.x == 20002) mat = 102.0;
+	if (mc_Entity.x == 20003) mat = 103.0;
+	if (mc_Entity.x == 20004) mat = 104.0;
+	if (mc_Entity.x == 20005) mat = 105.0;
+	if (mc_Entity.x == 20006) mat = 106.0;
+	if (mc_Entity.x == 20008) mat = 108.0;
+	if (mc_Entity.x == 20010) mat = 110.0;
+	if (mc_Entity.x == 20011) mat = 111.0;
+	if (mc_Entity.x == 20012) mat = 112.0;
+	if (mc_Entity.x == 20013) mat = 113.0;
+	if (mc_Entity.x == 20014) mat = 114.0;
+	if (mc_Entity.x == 20015) mat = 115.0;
+	if (mc_Entity.x == 10206) mat = 116.0;
+	if (mc_Entity.x == 20017) mat = 117.0;
+	if (mc_Entity.x == 20018) mat = 118.0;
+	if (mc_Entity.x == 10101) isPlant = 1.0;
+}
+#endif

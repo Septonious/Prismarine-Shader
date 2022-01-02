@@ -1,7 +1,7 @@
 float getCloudSample(vec3 pos, float height){
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
-	float amount = VCLOUDS_AMOUNT * (0.8 + rainStrength * 0.1);
+	float amount = VCLOUDS_AMOUNT * (0.8 + rainStrength * 0.15);
 	
 	float noiseA = 0.0;
 	float mult = 1.0;
@@ -72,7 +72,7 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 				cloudsColor *= translucent;
 			}
 
-			finalColor += 0.75 * cloudsColor * (1.0 - moonVisibility * 0.5) * (1.0 - finalColor.a);
+			finalColor += 0.75 * cloudsColor * (1.0 - moonVisibility * 0.5) * (1.0 - rainStrength * 0.85) * (1.0 - finalColor.a);
 		}
 	}
 

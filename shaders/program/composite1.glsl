@@ -74,11 +74,11 @@ void main() {
 	#else
 	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.0).rgb;
 	#endif
-	vl *= vl;
 	#endif
 
 	#ifdef LIGHT_SHAFT
-	vl.rgb *= lightCol * 0.1;
+	vl.rgb *= lightCol * 0.25;
+	vl.rgb *= vl.rgb;
     vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
 	#endif
 

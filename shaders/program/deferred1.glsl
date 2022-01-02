@@ -142,6 +142,12 @@ void GlowOutline(inout vec3 color){
 	}
 }
 
+#ifdef OVERWORLD
+vec3 ToWorld(vec3 pos) {
+	return mat3(gbufferModelViewInverse) * pos + gbufferModelViewInverse[3].xyz;
+}
+#endif
+
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"

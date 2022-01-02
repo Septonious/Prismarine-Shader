@@ -12,6 +12,10 @@ https://bitslablab.com
 //Varyings//
 varying float mat, recolor;
 
+#ifdef INTEGRATED_EMISSION
+varying float isPlant;
+#endif
+
 varying vec2 texCoord, lmCoord;
 
 varying vec3 normal;
@@ -103,6 +107,10 @@ float GetLuminance(vec3 color) {
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 
+#ifdef INTEGRATED_EMISSION
+#include "/lib/surface/integratedEmission.glsl"
+#endif
+
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
 #endif
@@ -153,9 +161,10 @@ void main() {
 
 		float metalness      = 0.0;
 		float emission       = (emissive + candle + lava) * 0.4;
+		float giEmissive 	 = 0.0;
 		float subsurface     = (foliage + candle) * 0.5 + leaves;
 		vec3 baseReflectance = vec3(0.04);
-		
+
 		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 		
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
@@ -165,6 +174,10 @@ void main() {
 		vec3 viewPos = ToNDC(screenPos);
 		#endif
 		vec3 worldPos = ToWorld(viewPos);
+
+		#ifdef INTEGRATED_EMISSION
+		getIntegratedEmission(emission, giEmissive, lightmap, albedo, worldPos);
+		#endif
 
 		#ifdef ADVANCED_MATERIALS
 		float f0 = 0.0, porosity = 0.5, ao = 1.0;
@@ -348,6 +361,10 @@ void main() {
 //Varyings//
 varying float mat, recolor;
 
+#ifdef INTEGRATED_EMISSION
+varying float isPlant;
+#endif
+
 varying vec2 texCoord, lmCoord;
 
 varying vec3 normal;
@@ -404,6 +421,10 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 
 #ifdef WORLD_CURVATURE
 #include "/lib/vertex/worldCurvature.glsl"
+#endif
+
+#ifdef INTEGRATED_EMISSION
+#include "/lib/surface/integratedEmission.glsl"
 #endif
 
 //Program//
@@ -464,6 +485,10 @@ void main() {
 
 	if (mc_Entity.x == 10400)
 		color.a = 1.0;
+
+	#ifdef INTEGRATED_EMISSION
+	getIntegratedEmissionMaterials(mat, isPlant);
+	#endif
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);

@@ -49,7 +49,6 @@ vec3 GetFogColor(vec3 viewPos) {
     fog = mix(fog, weatherFog * rainGradient, rainStrength);
 	fog = mix(minLightCol * 0.5, fog * eBS, eBS);
 
-    //fog *= voidFade;
 	#if MC_VERSION >= 11800
 	fog *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else
@@ -60,7 +59,7 @@ vec3 GetFogColor(vec3 viewPos) {
 }
 #endif
 
-void NormalFog(inout vec3 color, vec3 viewPos) {
+void NormalFog(inout vec3 color, vec3 viewPos, bool isDense) {
 	#if DISTANT_FADE > 0
 	#if DISTANT_FADE_STYLE == 0
 	float fogFactor = length(viewPos);
@@ -72,10 +71,19 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float fog = length(viewPos) * FOG_DENSITY / 256.0;
+	float fog = length(viewPos) * (FOG_DENSITY * (1.0 + float(isDense) + float(isDense) + float(isDense))) / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0) * eBS, eBS);
 	fog = 1.0 - exp(-2.0 * pow(fog, 0.15 * clearDay * eBS + 1.25));
+
+	if (isDense){
+		vec3 pos = ToWorld(viewPos.xyz) + cameraPosition.xyz + 1000.0;
+		float height = (pos.y - 80.0) * 0.001;
+			height = pow16(height);
+			height = clamp(height, 0.0, 1.0);
+		fog *= 1.0 - height;
+	}
+
 	vec3 fogColor = GetFogColor(viewPos);
 
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3
@@ -88,7 +96,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 		float vanillaFog = 1.0 - (far - (fogFactor + fogOffset)) * 5.0 / (FOG_DENSITY * far);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 	
-		if(vanillaFog > 0.0){
+		if (vanillaFog > 0.0){
 			vec3 vanillaFogColor = GetSkyColor(viewPos, false);
 			vanillaFogColor *= (4.0 - 3.0 * eBS) * (1.0 + nightVision);
 
@@ -105,7 +113,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	float viewLength = length(viewPos);
 	float fog = 2.0 * pow(viewLength * FOG_DENSITY / 256.0, 1.5);
 	#if DISTANT_FADE == 2 || DISTANT_FADE == 3
-	fog += 6.0 * pow(fogFactor * 1.5 / far, 4.0);
+	fog += 6.0 * pow4(fogFactor * 1.5 / far);
 	#endif
 	fog = 1.0 - exp(-fog);
 	vec3 fogColor = netherCol.rgb * 0.04;
@@ -114,7 +122,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#ifdef END
 	float fog = length(viewPos) * FOG_DENSITY / 128.0;
 	#if DISTANT_FADE == 2 || DISTANT_FADE == 3
-	fog += 6.0 * pow(fogFactor * 1.0 / far, 6.0);
+	fog += 6.0 * pow6(fogFactor * 1.0 / far);
 	#endif
 	fog = 1.0 - exp(-0.8 * fog * fog);
 	vec3 fogColor = endCol.rgb * 0.00625;
@@ -142,7 +150,10 @@ void DenseFog(inout vec3 color, vec3 viewPos) {
 }
 
 void Fog(inout vec3 color, vec3 viewPos) {
-	NormalFog(color, viewPos);
+	#ifdef OVERWORLD
+	NormalFog(color, viewPos, true);
+	#endif
+	NormalFog(color, viewPos, false);
 	if (isEyeInWater > 1) DenseFog(color, viewPos);
 	if (blindFactor > 0.0) BlindFog(color, viewPos);
 }
