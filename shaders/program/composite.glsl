@@ -92,7 +92,6 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
 #ifdef VOLUMETRIC_CLOUDS
-#include "/lib/filters/blur.glsl"
 #include "/lib/atmospherics/volumetricClouds.glsl"
 #endif
 
@@ -142,9 +141,7 @@ void main() {
 
 	//Volumetric Clouds
 	#ifdef VOLUMETRIC_CLOUDS
-	vec3 blur = GaussianBlur(colortex0, texCoord.xy).rgb;
-	getVolumetricCloud(viewPos.xyz, z1, z0, InterleavedGradientNoiseVL(), blur, translucent);
-	color += blur;
+	getVolumetricCloud(viewPos.xyz, z1, z0, InterleavedGradientNoiseVL(), color, translucent);
 	#endif
 
 	#if ALPHA_BLEND == 0
