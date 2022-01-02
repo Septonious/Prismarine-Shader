@@ -99,7 +99,6 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 		#endif
 
 		vl = sqrt(vl * visibility);
-		if(dot(vl, vl) > 0.0) vl += (dither - 0.25) / 128.0;
 	}
 	
 	return vl;

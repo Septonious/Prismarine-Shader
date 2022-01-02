@@ -72,7 +72,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
     visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75) * (1.0 - rainStrength * eBS * 0.875);
-	visibility *= shadowFade * LIGHT_SHAFT_STRENGTH;
+	visibility *= shadowFade * 0.25;
 
 	#if MC_VERSION >= 11800
 	visibility *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
@@ -109,7 +109,7 @@ void main() {
 	#endif
 
 	#ifdef STARS
-	if (moonVisibility > 0.0) DrawStars(albedo.rgb, viewPos.xyz);
+	DrawStars(albedo.rgb, viewPos.xyz);
 	#endif
 
 	float dither = Bayer64(gl_FragCoord.xy);

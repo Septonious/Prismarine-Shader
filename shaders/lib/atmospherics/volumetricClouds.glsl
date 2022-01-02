@@ -1,12 +1,12 @@
 float getCloudSample(vec3 pos, float height){
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
-	float amount = 0.6 * (0.8 + rainStrength * 0.1);
+	float amount = VCLOUDS_AMOUNT * (0.8 + rainStrength * 0.1);
 	
 	float noiseA = 0.0;
-	float mult = 0.1;
-	for (int i = 2; i < 7; i++){
-		noiseA += getCloudNoise(pos * mult - wind * mult) * i * VCLOUDS_HORIZONTAL_THICKNESS;
+	float mult = 1.0;
+	for (int i = 1; i < 4; i++){
+		noiseA += getCloudNoise(pos * (mult * mult * VCLOUDS_DETAIL) - wind * mult) * i * VCLOUDS_HORIZONTAL_THICKNESS;
 		mult *= 0.5;
 	}
 
@@ -17,7 +17,6 @@ float getCloudSample(vec3 pos, float height){
 	float density = pow(smoothstep(height + VCLOUDS_VERTICAL_THICKNESS * noiseB, height - VCLOUDS_VERTICAL_THICKNESS * noiseB, pos.y), 0.25);
 	sampleHeight = pow(sampleHeight, 8.0 * (1.5 - density) * (1.5 - density));
 
-	//Output
 	return clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 }
 
@@ -26,9 +25,7 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 	vec4 finalColor = vec4(0.0);
 
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
-
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-	float halfVoLSqr = halfVoL * halfVoL;
 	float scattering = pow6(halfVoL);
 
 	float depth0 = GetLinearDepth2(z0);
@@ -37,10 +34,11 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 	float maxDist = 512.0 * VCLOUDS_RANGE;
 	float minDist = 0.01 + (dither * VCLOUDS_QUALITY);
 
+	float height = VCLOUDS_HEIGHT * (1.0 + rainStrength * 0.2);
 	float rainFactor = (1.0 - rainStrength * 0.4);
 
 	for (minDist; minDist < maxDist; minDist += VCLOUDS_QUALITY) {
-		if (depth1 < minDist || isEyeInWater == 1){
+		if (depth1 < minDist || isEyeInWater == 1.0){
 			break;
 		}
 		
@@ -54,7 +52,6 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 
 			wpos.xyz += cameraPosition.xyz + vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
-			float height = VCLOUDS_HEIGHT * (1.0 + rainStrength * 0.2);
 			float noise = getCloudSample(wpos.xyz, height);
 
 			//Find the lower and upper parts of the cloud
@@ -73,13 +70,11 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 			//Translucency blending, works half correct
 			if (depth0 < minDist){
 				cloudsColor *= translucent;
-				finalColor *= translucent;
 			}
 
 			finalColor += 0.75 * cloudsColor * (1.0 - moonVisibility * 0.5) * (1.0 - finalColor.a);
 		}
 	}
 
-	//Output
 	return finalColor;
 }

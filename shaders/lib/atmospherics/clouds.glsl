@@ -93,20 +93,18 @@ float GetNoise(vec2 pos) {
 void DrawStars(inout vec3 color, vec3 viewPos) {
 	vec3 wpos = vec3(gbufferModelViewInverse * vec4(viewPos, 1.0));
 	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
+
 	vec2 wind = vec2(frametime, 0.0);
-	vec2 coord = planeCoord.xz * 0.4 + cameraPosition.xz * 0.0001 + wind * 0.00125;
-	coord = floor(coord * 1024.0) / 1024.0;
+	vec2 coord = planeCoord.xz * 0.4 + cameraPosition.xz * 0.0001 + wind * 0.001;
+		 coord = floor(coord * 1024.0) / 1024.0;
 	
 	float VoU = clamp(dot(normalize(viewPos), upVec), 0.0, 1.0);
-	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength) * moonVisibility;
+	float multiplier = VoU * 16.0 * (1.0 - rainStrength) * (1.0 - sunVisibility * 0.5);
 	
-	float star = 1.0;
-	if (VoU > 0.0) {
-		star *= GetNoise(coord.xy);
-		star *= GetNoise(coord.xy + 0.10);
-		star *= GetNoise(coord.xy + 0.23);
-	}
-	star = clamp(star - 0.8125, 0.0, 1.0) * multiplier;
+	float star = GetNoise(coord.xy);
+		  star*= GetNoise(coord.xy + 0.10);
+		  star*= GetNoise(coord.xy + 0.23);
+	star = clamp(star - 0.75, 0.0, 1.0) * multiplier;
 
 	#if MC_VERSION >= 11800
 	star *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
