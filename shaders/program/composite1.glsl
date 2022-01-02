@@ -28,6 +28,10 @@ uniform float timeAngle, timeBrightness;
 
 uniform sampler2D colortex0;
 
+#ifdef VOLUMETRIC_CLOUDS
+uniform sampler2D colortex8;
+#endif
+
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -62,15 +66,15 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 
 //Program//
 void main() {
-    vec4 color = texture2D(colortex0, texCoord.xy);
+    vec3 color = texture2D(colortex0, texCoord.xy).rgb;
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	#ifdef BLUR_FILTERING
-	vec4 vl = GaussianBlur(colortex1, texCoord.xy);
+	vec3 vl = GaussianBlur(colortex1, texCoord.xy).rgb;
 	#else
-	vec4 vl = texture2DLod(colortex1, texCoord.xy, 1.0);
+	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.0).rgb;
 	#endif
-	vl.rgb *= vl.rgb;
+	vl *= vl;
 	#endif
 
 	#ifdef LIGHT_SHAFT
@@ -82,8 +86,12 @@ void main() {
 	color += vl;
 	#endif
 
+	#ifdef VOLUMETRIC_CLOUDS
+
+	#endif
+
 	/*DRAWBUFFERS:0*/
-	gl_FragData[0] = color;
+	gl_FragData[0] = vec4(color, 1.0);
 }
 
 #endif

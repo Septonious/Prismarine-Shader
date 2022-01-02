@@ -13,6 +13,7 @@ https://bitslablab.com
 varying vec2 texCoord;
 
 //Uniforms//
+#ifdef MOTION_BLUR
 uniform float viewWidth, viewHeight;
 
 uniform vec3 cameraPosition, previousCameraPosition;
@@ -20,9 +21,12 @@ uniform vec3 cameraPosition, previousCameraPosition;
 uniform mat4 gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
 
-uniform sampler2D colortex0;
 uniform sampler2D depthtex1;
+#endif
 
+uniform sampler2D colortex0;
+
+#ifdef MOTION_BLUR
 //Common Functions//
 vec3 MotionBlur(vec3 color, float z, float dither) {
 	
@@ -63,9 +67,9 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 	else return color;
 }
 
-
 //Includes//
 #include "/lib/util/dither.glsl"
+#endif
 
 //Program//
 void main() {
@@ -79,7 +83,7 @@ void main() {
 	#endif
 	
 	/*DRAWBUFFERS:0*/
-	gl_FragData[0] = vec4(color,1.0);
+	gl_FragData[0] = vec4(color, 1.0);
 }
 
 #endif

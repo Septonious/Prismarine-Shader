@@ -8,7 +8,7 @@ float CloudSample(vec2 coord, vec2 wind, float sampleStep) {
 		  noise+= texture2D(noisetex, coord * 0.5000 + wind * 0.80).r * 2.00;
 		  noise+= texture2D(noisetex, coord * 0.2500 + wind * 0.60).r * 3.00;
 		  noise+= texture2D(noisetex, coord * 0.1250 + wind * 0.50).r * 4.00;
-		  noise+= texture2D(noisetex, coord * 0.0750 + wind * 0.40).r * 5.00;
+		  noise+= texture2D(noisetex, coord * 0.0625 + wind * 0.40).r * 5.00;
 		  noise+= texture2D(noisetex, coord * 0.0375 + wind * 0.30).r * 6.00;
 
 	noise *= 1.0 + rainStrength * 0.15;

@@ -1,4 +1,4 @@
-vec4 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
+vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
     float dither = Bayer64(gl_FragCoord.xy);
 
 	float maxDist = LIGHTSHAFT_MAX_DISTANCE;
@@ -53,6 +53,6 @@ vec4 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
 		vf = sqrt(vf * visibility);
     }
 	
-	return vf;
+	return vf.rgb;
 }
 

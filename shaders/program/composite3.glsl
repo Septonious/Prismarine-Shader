@@ -13,18 +13,22 @@ https://bitslablab.com
 varying vec2 texCoord;
 
 //Uniforms//
+#ifdef DOF
 uniform float viewWidth, viewHeight, aspectRatio;
 uniform float centerDepthSmooth;
 
 uniform mat4 gbufferProjection;
 
-uniform sampler2D colortex0;
 uniform sampler2D depthtex1;
+#endif
+
+uniform sampler2D colortex0;
 
 //Optifine Constants//
 const bool colortex0MipmapEnabled = true;
 
 //Common Variables//
+#ifdef DOF
 vec2 dofOffsets[60] = vec2[60](
 	vec2( 0.0    ,  0.25  ),
 	vec2(-0.2165 ,  0.125 ),
@@ -108,6 +112,7 @@ vec3 DepthOfField(vec3 color, float z) {
 	else dof = color;
 	return dof;
 }
+#endif
 
 //Program//
 void main() {
@@ -120,7 +125,7 @@ void main() {
 	#endif
 	
     /*DRAWBUFFERS:0*/
-	gl_FragData[0] = vec4(color,1.0);
+	gl_FragData[0] = vec4(color, 1.0);
 }
 
 #endif

@@ -31,7 +31,7 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 #endif
 
-uniform float viewWidth, viewHeight, aspectRatio;
+uniform float viewWidth, viewHeight;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -91,6 +91,11 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #include "/lib/util/dither.glsl"
 #endif
 
+#ifdef VOLUMETRIC_CLOUDS
+#include "/lib/filters/blur.glsl"
+#include "/lib/atmospherics/volumetricClouds.glsl"
+#endif
+
 #ifdef LIGHT_SHAFT
 #include "/lib/atmospherics/volumetricLight.glsl"
 #endif
@@ -101,7 +106,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 
 //Program//
 void main() {
-    vec4 color = texture2D(colortex0, texCoord);
+    vec3 color = texture2D(colortex0, texCoord).rgb;
 
 	float z0 = texture2D(depthtex0, texCoord).r;
 
@@ -123,14 +128,23 @@ void main() {
 	float z1 = texture2D(depthtex1, texCoord).r;
 	#endif
 
-	vec4 vl = vec4(0.0);
+	vec3 vl = vec3(0.0);
 
+	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	vl.rgb += GetLightShafts(z0, z1, translucent.rgb, dither);
+	vl += GetLightShafts(z0, z1, translucent.rgb, dither);
 	#endif
 	
+	//Nether & End Smoke
 	#if defined NETHER_SMOKE || defined END_SMOKE
 	vl += GetVolumetricSmoke(z0, z1, viewPos.xyz);
+	#endif
+
+	//Volumetric Clouds
+	#ifdef VOLUMETRIC_CLOUDS
+	vec3 blur = GaussianBlur(colortex0, texCoord.xy).rgb;
+	getVolumetricCloud(viewPos.xyz, z1, z0, InterleavedGradientNoiseVL(), blur, translucent);
+	color += blur;
 	#endif
 
 	#if ALPHA_BLEND == 0
@@ -138,8 +152,8 @@ void main() {
 	#endif
 
     /* DRAWBUFFERS:01 */
-	gl_FragData[0] = color;
-	gl_FragData[1] = vl;
+	gl_FragData[0] = vec4(color.rgb, 1.0);
+	gl_FragData[1] = vec4(vl, 1.0);
 	
     #ifdef REFLECTION_PREVIOUS
 	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;
