@@ -1,13 +1,14 @@
 float getCloudSample(vec3 pos, float height){
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
-	float amount = 0.55 * (1.15 - timeBrightness * 0.15) * (0.8 + rainStrength * 0.1);
+	float amount = 0.6 * (0.8 + rainStrength * 0.1);
 	
-	float noiseA = getCloudNoise(pos * VCLOUDS_DETAIL * 0.500000 - wind * 0.5) * 2.0 * VCLOUDS_HORIZONTAL_THICKNESS;
-		  noiseA+= getCloudNoise(pos * VCLOUDS_DETAIL * 0.250000 - wind * 0.4) * 3.0 * VCLOUDS_HORIZONTAL_THICKNESS;
-		  noiseA+= getCloudNoise(pos * VCLOUDS_DETAIL * 0.125000 - wind * 0.3) * 4.0 * VCLOUDS_HORIZONTAL_THICKNESS;
-		  noiseA+= getCloudNoise(pos * VCLOUDS_DETAIL * 0.062500 - wind * 0.2) * 5.0 * VCLOUDS_HORIZONTAL_THICKNESS;
-		  noiseA+= getCloudNoise(pos * VCLOUDS_DETAIL * 0.031250 - wind * 0.1) * 6.0 * VCLOUDS_HORIZONTAL_THICKNESS;
+	float noiseA = 0.0;
+	float mult = 0.1;
+	for (int i = 2; i < 7; i++){
+		noiseA += getCloudNoise(pos * mult - wind * mult) * i * VCLOUDS_HORIZONTAL_THICKNESS;
+		mult *= 0.5;
+	}
 
 	float sampleHeight = abs(height - pos.y) / VCLOUDS_VERTICAL_THICKNESS;
 
@@ -25,7 +26,7 @@ void getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 	vec4 finalColor = vec4(0.0);
 
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
-	float scattering = pow(VoL * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 8.0);
+	float scattering = pow(VoL * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0) * 2.0;
 
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
@@ -57,7 +58,7 @@ void getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 			float density = pow(smoothstep(height + VCLOUDS_VERTICAL_THICKNESS * noise, height - VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y), 0.4);
 
 			//Color calculation and lighting
-			vec4 cloudsColor = vec4(mix(lightCol * (1.0 + scattering), ambientCol * 1.25, noise * density), noise);
+			vec4 cloudsColor = vec4(mix(lightCol, ambientCol * 1.25, noise * density) * (1.0 + scattering), noise);
 			cloudsColor.rgb *= 1.00 - 0.25 * (1.0 - sunVisibility) * (1.0 - rainStrength);
 			cloudsColor.rgb *= cloudsColor.a * VCLOUDS_OPACITY;
 

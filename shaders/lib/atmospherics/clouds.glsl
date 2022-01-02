@@ -4,12 +4,12 @@ void erodeCoord(inout vec2 coord, in float currentStep, in float erosionStrength
 
 #if CLOUDS == 1 && defined OVERWORLD
 float CloudSample(vec2 coord, vec2 wind, float sampleStep) {
-	float noise = texture2D(noisetex, coord * 1.0000 + wind * 0.90).r * 1.00;
-		  noise+= texture2D(noisetex, coord * 0.5000 + wind * 0.80).r * 2.00;
-		  noise+= texture2D(noisetex, coord * 0.2500 + wind * 0.60).r * 3.00;
-		  noise+= texture2D(noisetex, coord * 0.1250 + wind * 0.50).r * 4.00;
-		  noise+= texture2D(noisetex, coord * 0.0625 + wind * 0.40).r * 5.00;
-		  noise+= texture2D(noisetex, coord * 0.0375 + wind * 0.30).r * 6.00;
+	float noise = 0.0;
+	float mult = 1.0;
+	for (int i = 1; i < 7; i++){
+		noise += texture2D(noisetex, coord * mult + wind * mult).r * i;
+		mult *= 0.5;
+	}
 
 	noise *= 1.0 + rainStrength * 0.15;
 	float multiplier = CLOUD_THICKNESS * sampleStep;

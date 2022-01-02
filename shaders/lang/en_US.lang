@@ -245,7 +245,7 @@ option.CLOUDS.comment=Enables clouds. §e[+]§rPlanar clouds have a low performa
 value.CLOUDS.0=§cOFF
 value.CLOUDS.1=Planar
 value.CLOUDS.2=Vanilla
-value.CLOUDS.3=volumetric
+value.CLOUDS.3=Volumetric
 
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
