@@ -76,7 +76,7 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 				finalColor *= translucent;
 			}
 
-			finalColor += 0.75 * cloudsColor * (1.0 - finalColor.a);
+			finalColor += 0.75 * cloudsColor * (1.0 - moonVisibility * 0.5) * (1.0 - finalColor.a);
 		}
 	}
 

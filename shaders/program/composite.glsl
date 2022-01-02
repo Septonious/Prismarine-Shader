@@ -140,8 +140,10 @@ void main() {
 	#endif
 
 	//Volumetric Clouds
+	vec4 cloud = vec4(0.0);
+
 	#ifdef VOLUMETRIC_CLOUDS
-	vec4 cloud = getVolumetricCloud(viewPos.xyz, z1, z0, InterleavedGradientNoiseVL(), translucent);
+	cloud = getVolumetricCloud(viewPos.xyz, z1, z0, InterleavedGradientNoiseVL(), translucent);
 	#endif
 
 	#if ALPHA_BLEND == 0
@@ -156,8 +158,8 @@ void main() {
     #ifdef REFLECTION_PREVIOUS
 	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;
 
-    /*DRAWBUFFERS:015*/
-	gl_FragData[2] = vec4(reflectionColor, float(z0 < 1.0));
+    /*DRAWBUFFERS:0185*/
+	gl_FragData[3] = vec4(reflectionColor, float(z0 < 1.0));
 	#endif
 }
 

@@ -54,11 +54,11 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 #endif
 
 //Includes//
-#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 #ifdef BLUR_FILTERING
 #include "/lib/filters/blur.glsl"
 #endif
 
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 #ifdef LIGHT_SHAFT
 #include "/lib/color/lightColor.glsl"
 #endif
@@ -87,7 +87,11 @@ void main() {
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
+	#ifdef BLUR_FILTERING
 	vec4 cloud = GaussianBlur(colortex8, texCoord.xy);
+	#else
+	vec4 cloud = texture2D(colortex8, texCoord.xy);
+	#endif
 	color = mix(color, cloud.rgb, cloud.a);
 	#endif
 
