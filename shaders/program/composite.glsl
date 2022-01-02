@@ -131,7 +131,7 @@ void main() {
 
 	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	vl += GetLightShafts(z0, z1, translucent.rgb, dither);
+	vl += GetLightShafts(viewPos.xyz, z0, z1, translucent.rgb, dither);
 	#endif
 	
 	//Nether & End Smoke
@@ -141,16 +141,17 @@ void main() {
 
 	//Volumetric Clouds
 	#ifdef VOLUMETRIC_CLOUDS
-	getVolumetricCloud(viewPos.xyz, z1, z0, InterleavedGradientNoiseVL(), color, translucent);
+	vec4 cloud = getVolumetricCloud(viewPos.xyz, z1, z0, InterleavedGradientNoiseVL(), translucent);
 	#endif
 
 	#if ALPHA_BLEND == 0
 	color.rgb *= color.rgb;
 	#endif
 
-    /* DRAWBUFFERS:01 */
+    /* DRAWBUFFERS:018 */
 	gl_FragData[0] = vec4(color.rgb, 1.0);
 	gl_FragData[1] = vec4(vl, 1.0);
+	gl_FragData[2] = cloud;
 	
     #ifdef REFLECTION_PREVIOUS
 	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;

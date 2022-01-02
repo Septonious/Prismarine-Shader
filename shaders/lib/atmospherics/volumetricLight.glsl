@@ -19,16 +19,12 @@ vec4 GetShadowSpace(vec4 wpos) {
 }
 
 //Light shafts from Robobo1221 (modified)
-vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
+vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
 	#ifdef TAA
 	dither = fract(dither + frameCounter / 32.0);
 	#endif
-	
-	vec3 screenPos = vec3(texCoord, pixeldepth0);
-	vec4 viewPos = gbufferProjectionInverse * (vec4(screenPos, 1.0) * 2.0 - 1.0);
-	viewPos /= viewPos.w;
 
 	#ifdef OVERWORLD
 	float visfactor = 0.05 * (-0.8 * timeBrightness + 1.0);

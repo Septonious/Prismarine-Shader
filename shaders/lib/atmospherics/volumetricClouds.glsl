@@ -21,12 +21,15 @@ float getCloudSample(vec3 pos, float height){
 	return clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 }
 
-void getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dither, inout vec3 color, in vec4 translucent){
+vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dither, in vec4 translucent){
 	vec4 wpos = vec4(0.0);
 	vec4 finalColor = vec4(0.0);
 
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
-	float scattering = pow(VoL * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0) * 2.0;
+
+	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
+	float halfVoLSqr = halfVoL * halfVoL;
+	float scattering = pow6(halfVoL);
 
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
@@ -58,8 +61,7 @@ void getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 			float density = pow(smoothstep(height + VCLOUDS_VERTICAL_THICKNESS * noise, height - VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y), 0.4);
 
 			//Color calculation and lighting
-			vec4 cloudsColor = vec4(mix(lightCol, ambientCol * 1.25, noise * density) * (1.0 + scattering), noise);
-			cloudsColor.rgb *= 1.00 - 0.25 * (1.0 - sunVisibility) * (1.0 - rainStrength);
+			vec4 cloudsColor = vec4(mix(lightCol, ambientCol, noise * density) * (1.0 + scattering), noise);
 			cloudsColor.rgb *= cloudsColor.a * VCLOUDS_OPACITY;
 
 			#if MC_VERSION >= 11800
@@ -74,10 +76,10 @@ void getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 				finalColor *= translucent;
 			}
 
-			finalColor += cloudsColor * (1.0 - finalColor.a);
+			finalColor += 0.75 * cloudsColor * (1.0 - finalColor.a);
 		}
 	}
 
 	//Output
-	color = mix(color, finalColor.rgb * rainFactor, finalColor.a);
+	return finalColor;
 }

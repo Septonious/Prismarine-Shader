@@ -60,7 +60,6 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     sky = mix(minLightCol * 0.125, sky, ug);
     #endif
 
-    // sky *= voidFade;
 	#if MC_VERSION >= 11800
 	sky *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else

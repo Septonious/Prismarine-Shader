@@ -87,7 +87,8 @@ void main() {
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
-
+	vec4 cloud = GaussianBlur(colortex8, texCoord.xy);
+	color = mix(color, cloud.rgb, cloud.a);
 	#endif
 
 	/*DRAWBUFFERS:0*/
