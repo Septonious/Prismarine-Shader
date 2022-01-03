@@ -94,67 +94,82 @@ float GetLuminance(vec3 color) {
 	return dot(color,vec3(0.299, 0.587, 0.114));
 }
 
-float GetWaterHeightMap(vec3 worldPos, vec2 offset) {
+float GetWaterHeightMap(vec3 worldPos, vec3 viewPos){
     float noise = 0.0;
+
+    float mult = clamp(-dot(normalize(normal), normalize(viewPos)) * 8.0, 0.0, 1.0) / 
+                 sqrt(sqrt(max(dist, 4.0)));
     
-    vec2 wind = vec2(frametime) * 0.5 * WATER_SPEED;
+    vec2 wind = vec2(frametime);
+    float verticalOffset = worldPos.y * 0.2;
 
-	worldPos.xz -= worldPos.y * 0.2;
+    if (mult > 0.01){
+        #if WATER_NORMALS == 1
+		noise = texture2D(noisetex, (worldPos.xz + wind - verticalOffset) * 0.002).r * 1.0;
+		noise+= texture2D(noisetex, (worldPos.xz - wind - verticalOffset) * 0.003).r * 0.8;
+		noise-= texture2D(noisetex, (worldPos.xz + wind + verticalOffset) * 0.005).r * 0.6;
+		noise+= texture2D(noisetex, (worldPos.xz - wind - verticalOffset) * 0.010).r * 0.4;
+		noise-= texture2D(noisetex, (worldPos.xz + wind + verticalOffset) * 0.015).r * 0.2;
 
-	#if WATER_NORMALS == 1
-	offset /= 256.0;
-	float noiseA = texture2D(noisetex, (worldPos.xz - wind) / 256.0 + offset).g;
-	float noiseB = texture2D(noisetex, (worldPos.xz + wind) / 48.0 + offset).g;
-	#elif WATER_NORMALS == 2
-	offset /= 256.0;
-	float noiseA = texture2D(noisetex, (worldPos.xz - wind) / 256.0 + offset).r;
-	float noiseB = texture2D(noisetex, (worldPos.xz + wind) / 96.0 + offset).r;
-	noiseA *= noiseA; noiseB *= noiseB;
-	#endif
-	
-	#if WATER_NORMALS > 0
-	noise = mix(noiseA, noiseB, WATER_DETAIL);
-	#endif
+		noise*= mult;
+		#elif WATER_NORMALS == 2
+        float lacunarity = 1.0 / WATER_SIZE, persistance = 1.0, weight = 0.0;
 
-    return noise * WATER_BUMP;
+        mult *= WATER_BUMP * WATER_SIZE / 450.0;
+        wind *= WATER_SPEED;
+
+        for(int i = 0; i < WATER_OCTAVE; i++){
+            float windSign = mod(i, 2) * 2.0 - 1.0;
+			vec2 noiseCoord = worldPos.xz + wind * windSign - verticalOffset;
+            noise += texture2D(noisetex, noiseCoord * lacunarity).r * persistance;
+            if (i == 0) noise = -noise;
+
+            weight += persistance;
+            lacunarity *= WATER_LACUNARITY;
+            persistance *= WATER_PERSISTANCE;
+        }
+        noise *= mult / weight;
+		#endif
+    }
+
+    return noise;
 }
 
-vec3 GetParallaxWaves(vec3 worldPos, vec3 viewVector) {
+
+vec3 GetParallaxWaves(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 	vec3 parallaxPos = worldPos;
 	
-	for(int i = 0; i < 4; i++) {
-		float height = -1.25 * GetWaterHeightMap(parallaxPos, vec2(0.0)) + 0.25;
+	for(int i = 0; i < 4; i++){
+		float height = (GetWaterHeightMap(parallaxPos, viewPos) - 0.5) * 0.2;
 		parallaxPos.xz += height * viewVector.xy / dist;
 	}
 	return parallaxPos;
 }
 
-vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
+vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector){
 	vec3 waterPos = worldPos + cameraPosition;
 
-	#if WATER_PIXEL > 0
-	waterPos = floor(waterPos * WATER_PIXEL) / WATER_PIXEL;
-	#endif
-
 	#ifdef WATER_PARALLAX
-	waterPos = GetParallaxWaves(waterPos, viewVector);
+	waterPos = GetParallaxWaves(waterPos, viewPos, viewVector);
 	#endif
 
+	#if WATER_NORMALS == 2
 	float normalOffset = WATER_SHARPNESS;
-	
-	float fresnel = pow(clamp(1.0 + dot(normalize(normal), normalize(viewPos)), 0.0, 1.0), 8.0);
-	float normalStrength = 0.35 * (1.0 - fresnel);
+	#else
+	float normalOffset = 0.1;
+	#endif
 
-	float h1 = GetWaterHeightMap(waterPos, vec2( normalOffset, 0.0));
-	float h2 = GetWaterHeightMap(waterPos, vec2(-normalOffset, 0.0));
-	float h3 = GetWaterHeightMap(waterPos, vec2(0.0,  normalOffset));
-	float h4 = GetWaterHeightMap(waterPos, vec2(0.0, -normalOffset));
+	float h0 = GetWaterHeightMap(waterPos, viewPos);
+	float h1 = GetWaterHeightMap(waterPos + vec3( normalOffset, 0.0, 0.0), viewPos);
+	float h2 = GetWaterHeightMap(waterPos + vec3(-normalOffset, 0.0, 0.0), viewPos);
+	float h3 = GetWaterHeightMap(waterPos + vec3(0.0, 0.0,  normalOffset), viewPos);
+	float h4 = GetWaterHeightMap(waterPos + vec3(0.0, 0.0, -normalOffset), viewPos);
 
-	float xDelta = (h2 - h1) / normalOffset;
-	float yDelta = (h4 - h3) / normalOffset;
+	float xDelta = (h1 - h2) / normalOffset;
+	float yDelta = (h3 - h4) / normalOffset;
 
 	vec3 normalMap = vec3(xDelta, yDelta, 1.0 - (xDelta * xDelta + yDelta * yDelta));
-	return normalMap * normalStrength + vec3(0.0, 0.0, 1.0 - normalStrength);
+	return normalMap * 0.03 + vec3(0.0, 0.0, 0.97);
 }
 
 //Includes//
@@ -512,6 +527,49 @@ void main() {
 										   	   specularColor, shadow * vanillaDiffuse, color.a);
 			#endif
 		}
+
+		#if defined OVERWORLD && defined TRANSLUCENCY_BLENDING
+		glass = float(mat > 1.98 && mat < 2.02);
+		if ((isEyeInWater == 0 && water > 0.5) || glass > 0.5) {
+			vec3 terrainColor = texture2D(gaux2, gl_FragCoord.xy / vec2(viewWidth, viewHeight)).rgb;
+		 	float oDepth = texture2D(depthtex1, screenPos.xy).r;
+		 	vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
+			
+		 	#ifdef TAA
+		 	vec3 oViewPos = ToNDC(vec3(TAAJitter(oScreenPos.xy, -0.5), oScreenPos.z));
+		 	#else
+		 	vec3 oViewPos = ToNDC(oScreenPos);
+		 	#endif
+
+			float clampTimeBrightness = pow(clamp(timeBrightness, 0.1, 1.0), 2.0);
+			float rainFactor = 1.00 - rainStrength * 0.75;
+			float difT = length(oViewPos - viewPos.xyz);
+					
+			vec3 absorbColor = vec3(0.0);
+			float absorbDist = 0.0;
+
+			if (isEyeInWater == 0 && water > 0.5){
+				waterColor.g *= 1.25;
+				absorbColor = normalize(waterColor.rgb * WATER_I) * rainFactor * clampTimeBrightness * terrainColor * 2.0;
+				absorbDist = 1.0 - clamp(difT / 12.0, 0.0, 1.0);
+			}
+
+			if (glass > 0.5){
+				albedo.a += albedo.a * 0.75;
+				albedo.a = clamp(albedo.a, 0.5, 0.95);
+				absorbColor = normalize(albedo.rgb * albedo.rgb) * terrainColor * 1.5;
+				absorbDist = 1.0 - clamp(difT, 0.0, 1.0);
+			}
+			
+			vec3 newAlbedo = mix(absorbColor * absorbColor, terrainColor * terrainColor, absorbDist * absorbDist);
+			newAlbedo *= newAlbedo;
+
+			float absorb = (1.0 - albedo.a);
+			absorb = sqrt(absorb * (1.0 - rainStrength) * clampTimeBrightness * lightmap.y);
+
+			albedo.rgb = mix(albedo.rgb, newAlbedo / 0.4, absorb);
+		}
+		#endif
 
 		Fog(albedo.rgb, viewPos);
 

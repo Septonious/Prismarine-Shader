@@ -1,10 +1,10 @@
 float h(vec3 pos){
-	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime * WATER_SPEED) * 0.1 + pos.y) * 0.01).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime * WATER_SPEED) * 0.2 - pos.y) * 0.01).r;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime * WATER_SPEED) * 0.3 + pos.y) * 0.01).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime * WATER_SPEED) * 0.4 - pos.y) * 0.01).r;
+	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime * WATER_SPEED) * 0.1 + pos.y) * 0.0025).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime * WATER_SPEED) * 0.2 - pos.y) * 0.0025).r;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime * WATER_SPEED) * 0.3 + pos.y) * 0.0025).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime * WATER_SPEED) * 0.4 - pos.y) * 0.0025).r;
 
-	return noise;
+	return noise * 1.25;
 }
 
 float getCaustics(vec3 pos){

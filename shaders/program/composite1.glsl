@@ -77,7 +77,7 @@ void main() {
 	#endif
 
 	#ifdef LIGHT_SHAFT
-	vl.rgb *= lightCol * 0.25;
+	vl.rgb *= lightCol * 0.25 * (1.0 - isEyeInWater * 0.75);
 	vl.rgb *= vl.rgb;
     vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
 	#endif

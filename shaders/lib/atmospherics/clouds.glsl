@@ -157,10 +157,10 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	if (VoU > 0.0 && visibility > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((8.0 + currentStep * 7.0) / wpos.y) * 0.004;
+			vec3 planeCoord = wpos * ((8.0 + currentStep * 8.0) / wpos.y) * 0.005;
 
 			vec2 coord = cameraPosition.xz * 0.00004 + planeCoord.xz;
-			coord += vec2(coord.y, -coord.x) * 0.3;
+			coord += vec2(coord.y, -coord.x) * 0.5;
 
 			float noise = AuroraSample(coord, wind, VoU);
 			

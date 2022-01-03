@@ -78,7 +78,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol * (0.5 + eBS);
+				else if (isEyeInWater == 1.0) shadow *= watercol * 256.0 * (0.5 + eBS);
 				
 				#ifdef LIGHTSHAFT_CLOUDY_NOISE
 				if (isEyeInWater == 0){

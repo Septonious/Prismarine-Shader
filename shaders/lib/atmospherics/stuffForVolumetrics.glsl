@@ -24,8 +24,8 @@ float InterleavedGradientNoiseVL() {
 }
 
 float getCloudNoise(vec3 pos){
-	pos *= 0.50;
-	pos.xz *= 0.40;
+	pos *= 0.35;
+	pos.xz *= 0.3;
 
 	vec3 u = floor(pos);
 	vec3 v = fract(pos);
@@ -44,7 +44,7 @@ float getFogSample(vec3 pos, float height, float verticalThickness){
 	float sampleHeight = pow(abs(height - pos.y) / verticalThickness, 2.0);
 	vec3 wind = vec3(frametime, 0.0, 0.0);
 
-	pos *= 0.50;
+	pos *= 0.1;
 
 	#ifdef NETHER
 	wind.r *= 3.0;
