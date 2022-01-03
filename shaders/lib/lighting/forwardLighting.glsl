@@ -45,6 +45,10 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.7;
     vec3 blockLighting = blocklightCol * newLightmap * newLightmap;
 
+    #ifdef SSGI
+    blockLighting *= 0.0;
+    #endif
+
     vec3 minLighting = minLightCol * (1.0 - eBS);
 
     #ifdef TOON_LIGHTMAP

@@ -13,39 +13,45 @@ https://bitslablab.com
 varying vec2 texCoord;
 
 //Uniforms//
-uniform int frameCounter;
-uniform float viewWidth, viewHeight, aspectRatio;
+uniform sampler2D colortex11;
 
-uniform sampler2D colortex1;
+uniform sampler2D colortex13, depthtex1;
+uniform float viewWidth, viewHeight;
+uniform int frameCounter;
 
 uniform vec3 cameraPosition, previousCameraPosition;
 
 uniform mat4 gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
 
-uniform sampler2D colortex2;
-uniform sampler2D depthtex1;
+#ifdef DENOISE
+uniform sampler2D colortex6;
+uniform sampler2D depthtex0;
 
-//Optifine Constants//
-#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
-const bool colortex1MipmapEnabled = true;
+uniform mat4 gbufferProjection;
 #endif
 
 //Includes//
 #include "/lib/antialiasing/taa.glsl"
 
+#ifdef DENOISE
+#include "/lib/util/encode.glsl"
+#include "/lib/filters/normalAwareBlur.glsl"
+#endif
+
 //Program//
 void main() {
-	vec3 color = texture2DLod(colortex1, texCoord, 0.0).rgb;
-    vec4 prev = vec4(texture2DLod(colortex2, texCoord, 0).r, 0.0, 0.0, 0.0);
-	
-	#ifdef TAA
-	prev = TemporalAA(color, prev.r);
-	#endif
+    vec3 gi = texture2D(colortex11, texCoord).rgb;
+    vec4 prev = vec4(texture2DLod(colortex13, texCoord, 0.0).r, 0.0, 0.0, 0.0);
+    prev = TemporalAA(gi.rgb, prev.r, colortex11, colortex13);
 
-    /*DRAWBUFFERS:12*/
-	gl_FragData[0] = vec4(color, 1.0);
-	gl_FragData[1] = vec4(prev);
+    #ifdef DENOISE
+    gi = NormalAwareBlur(texCoord).rgb;
+    #endif
+
+    /* RENDERTARGETS:11,13 */
+    gl_FragData[0] = vec4(gi, 1.0);
+    gl_FragData[1] = vec4(prev);
 }
 
 #endif

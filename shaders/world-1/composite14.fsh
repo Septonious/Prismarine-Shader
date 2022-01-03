@@ -7,7 +7,7 @@ https://bitslablab.com
 
 #extension GL_ARB_shader_texture_lod : enable
 
-#define OVERWORLD
+#define NETHER
 #define FSH
 
-#include "/program/composite7.glsl"
+#include "/program/composite14.glsl"

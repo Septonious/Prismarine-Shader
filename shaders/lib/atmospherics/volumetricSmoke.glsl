@@ -1,5 +1,5 @@
 vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
-    float dither = Bayer64(gl_FragCoord.xy);
+    float dither = InterleavedGradientNoiseVL();
 
 	float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 
@@ -7,7 +7,7 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
 	float depth1 = GetLinearDepth2(z1);
 
     #ifdef NETHER_SMOKE
-    float visibility = 1.00;
+    float visibility = 0.25;
     #endif
 
     #ifdef END_SMOKE
@@ -21,8 +21,8 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
     vec4 wpos = vec4(0.0);
 
     if (visibility > 0.0){
-        for(int i = 0; i < 2; i++) {
-			float minDist = (i + dither) * 20.0;
+        for(int i = 0; i < 4; i++) {
+			float minDist = (i + dither) * 16.0;
 
 			wpos = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord.st);
 
@@ -32,7 +32,7 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
                 else break;
                 #endif
 
-                wpos.xyz += cameraPosition.xyz + vec3(frametime * 0.25, 0.0, 0.0);
+                wpos.xyz += cameraPosition.xyz + vec3(frametime * 0.025, 0.0, 0.0);
 
                 #if defined NETHER_SMOKE
                 float noise = getFogSample(wpos.xyz, 40.0, 256.0);

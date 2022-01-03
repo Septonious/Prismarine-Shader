@@ -5,7 +5,9 @@ https://bitslablab.com
 
 #version 120 
 
-#define OVERWORLD
-#define VSH
+#extension GL_ARB_shader_texture_lod : enable
 
-#include "/program/composite6.glsl"
+#define OVERWORLD
+#define FSH
+
+#include "/program/composite15.glsl"

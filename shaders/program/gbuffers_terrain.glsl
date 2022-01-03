@@ -119,8 +119,11 @@ float GetLuminance(vec3 color) {
 #include "/lib/util/jitter.glsl"
 #endif
 
-#ifdef ADVANCED_MATERIALS
+#if defined ADVANCED_MATERIALS || defined SSGI
 #include "/lib/util/encode.glsl"
+#endif
+
+#ifdef ADVANCED_MATERIALS
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/directionalLightmap.glsl"
 #include "/lib/surface/materialGbuffers.glsl"
@@ -154,18 +157,20 @@ void main() {
 	vec3 fresnel3 = vec3(0.0);
 	#endif
 
+	vec2 lightmap = vec2(0.0);
+	float emissive = 0.0, lava = 0.0, giEmissive = 0.0;
+
 	if (albedo.a > 0.001) {
-		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+		lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 		
 		float foliage  = float(mat > 0.98 && mat < 1.02);
 		float leaves   = float(mat > 1.98 && mat < 2.02);
-		float emissive = float(mat > 2.98 && mat < 3.02);
-		float lava     = float(mat > 3.98 && mat < 4.02);
+		emissive = float(mat > 2.98 && mat < 3.02);
+		lava     = float(mat > 3.98 && mat < 4.02);
 		float candle   = float(mat > 4.98 && mat < 5.02);
 
 		float metalness      = 0.0;
 		float emission       = (emissive + candle + lava) * 0.4;
-		float giEmissive 	 = 0.0;
 		float subsurface     = (foliage + candle) * 0.5 + leaves;
 		vec3 baseReflectance = vec3(0.04);
 
@@ -364,6 +369,13 @@ void main() {
 	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[3] = vec4(fresnel3, 1.0);
+	#endif
+
+	#ifdef SSGI
+	/* RENDERTARGETS:0,6,9,12 */
+	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+	gl_FragData[2] = vec4(emissive + lava + giEmissive, 0.0, lightmap.y, 0.0);
+	gl_FragData[3] = albedo;
 	#endif
 }
 

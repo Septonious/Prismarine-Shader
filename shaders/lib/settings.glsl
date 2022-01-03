@@ -25,8 +25,17 @@ Read lang/en_US.lang to get the description of what every option does.
 Please don't edit anything from Undefine section and onwards.
 */
 
-
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
+  #define SSGI
+  #define GI_DEPTH_LENIENCY 5.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
+  #define DENOISE
+  #define DENOISE_QUALITY 60 //[10 20 30 40 50 60]
+  #define DENOISE_STRENGTH 48.00 //[2.00 4.00 8.00 16.00 24.00 32.00 48.00 64.00]
+  #define BOUNCES 1 //[1 2 3 4]
+  #define ILLUMINATION_STRENGTH 3.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+  #define STRIDE 48 //[4 8 16 24 32 48 64 96 128]
+  #define EMISSIVE_CONCRETE
+
   #define TRANSLUCENCY_BLENDING
   #define WATER_CAUSTICS
   #define WATER_CAUSTICS_STRENGTH 8 //[2 4 6 8 10 12 14 16]  

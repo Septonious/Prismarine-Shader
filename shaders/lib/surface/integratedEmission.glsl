@@ -11,6 +11,7 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
     } else if (mat > 100.9 && mat < 101.1) { // Crying Obsidian and Respawn Anchor
 		newEmissive = (albedo.b - albedo.r) * albedo.r * GLOW_STRENGTH;
         newEmissive *= newEmissive * newEmissive * GLOW_STRENGTH * jitter;
+		giEmissive = 2.0;
 	} else if (mat > 101.9 && mat < 102.1) { // Command Block
         vec3 comPos = fract(worldPos.xyz + cameraPosition.xyz);
              comPos = abs(comPos - vec3(0.5));
@@ -30,21 +31,28 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
         float core = float(albedo.r < 0.1);
         float edge = float(albedo.b > 0.35 && albedo.b < 0.401 && core == 0.0);
         newEmissive = (core * 0.195 + 0.035 * edge);
-		newEmissive *= 8.0 * GLOW_STRENGTH;
+		newEmissive *= GLOW_STRENGTH;
+		giEmissive = 8.0;
 	} else if (mat > 103.9 && mat < 104.1) { // Crimson Stem & Hyphae
         newEmissive = float(albedo.b < 0.16);
         newEmissive = min(pow(length(albedo.rgb) * length(albedo.rgb), 2.0) * newEmissive * GLOW_STRENGTH, 0.3);
-		newEmissive *= 8.0 * GLOW_STRENGTH;
+		newEmissive *= GLOW_STRENGTH;
+		giEmissive = 8.0;
 	} else if (mat > 104.9 && mat < 105.1) { // Warped Nether Warts
 		newEmissive = pow2(float(albedo.g - albedo.b)) * GLOW_STRENGTH;
+		giEmissive = 1.0;
 	} else if (mat > 105.9 && mat < 106.1) { // Warped Nylium
 		newEmissive = float(albedo.g > albedo.b && albedo.g > albedo.r) * pow(float(albedo.g - albedo.b), 3.0) * GLOW_STRENGTH;
+		giEmissive = 1.0;
 	} else if (mat > 107.9 && mat < 108.1) { // Amethyst
 		newEmissive = float(length(albedo.rgb) > 0.975) * 0.25 * GLOW_STRENGTH * jitter;
+		giEmissive = 2.0;
 	} else if (mat > 109.9 && mat < 110.1) { // Glow Lichen
 		newEmissive = (1.0 - lightmap.y) * float(albedo.r > albedo.g || albedo.r > albedo.b) * 3.0;
+		giEmissive = 1.0;
 	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
 		newEmissive = float(albedo.r > albedo.g && albedo.r > albedo.b) * 0.1 * GLOW_STRENGTH;
+		giEmissive = 1.0;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
 		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.5 * GLOW_STRENGTH;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
@@ -53,10 +61,13 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b) * GLOW_STRENGTH;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
 		newEmissive = GLOW_STRENGTH * GLOW_STRENGTH * jitter;
+		giEmissive = 3.0 * GLOW_STRENGTH;
 	} else if (mat > 115.9 && mat < 116.1) { // Lantern
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * 2.0 * GLOW_STRENGTH * jitter;
+		giEmissive = 3.0 * GLOW_STRENGTH;
 	} else if (mat > 116.9 && mat < 117.1) { // Chorus
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25 * GLOW_STRENGTH;
+		giEmissive = 1.0;
 	} else if (mat > 117.9 && mat < 118.1) {
 		newEmissive = 0.0;
 	}
@@ -64,6 +75,16 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 	#ifdef OVERWORLD
 	if (isPlant > 0.9 && isPlant < 1.1){ // Flowers
 		newEmissive = float(albedo.b > albedo.g || albedo.r > albedo.g) * GLOW_STRENGTH * 0.1;
+		giEmissive = 2.0 * GLOW_STRENGTH;
+	}
+	#endif
+
+	#if defined SSGI && defined EMISSIVE_CONCRETE
+	if (mat > 997.9 && mat < 998.1){
+		giEmissive = (0.0 + lightmap.y * timeBrightness) * 0.1;
+	} else if (mat > 998.9 && mat < 999.1){
+		newEmissive = 1.0;
+		giEmissive = 4.0;
 	}
 	#endif
 
@@ -92,5 +113,10 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	if (mc_Entity.x == 20017) mat = 117.0;
 	if (mc_Entity.x == 20018) mat = 118.0;
 	if (mc_Entity.x == 10101) isPlant = 1.0;
+
+	#if defined SSGI && defined EMISSIVE_CONCRETE
+	if (mc_Entity.x == 29998) mat = 998.0;
+	if (mc_Entity.x == 29999) mat = 999.0;
+	#endif
 }
 #endif
