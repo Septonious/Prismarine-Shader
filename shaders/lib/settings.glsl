@@ -47,7 +47,7 @@ Please don't edit anything from Undefine section and onwards.
   #define VCLOUDS_RANGE 3.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.25 4.50 4.75 5.00 5.25 5.50 5.75 6.00]
   #define VCLOUDS_AMOUNT 2.20 //[1.00 1.25 1.50 1.75 2.00]
   #define VCLOUDS_HORIZONTAL_THICKNESS 2.10 //[2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
-  #define VCLOUDS_DETAIL 0.1 //[0.1 0.2 0.3 0.4 0.5]
+  #define VCLOUDS_DETAIL 0.2 //[0.1 0.2 0.3 0.4 0.5]
 
   #define NETHER_SMOKE
   #define END_SMOKE
@@ -171,7 +171,7 @@ Please don't edit anything from Undefine section and onwards.
   #define WATER_NORMALS 2 //[0 1 2]
   #define WATER_PARALLAX
   #define WATER_OCTAVE 5 //[1 2 3 4 5 6 7 8 9 10]
-  #define WATER_BUMP 4.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.25 4.50 4.75 5.00]
+  #define WATER_BUMP 5.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.25 4.50 4.75 5.00]
   #define WATER_LACUNARITY 1.50 //[1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00]
   #define WATER_PERSISTANCE 0.90 //[0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90]
   #define WATER_SHARPNESS 0.50 //[0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.50]
