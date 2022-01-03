@@ -60,6 +60,13 @@ void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor)
 	float sun = pow(abs(VoL), 800.0 * isMoon + 800.0) * (1.0 - sqrt(rainStrength));
 
 	vec3 sunMoonCol = mix(moonColor * moonVisibility, sunColor * sunVisibility, float(VoL > 0.0));
+
+	#if MC_VERSION >= 11800
+	sunMoonCol *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
+	#else
+	sunMoonCol *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
+	#endif
+	
 	color += sun * sunMoonCol;
 }
 

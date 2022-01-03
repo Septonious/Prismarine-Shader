@@ -107,6 +107,10 @@ float GetLuminance(vec3 color) {
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 
+#ifdef OVERWORLD
+#include "/lib/color/waterColor.glsl"
+#endif
+
 #ifdef INTEGRATED_EMISSION
 #include "/lib/surface/integratedEmission.glsl"
 #endif
@@ -334,6 +338,16 @@ void main() {
 			normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
 			newNormal = mix(normalMap * tbnMatrix, newNormal, 1.0 - pow(1.0 - puddles, 4.0));
 			newNormal = clamp(normalize(newNormal), vec3(-1.0), vec3(1.0));
+		}
+		#endif
+
+		#ifdef OVERWORLD
+		float depth = clamp(length(viewPos.xyz), 0.0, 7.0);
+		depth = 8.0 - depth;
+		if (isEyeInWater == 1){
+			float clampEyeBrightness = clamp(eBS, 0.1, 1.0);
+			albedo.rgb *= waterColor.rgb * (4.0 - rainStrength - rainStrength) * clampEyeBrightness;
+			albedo.rgb *= waterColor.rgb * waterColor.rgb * 128.0 * (0.25 + timeBrightness) + depth;
 		}
 		#endif
 

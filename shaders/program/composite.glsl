@@ -42,7 +42,7 @@ uniform sampler2D depthtex0;
 
 uniform mat4 gbufferProjectionInverse;
 
-#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
 uniform mat4 gbufferModelViewInverse;
 
 uniform sampler2D colortex1;
@@ -120,7 +120,7 @@ void main() {
 		color.rgb *= color.rgb;
 	}
 
-	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
     vec4 translucent = texture2D(colortex1, texCoord);
 
 	float dither = InterleavedGradientNoiseVL();

@@ -447,7 +447,6 @@ option.BLOOM_STRENGTH=Strength
 option.BLOOM_STRENGTH.comment=Adjusts bloom intensity.
 
 option.BLOOM_CONTRAST=Contrast
-option.BLOOM_CONTRAST.comment=Adjusts. Higher value while lower value
 value.BLOOM_CONTRAST.-4=-1.00
 value.BLOOM_CONTRAST.-3=-0.75
 value.BLOOM_CONTRAST.-2=-0.50

@@ -32,12 +32,12 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex8;
 #endif
 
-#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
-uniform ivec2 eyeBrightnessSmooth;
-
 #ifdef BLUR_FILTERING
 uniform float viewWidth, viewHeight;
 #endif
+
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform sampler2D colortex1;
 #endif

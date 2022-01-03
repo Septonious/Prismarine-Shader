@@ -44,7 +44,7 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 	} else if (mat > 109.9 && mat < 110.1) { // Glow Lichen
 		newEmissive = (1.0 - lightmap.y) * float(albedo.r > albedo.g || albedo.r > albedo.b) * 3.0;
 	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
-		newEmissive = float(albedo.r > albedo.g && albedo.r > albedo.b) * 0.2 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > albedo.g && albedo.r > albedo.b) * 0.1 * GLOW_STRENGTH;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
 		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.5 * GLOW_STRENGTH;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand

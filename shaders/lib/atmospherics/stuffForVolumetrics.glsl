@@ -59,6 +59,10 @@ float getFogSample(vec3 pos, float height, float verticalThickness){
 	noise *= 0.9;
 	#endif
 
+	#ifdef OVERWORLD
+	noise *= 1.1;
+	#endif
+
 	noise = clamp(noise * 0.6 - (1.0 + sampleHeight), 0.0, 1.0);
 
 	return noise;
