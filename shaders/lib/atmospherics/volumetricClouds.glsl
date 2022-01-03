@@ -24,6 +24,10 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 	vec4 wpos = vec4(0.0);
 	vec4 finalColor = vec4(0.0);
 
+	#ifdef TAA
+	dither = fract(dither + frameCounter / 32.0);
+	#endif
+
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
 	float scattering = pow6(halfVoL);
