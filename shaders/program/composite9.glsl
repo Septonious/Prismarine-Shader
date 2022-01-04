@@ -27,8 +27,6 @@ uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
 #ifdef DENOISE
 uniform sampler2D colortex6;
 uniform sampler2D depthtex0;
-
-uniform mat4 gbufferProjection;
 #endif
 
 //Includes//
@@ -44,10 +42,6 @@ void main() {
     vec3 gi = texture2D(colortex11, texCoord).rgb;
     vec4 prev = vec4(texture2DLod(colortex13, texCoord, 0.0).r, 0.0, 0.0, 0.0);
     prev = TemporalAA(gi.rgb, prev.r, colortex11, colortex13);
-
-    #ifdef DENOISE
-    gi = NormalAwareBlur(texCoord).rgb;
-    #endif
 
     /* RENDERTARGETS:11,13 */
     gl_FragData[0] = vec4(gi, 1.0);

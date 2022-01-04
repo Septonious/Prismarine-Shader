@@ -61,10 +61,10 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b) * GLOW_STRENGTH;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
 		newEmissive = GLOW_STRENGTH * GLOW_STRENGTH * jitter;
-		giEmissive = 3.0 * GLOW_STRENGTH;
+		giEmissive = 8.0;
 	} else if (mat > 115.9 && mat < 116.1) { // Lantern
-		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * 2.0 * GLOW_STRENGTH * jitter;
-		giEmissive = 3.0 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * GLOW_STRENGTH * jitter;
+		giEmissive = 8.0;
 	} else if (mat > 116.9 && mat < 117.1) { // Chorus
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25 * GLOW_STRENGTH;
 		giEmissive = 1.0;
@@ -81,7 +81,7 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 
 	#if defined SSGI && defined EMISSIVE_CONCRETE
 	if (mat > 997.9 && mat < 998.1){
-		giEmissive = (0.0 + lightmap.y * timeBrightness) * 0.1;
+		giEmissive = (0.0 + lightmap.y * timeBrightness) * 0.01;
 	} else if (mat > 998.9 && mat < 999.1){
 		newEmissive = 1.0;
 		giEmissive = 4.0;

@@ -19,7 +19,7 @@ uniform float viewHeight, viewWidth;
 uniform sampler2D colortex6;
 uniform sampler2D depthtex0, depthtex1;
 
-uniform mat4 gbufferProjection, gbufferProjectionInverse;
+uniform mat4 gbufferProjectionInverse;
 #endif
 
 uniform sampler2D colortex1, colortex9, colortex11;
