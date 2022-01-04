@@ -1,6 +1,10 @@
 vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
     float dither = InterleavedGradientNoiseVL();
 
+	#ifdef TAA
+	dither = fract(dither + frameCounter / 32.0);
+	#endif
+
 	float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 
 	float depth0 = GetLinearDepth2(z0);
