@@ -8,24 +8,24 @@ float GetLinearDepth2(float depth) {
 }
 #endif
 
-vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
-
 #define TAU 6.28318530
 
 float gaussian(float x, float sigma) {
     return (1.0 / sqrt(TAU * sigma)) * exp(-pow2(x) / (2.0 * pow2(sigma)));
 }
 
-vec3 NormalAwareBlur(vec2 coord) {
+vec3 NormalAwareBlur() {
     vec3 blur = vec3(0.0);
 
-	vec3 normal = normalize(DecodeNormal(texture2D(colortex6, coord).xy));
+	vec3 normal = normalize(DecodeNormal(texture2D(colortex6, texCoord).xy));
 
-	float centerDepth0 = texture2D(depthtex0, coord.xy).x;
+	float centerDepth0 = texture2D(depthtex0, texCoord.xy).x;
 
     #ifndef NETHER
-	float centerDepth1 = GetLinearDepth2(texture2D(depthtex1, coord.xy).x);
+	float centerDepth1 = GetLinearDepth2(texture2D(depthtex1, texCoord.xy).x);
     #endif
+
+	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 
 	float totalWeight = 0.0;
 
@@ -35,17 +35,17 @@ vec3 NormalAwareBlur(vec2 coord) {
 
 			vec2 offset = vec2(i, j) * DENOISE_STRENGTH * pixelSize;
 
-			vec3 currentNormal = normalize(DecodeNormal(texture2D(colortex6, coord + offset).xy));
+			vec3 currentNormal = normalize(DecodeNormal(texture2D(colortex6, texCoord + offset).xy));
 			float normalWeight = pow8(clamp(dot(normal, currentNormal), 0.0001, 1.0));
 			weight *= normalWeight;
 
 			#ifndef NETHER
-			float currentDepth = GetLinearDepth2(texture2D(depthtex1, coord + offset).x);
+			float currentDepth = GetLinearDepth2(texture2D(depthtex1, texCoord + offset).x);
 			float depthWeight = (clamp(1.0 - abs(currentDepth - centerDepth1), 0.0001, 0.1)); 
 			weight *= depthWeight;
 			#endif			
 
-            blur += texture2D(colortex11, coord + offset).rgb * weight;
+            blur += texture2D(colortex11, texCoord + offset).rgb * weight;
             totalWeight += weight;
         }
     }

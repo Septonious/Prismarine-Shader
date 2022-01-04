@@ -36,7 +36,7 @@ void main() {
     vec3 gi = texture2D(colortex11, texCoord).rgb;
 
     #ifdef DENOISE
-    gi = NormalAwareBlur(texCoord).rgb;
+    gi = NormalAwareBlur();
     #endif
 
     float skyLightmap = clamp(texture2D(colortex9, texCoord).b, 0.0, 1.0);

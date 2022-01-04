@@ -43,6 +43,10 @@ void main() {
     vec4 prev = vec4(texture2DLod(colortex13, texCoord, 0.0).r, 0.0, 0.0, 0.0);
     prev = TemporalAA(gi.rgb, prev.r, colortex11, colortex13);
 
+    #ifdef DENOISE
+    gi = NormalAwareBlur().rgb;
+    #endif
+
     /* RENDERTARGETS:11,13 */
     gl_FragData[0] = vec4(gi, 1.0);
     gl_FragData[1] = vec4(prev);
