@@ -11,17 +11,17 @@ vec3 ambientNight    = vec3(AMBIENT_NR, AMBIENT_NG, AMBIENT_NB) * AMBIENT_NI * 0
 #ifdef WEATHER_PERBIOME
 uniform float isDesert, isMesa, isCold, isSwamp, isMushroom, isSavanna;
 
-vec4 weatherRain     = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
-vec4 weatherCold     = vec4(vec3(WEATHER_CR, WEATHER_CG, WEATHER_CB) / 255.0, 1.0) * WEATHER_CI;
-vec4 weatherDesert   = vec4(vec3(WEATHER_DR, WEATHER_DG, WEATHER_DB) / 255.0, 1.0) * WEATHER_DI;
-vec4 weatherBadlands = vec4(vec3(WEATHER_BR, WEATHER_BG, WEATHER_BB) / 255.0, 1.0) * WEATHER_BI;
-vec4 weatherSwamp    = vec4(vec3(WEATHER_SR, WEATHER_SG, WEATHER_SB) / 255.0, 1.0) * WEATHER_SI;
-vec4 weatherMushroom = vec4(vec3(WEATHER_MR, WEATHER_MG, WEATHER_MB) / 255.0, 1.0) * WEATHER_MI;
-vec4 weatherSavanna  = vec4(vec3(WEATHER_VR, WEATHER_VG, WEATHER_VB) / 255.0, 1.0) * WEATHER_VI;
+vec3 weatherRain     = vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0 * WEATHER_RI;
+vec3 weatherCold     = vec3(WEATHER_CR, WEATHER_CG, WEATHER_CB) / 255.0 * WEATHER_CI;
+vec3 weatherDesert   = vec3(WEATHER_DR, WEATHER_DG, WEATHER_DB) / 255.0 * WEATHER_DI;
+vec3 weatherBadlands = vec3(WEATHER_BR, WEATHER_BG, WEATHER_BB) / 255.0 * WEATHER_BI;
+vec3 weatherSwamp    = vec3(WEATHER_SR, WEATHER_SG, WEATHER_SB) / 255.0 * WEATHER_SI;
+vec3 weatherMushroom = vec3(WEATHER_MR, WEATHER_MG, WEATHER_MB) / 255.0 * WEATHER_MI;
+vec3 weatherSavanna  = vec3(WEATHER_VR, WEATHER_VG, WEATHER_VB) / 255.0 * WEATHER_VI;
 
 float weatherWeight = isCold + isDesert + isMesa + isSwamp + isMushroom + isSavanna;
 
-vec4 weatherCol = mix(
+vec3 weatherCol = mix(
 	weatherRain,
 	(
 		weatherCold  * isCold  + weatherDesert   * isDesert   + weatherBadlands * isMesa    +
@@ -31,7 +31,7 @@ vec4 weatherCol = mix(
 );
 
 #else
-vec4 weatherCol = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
+vec3 weatherCol = vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0 * WEATHER_RI;
 #endif
 
 float mefade = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);

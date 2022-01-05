@@ -26,6 +26,9 @@ Please don't edit anything from Undefine section and onwards.
 */
 
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
+//#define POWDER_SNOW_HIGHLIGHT
+//#define ENTITY_HIGHLIGHT
+
 //#define SSGI
   #define GI_DEPTH_LENIENCY 5.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
   #define DENOISE
@@ -46,7 +49,7 @@ Please don't edit anything from Undefine section and onwards.
   #define LIGHTSHAFT_SAMPLES 2 //[1 2 3 4 5 6 7 8]
   #define LIGHTSHAFT_MAX_DISTANCE 512.0 //[128.0 256.0 512.0 1024.0]
   #define LIGHTSHAFT_MIN_DISTANCE 32.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0 21.0 22.0 23.0 24.0 25.0 26.0 27.0 28.0 29.0 30.0 31.0 32.0]
-  #define LIGHTSHAFT_HEIGHT 100 //[5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100]
+  #define LIGHTSHAFT_HEIGHT 80 //[5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100]
 
   #define VCLOUDS_QUALITY 32.0 //[32.0 30.0 28.0 26.0 24.0 22.0 20.0 18.0 16.0 14.0 12.0 10.0 8.0 6.0 4.0]
   #define VCLOUDS_HEIGHT 200 //[100 110 120 130 140 150 160 170 180 190 200 210 220 230 240 250 260 270 280 290 300 310 320 330 340 350 360 370 380 390 400]
@@ -54,7 +57,7 @@ Please don't edit anything from Undefine section and onwards.
   #define VCLOUDS_SPEED 0.25 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
   #define VCLOUDS_OPACITY 1.00 //[0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
   #define VCLOUDS_RANGE 3.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 4.25 4.50 4.75 5.00 5.25 5.50 5.75 6.00]
-  #define VCLOUDS_AMOUNT 2.20 //[1.00 1.25 1.50 1.75 2.00]
+  #define VCLOUDS_AMOUNT 2.00 //[1.00 1.25 1.50 1.75 2.00]
   #define VCLOUDS_HORIZONTAL_THICKNESS 2.10 //[2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
   #define VCLOUDS_DETAIL 0.2 //[0.1 0.2 0.3 0.4 0.5]
 

@@ -139,7 +139,7 @@ void main() {
 	float lightningBolt = float(entityId == 10101);
 	if (lightningBolt > 0.5) {
 		#ifdef OVERWORLD
-		albedo.rgb = weatherCol.rgb / weatherCol.a;
+		albedo.rgb = weatherCol.rgb;
 		albedo.rgb *= albedo.rgb * albedo.rgb;
 		#endif
 

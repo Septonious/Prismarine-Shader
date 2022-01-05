@@ -119,12 +119,12 @@ float GetAmbientOcclusion(float z){
 		vec2 offset = aoOffsets[i] / vec2(viewWidth, viewHeight);
 		float samplez = GetLinearDepth(texture2D(depthtex0, texCoord + offset * 3.0).r);
 		float wg = max(1.0 - 2.0 * far * abs(lz - samplez), 0.00001);
-		ao += texture2DLod(colortex4, texCoord + offset * 2.0, 1).r * wg;
+		ao += texture2DLod(colortex4, texCoord + offset * 2.0, 1.0).r * wg;
 		tw += wg;
 	}
 	ao /= tw;
 
-	if (tw < 0.0001) ao = texture2DLod(colortex4, texCoord, 2).r;
+	if (tw < 0.0001) ao = texture2DLod(colortex4, texCoord, 2.0).r;
 	
 	return pow(ao, AO_STRENGTH);
 }

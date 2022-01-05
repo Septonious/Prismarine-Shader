@@ -139,7 +139,7 @@ void main() {
 	float lightningBolt = float(entityId == 10101);
 	if(lightningBolt > 0.5) {
 		#ifdef OVERWORLD
-		albedo.rgb = weatherCol.rgb / weatherCol.a;
+		albedo.rgb = weatherCol.rgb;
 		albedo.rgb *= albedo.rgb * albedo.rgb;
 		#endif
 		#ifdef NETHER
@@ -159,6 +159,11 @@ void main() {
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
 		
+		#ifdef ENTITY_HIGHLIGHT
+		emission = 0.75;
+		albedo.rgb *= albedo.rgb;
+		#endif
+
 		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);

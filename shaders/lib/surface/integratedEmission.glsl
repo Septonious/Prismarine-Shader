@@ -88,6 +88,12 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 	}
 	#endif
 
+	#ifdef POWDER_SNOW_HIGHLIGHT
+	if (mat > 29999.9 && mat < 30000.1){
+		newEmissive = 1.0;
+	} 
+	#endif
+
 	emission += newEmissive;
 }
 #endif
@@ -117,6 +123,10 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	#if defined SSGI && defined EMISSIVE_CONCRETE
 	if (mc_Entity.x == 29998) mat = 998.0;
 	if (mc_Entity.x == 29999) mat = 999.0;
+	#endif
+
+	#ifdef POWDER_SNOW_HIGHLIGHT
+	if (mc_Entity.x == 30000) mat = 30000;
 	#endif
 }
 #endif

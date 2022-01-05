@@ -11,7 +11,7 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
 	float depth1 = GetLinearDepth2(z1);
 
     #ifdef NETHER_SMOKE
-    float visibility = 0.25;
+    float visibility = 0.05;
     #endif
 
     #ifdef END_SMOKE
