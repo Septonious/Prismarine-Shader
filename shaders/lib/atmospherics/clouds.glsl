@@ -95,15 +95,21 @@ void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float b
 	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
 
 	vec2 wind = vec2(frametime, 0.0);
-	vec2 coord = planeCoord.xz * 0.4 + cameraPosition.xz * 0.0001 + wind * 0.001;
-		 coord = floor(coord * 1024.0) / 1024.0 * size;
+	vec2 coord = planeCoord.xz * size + cameraPosition.xz * 0.0001 + wind * 0.001;
+		 coord = floor(coord * 1024.0) / 1024.0;
 	
 	float VoU = clamp(dot(normalize(viewPos), upVec), 0.0, 1.0);
-	float multiplier = VoU * 16.0 * (1.0 - rainStrength) * (1.0 - sunVisibility * 0.5) * amount;
+
+	#ifdef END
+	VoU = 1.0;
+	#endif
+
+	float multiplier = VoU * 16.0 * (1.0 - rainStrength) * (1.0 - sunVisibility * 0.5);
 	
 	float star = GetNoise(coord.xy);
 		  star*= GetNoise(coord.xy + 0.10);
 		  star*= GetNoise(coord.xy + 0.23);
+	star *= amount;
 	star = clamp(star - 0.75, 0.0, 1.0) * multiplier;
 
 	#if MC_VERSION >= 11800
@@ -308,6 +314,10 @@ vec3 DrawNebula(vec3 viewPos) {
 			currentStep += sampleStep;
 		}
 	}
+
+	#if defined UNDERGROUND_SKY && defined OVERWORLD
+	nebula *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+	#endif
 
 	return nebula * NEBULA_BRIGHTNESS * visFactor;
 }

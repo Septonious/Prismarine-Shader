@@ -107,7 +107,7 @@ void main() {
 	#endif
 
 	#ifdef END
-	albedo.rgb = endCol.rgb * 0.025;
+	albedo.rgb = endCol.rgb * 0.01;
 
 	#ifdef SKY_DESATURATION
 	albedo.rgb = GetLuminance(albedo.rgb) * endCol.rgb;
@@ -117,12 +117,13 @@ void main() {
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
 
-	#ifdef END_NEBULA
-	albedo.rgb += DrawNebula(viewPos.xyz);
+	#ifdef END_STARS
+	DrawStars(albedo.rgb, viewPos.xyz, 0.25, 0.9, 8.0);
+	DrawStars(albedo.rgb, viewPos.xyz, 0.75, 0.9, 7.0);
 	#endif
 
-	#ifdef END_STARS
-	DrawStars(albedo.rgb, viewPos.xyz, 1.0, 1.0, 3.0);
+	#ifdef END_NEBULA
+	albedo.rgb += DrawNebula(viewPos.xyz);
 	#endif
 
 	albedo.rgb *= SKYBOX_BRIGHTNESS * 0.02;
