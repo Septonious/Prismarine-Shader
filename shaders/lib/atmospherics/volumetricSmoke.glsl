@@ -11,14 +11,14 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
 	float depth1 = GetLinearDepth2(z1);
 
     #ifdef NETHER_SMOKE
-    float visibility = 0.05;
+    float visibility = 0.025;
     #endif
 
     #ifdef END_SMOKE
     float VoL = dot(normalize(viewPos.xyz), lightVec);
-    float scatter = pow(VoL * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 8.0);
+    float scatter = pow(VoL * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 8.0) * 0.1;
 
-    float visibility = 0.25 + scatter;
+    float visibility = 0.025 + scatter;
     #endif
 
 	vec4 vf = vec4(0.0);
@@ -26,7 +26,7 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
 
     if (visibility > 0.0){
         for(int i = 0; i < 4; i++) {
-			float minDist = (i + dither) * 16.0;
+			float minDist = (i + dither) * 24.0;
 
 			wpos = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord.st);
 
@@ -41,7 +41,7 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
                 #if defined NETHER_SMOKE
                 float noise = getFogSample(wpos.xyz, 40.0, 256.0);
                 #elif defined END_SMOKE
-                float noise = getFogSample(wpos.xyz, 60.0, 128.0);
+                float noise = getFogSample(wpos.xyz, 50.0, 128.0);
                 #endif
 
                 #if defined NETHER_SMOKE

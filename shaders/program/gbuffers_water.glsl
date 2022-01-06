@@ -36,7 +36,7 @@ uniform float frameTimeCounter;
 uniform float rainStrength;
 uniform float shadowFade, voidFade;
 uniform float timeAngle, timeBrightness;
-uniform float viewWidth, viewHeight;
+uniform float viewWidth, viewHeight, aspectRatio;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -234,7 +234,7 @@ void main() {
 		
 		float water       = float(mat > 0.98 && mat < 1.02);
 		float glass 	  = float(mat > 1.98 && mat < 2.02);
-		float translucent = float(mat > 2.98 && mat < 3.02);
+		float translucent = float(mat > 2.98 && mat < 3.02) + float(mat > 3.98 && mat < 4.02);
 		
 		float metalness      = 0.0;
 		float emission       = 0.0;
@@ -380,6 +380,22 @@ void main() {
 		#endif
 		
 		float fresnel = pow(clamp(1.0 + dot(newNormal, normalize(viewPos)), 0.0, 1.0), 5.0);
+
+	#ifdef CUSTOM_NETHER_PORTAL
+	if (mat > 3.98 && mat < 4.02) {
+		vec2 portalCoord = gl_FragCoord.xy / vec2(viewWidth, viewHeight);
+		portalCoord = (portalCoord - 0.5) * vec2(aspectRatio, 1.0);
+
+		vec2 wind = vec2(0.0, frametime * 0.05);
+
+		float portal = texture2D(noisetex, portalCoord * 0.25 + wind * 0.03).r * 0.1;
+			  portal+= texture2D(noisetex, portalCoord * 0.15 + wind * 0.02).r * 0.2;
+			  portal+= texture2D(noisetex, portalCoord * 0.05 + wind * 0.01).r * 0.3;
+		
+		albedo.rgb = portal * portal * vec3(0.75, 0.25, 1.5);
+		albedo.a = 0.25;
+	}
+	#endif
 
 		if (water > 0.5 || ((translucent + glass) > 0.5 && albedo.a < 0.95)) {
 			#if REFLECTION > 0
@@ -687,9 +703,10 @@ void main() {
 	mat = 0.0;
 	
 	if (mc_Entity.x == 10300 || mc_Entity.x == 10303) mat = 1.0;
-	if (mc_Entity.x == 10301 || mc_Entity.x == 10304) mat = 2.0;
+	if (mc_Entity.x == 10301) mat = 2.0;
 	if (mc_Entity.x == 10302) 						  mat = 3.0;
-	if (mc_Entity.x == 10303 || mc_Entity.x == 10304) color.a = 1.0;
+	if (mc_Entity.x == 10304)						  mat = 4.0;
+	if (mc_Entity.x == 10303) color.a = 1.0;
 
 	const vec2 sunRotationData = vec2(
 		 cos(sunPathRotation * 0.01745329251994),

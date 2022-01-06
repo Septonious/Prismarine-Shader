@@ -96,13 +96,8 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 
 	#ifdef END
-	float fog = length(viewPos) * FOG_DENSITY / 128.0;
-	#if DISTANT_FADE == 2 || DISTANT_FADE == 3
-	fog += 6.0 * pow6(fogFactor * 1.0 / far);
-	#endif
-	fog = 1.0 - exp(-0.8 * fog * fog);
-	vec3 fogColor = endCol.rgb * 0.00625;
-	fogColor *= 2.5;
+	float fog = 0.0;
+	vec3 fogColor = vec3(0.0);
 	#endif
 
 	color = mix(color, fogColor, fog);

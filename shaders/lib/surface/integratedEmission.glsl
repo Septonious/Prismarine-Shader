@@ -52,16 +52,19 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 		giEmissive = 1.0;
 	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
 		newEmissive = float(albedo.r > albedo.g && albedo.r > albedo.b) * 0.1 * GLOW_STRENGTH;
-		giEmissive = 1.0;
+		giEmissive = 2.0;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
 		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.5 * GLOW_STRENGTH;
+		giEmissive = 16.0;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
 		newEmissive = float(albedo.r > 0.65) * 0.5 * GLOW_STRENGTH;
+		giEmissive = 1.0;
 	} else if (mat > 113.9 && mat < 114.1) { // Glow berries
 		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b) * GLOW_STRENGTH;
+		giEmissive = 2.0;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
 		newEmissive = GLOW_STRENGTH * GLOW_STRENGTH * jitter;
-		giEmissive = 8.0;
+		giEmissive = 32.0;
 	} else if (mat > 115.9 && mat < 116.1) { // Lantern
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * GLOW_STRENGTH * jitter;
 		giEmissive = 8.0;
@@ -74,8 +77,8 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 
 	#ifdef OVERWORLD
 	if (isPlant > 0.9 && isPlant < 1.1){ // Flowers
-		newEmissive = float(albedo.b > albedo.g || albedo.r > albedo.g) * GLOW_STRENGTH * 0.1;
-		giEmissive = 2.0 * GLOW_STRENGTH;
+		newEmissive = float(albedo.b > albedo.g || albedo.r > albedo.g) * GLOW_STRENGTH * 0.05;
+		giEmissive = 0.05;
 	}
 	#endif
 

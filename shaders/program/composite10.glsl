@@ -41,7 +41,7 @@ void main() {
 
     float skyLightmap = clamp(texture2D(colortex9, texCoord).b, 0.0, 1.0);
 
-    gi *= (1.05 - skyLightmap) * 64.0;
+    gi *= (1.00 - skyLightmap * 0.5) * 24.0;
     color.rgb *= 1.0 + gi;
 
     /* DRAWBUFFERS:1 */

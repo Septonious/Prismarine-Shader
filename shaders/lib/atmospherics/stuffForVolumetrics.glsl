@@ -27,6 +27,10 @@ float getCloudNoise(vec3 pos){
 	pos *= 0.35;
 	pos.xz *= 0.3;
 
+	#ifdef END
+	pos.xz *= 0.5;
+	#endif
+
 	vec3 u = floor(pos);
 	vec3 v = fract(pos);
 	v = v * v * (3.0 - 2.0 * v);
@@ -49,6 +53,10 @@ float getFogSample(vec3 pos, float height, float verticalThickness){
 	#endif
 
 	pos *= 0.1;
+
+	#ifdef END
+	pos *= 3.0;
+	#endif
 
 	#ifdef NETHER
 	pos *= 4.0;

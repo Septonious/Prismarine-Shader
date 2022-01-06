@@ -41,6 +41,21 @@ uniform sampler2D gaux1;
 #define MC_RENDER_STAGE_MOON 1
 #endif
 
+#ifdef END_NEBULA
+uniform sampler2D noisetex;
+
+uniform mat4 gbufferModelViewInverse;
+
+uniform int worldTime;
+uniform float frameTimeCounter;
+
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter * ANIMATION_SPEED;
+#endif
+#endif
+
 //Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
@@ -53,6 +68,11 @@ float GetLuminance(vec3 color) {
 
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
+
+#ifdef END_NEBULA
+#include "/lib/util/dither.glsl"
+#include "/lib/atmospherics/clouds.glsl"
+#endif
 
 //Program//
 void main() {
@@ -87,10 +107,22 @@ void main() {
 	#endif
 
 	#ifdef END
-	albedo.rgb = pow(albedo.rgb,vec3(2.2));
+	albedo.rgb = endCol.rgb * 0.025;
 
 	#ifdef SKY_DESATURATION
 	albedo.rgb = GetLuminance(albedo.rgb) * endCol.rgb;
+	#endif
+
+	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
+	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+	viewPos /= viewPos.w;
+
+	#ifdef END_NEBULA
+	albedo.rgb += DrawNebula(viewPos.xyz);
+	#endif
+
+	#ifdef END_STARS
+	DrawStars(albedo.rgb, viewPos.xyz, 1.0, 1.0, 3.0);
 	#endif
 
 	albedo.rgb *= SKYBOX_BRIGHTNESS * 0.02;

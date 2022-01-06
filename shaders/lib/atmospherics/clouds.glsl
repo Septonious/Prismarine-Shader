@@ -90,16 +90,16 @@ float GetNoise(vec2 pos) {
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
-void DrawStars(inout vec3 color, vec3 viewPos) {
+void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float brightness) {
 	vec3 wpos = vec3(gbufferModelViewInverse * vec4(viewPos, 1.0));
 	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
 
 	vec2 wind = vec2(frametime, 0.0);
 	vec2 coord = planeCoord.xz * 0.4 + cameraPosition.xz * 0.0001 + wind * 0.001;
-		 coord = floor(coord * 1024.0) / 1024.0;
+		 coord = floor(coord * 1024.0) / 1024.0 * size;
 	
 	float VoU = clamp(dot(normalize(viewPos), upVec), 0.0, 1.0);
-	float multiplier = VoU * 16.0 * (1.0 - rainStrength) * (1.0 - sunVisibility * 0.5);
+	float multiplier = VoU * 16.0 * (1.0 - rainStrength) * (1.0 - sunVisibility * 0.5) * amount;
 	
 	float star = GetNoise(coord.xy);
 		  star*= GetNoise(coord.xy + 0.10);
@@ -115,8 +115,8 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	#ifdef UNDERGROUND_SKY
 	star *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 	#endif
-		
-	color += star * lightNight;
+	
+	color += star * vec3(0.5, 0.75, 1.00) * brightness;
 }
 
 #ifdef AURORA
@@ -202,15 +202,43 @@ float nebulaSample(vec2 coord, vec2 wind, float VoU) {
 
 	noise *= NEBULA_AMOUNT;
 	
+	#ifdef END
+	noise *= 1.15;
+	#endif
+
 	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.5), 0.0);
 
 	return noise;
 }
 
-vec3 DrawNebula(vec3 viewPos) {
-	int samples = 2;
+#ifdef END_NEBULA
+float InterleavedGradientNoise() {
+	float n = 52.9829189 * fract(0.06711056 * gl_FragCoord.x + 0.00583715 * gl_FragCoord.y);
 
+	return fract(n);
+}
+#endif
+
+vec3 DrawNebula(vec3 viewPos) {
+	#ifdef OVERWORLD
+	int samples = 4;
+	#else
+	int samples = 8;
+	#endif
+
+	#ifdef OVERWORLD_NEBULA
 	float dither = Bayer64(gl_FragCoord.xy) * 0.4;
+	#endif
+
+	#ifdef END_NEBULA
+	float dither = InterleavedGradientNoise();
+
+	#ifdef TAA
+	dither = fract(16.0 * frameTimeCounter + dither);
+	#endif
+
+	#endif
+
 	float VoU = dot(normalize(viewPos.xyz), upVec);
 
 	#ifdef END
@@ -223,7 +251,7 @@ vec3 DrawNebula(vec3 viewPos) {
 	float auroraVisibility = 0.0;
 
 	#ifdef NEBULA_AURORA_CHECK
-	#if defined AURORA && defined WEATHER_PERBIOME
+	#if defined AURORA && defined WEATHER_PERBIOME && defined OVERWORLD
 	auroraVisibility = isCold * isCold;
 	#endif
 	#endif
@@ -271,7 +299,7 @@ vec3 DrawNebula(vec3 viewPos) {
 				 noise *= max(sqrt(1.0 - length(planeCoord.xz) * 4.0), 0.0);
 
 			#if defined END
-			nebulaColor = mix(endCol.rgb, endCol.rgb * 1.25, currentStep);
+			nebulaColor = mix(vec3(endCol.r, endCol.g, endCol.b * 1.5) * 2.0, vec3(endCol.r * 2.0, endCol.g, endCol.b) * 8.0, currentStep);
 			#elif defined OVERWORLD
 			nebulaColor = mix(nebulaLowCol, nebulaHighCol, currentStep);
 			#endif
