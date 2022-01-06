@@ -94,10 +94,7 @@ void main() {
 
 	color /= vec3(1.5, 2.0, 1.5);
 	#endif
-	
-	#if defined TAA || defined CAS
-	ContrastAdaptiveSharpening(color.rgb);
-	#endif
+
 
 	gl_FragColor = vec4(color, 1.0);
 }

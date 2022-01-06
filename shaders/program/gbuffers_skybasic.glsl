@@ -117,7 +117,7 @@ void main() {
 
 	#ifdef STARS
 	DrawStars(albedo.rgb, viewPos.xyz, 0.25, 0.9, 1.5);
-	DrawStars(albedo.rgb, viewPos.xyz, 0.75, 0.9, 0.75);
+	DrawStars(albedo.rgb, viewPos.xyz, 0.75, 1.0, 0.75);
 	#endif
 
 	float dither = Bayer64(gl_FragCoord.xy);

@@ -26,8 +26,8 @@ Please don't edit anything from Undefine section and onwards.
 */
 
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
-//#define POWDER_SNOW_HIGHLIGHT
-//#define ENTITY_HIGHLIGHT
+  #define POWDER_SNOW_HIGHLIGHT
+  #define ENTITY_HIGHLIGHT
 
   #define CUSTOM_NETHER_PORTAL
 
@@ -42,18 +42,19 @@ Please don't edit anything from Undefine section and onwards.
   #define EMISSIVE_CONCRETE
 
   #define TRANSLUCENCY_BLENDING
+  #define WATER_REFRACTION
   #define WATER_CAUSTICS
   #define WATER_CAUSTICS_STRENGTH 8 //[2 4 6 8 10 12 14 16]  
   #define INTEGRATED_EMISSION
   #define BLOCKLIGHT_FLICKERING_STRENGTH 0.5 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
   #define GLOW_STRENGTH 2 //[1 2 3 4 5 6 7 8]
 
-  #define LIGHTSHAFT_SAMPLES 2 //[1 2 3 4 5 6 7 8]
+  #define LIGHTSHAFT_SAMPLES 4 //[1 2 3 4 5 6 7 8]
   #define LIGHTSHAFT_MAX_DISTANCE 512.0 //[128.0 256.0 512.0 1024.0]
   #define LIGHTSHAFT_MIN_DISTANCE 32.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0 21.0 22.0 23.0 24.0 25.0 26.0 27.0 28.0 29.0 30.0 31.0 32.0]
   #define LIGHTSHAFT_HEIGHT 80 //[5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100]
 
-  #define VCLOUDS_QUALITY 32.0 //[32.0 30.0 28.0 26.0 24.0 22.0 20.0 18.0 16.0 14.0 12.0 10.0 8.0 6.0 4.0]
+  #define VCLOUDS_QUALITY 48.0 //[48.0 46.0 44.0 42.0 40.0 38.0 36.0 34.0 32.0 30.0 28.0 26.0 24.0 22.0 20.0 18.0 16.0 14.0 12.0 10.0 8.0 6.0 4.0]
   #define VCLOUDS_HEIGHT 200 //[100 110 120 130 140 150 160 170 180 190 200 210 220 230 240 250 260 270 280 290 300 310 320 330 340 350 360 370 380 390 400]
   #define VCLOUDS_VERTICAL_THICKNESS 30.0 //[10 20 30 40 50 60 70 80 90 100]
   #define VCLOUDS_SPEED 0.25 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
