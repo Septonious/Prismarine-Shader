@@ -26,8 +26,8 @@ Please don't edit anything from Undefine section and onwards.
 */
 
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
-  #define POWDER_SNOW_HIGHLIGHT
-  #define ENTITY_HIGHLIGHT
+//#define POWDER_SNOW_HIGHLIGHT
+//#define ENTITY_HIGHLIGHT
 
   #define CUSTOM_NETHER_PORTAL
 
