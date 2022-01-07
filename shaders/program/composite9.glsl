@@ -30,7 +30,7 @@ uniform sampler2D depthtex0;
 #endif
 
 //Includes//
-#include "/lib/antialiasing/taa.glsl"
+#include "/lib/util/temporalAccumulation.glsl"
 
 #ifdef DENOISE
 #include "/lib/util/encode.glsl"
@@ -41,7 +41,7 @@ uniform sampler2D depthtex0;
 void main() {
     vec3 gi = texture2D(colortex11, texCoord).rgb;
     vec4 prev = vec4(texture2DLod(colortex13, texCoord, 0.0).r, 0.0, 0.0, 0.0);
-    prev = TemporalAA(gi.rgb, prev.r, colortex11, colortex13);
+    prev = TemporalAccumulation(gi.rgb, prev.r, colortex13);
 
     #ifdef DENOISE
     gi = NormalAwareBlur().rgb;

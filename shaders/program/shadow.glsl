@@ -59,6 +59,7 @@ void main() {
 
 	#ifdef WATER_CAUSTICS
 	if (mat > 2.98 && mat < 3.02){
+		waterColor.g *= 0.75;
 		albedo.rgb = waterColor.rgb;
 		albedo.rgb = getCaustics(position.xyz + cameraPosition.xyz) * albedo.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness);
 	}

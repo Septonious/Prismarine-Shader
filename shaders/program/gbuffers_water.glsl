@@ -387,7 +387,7 @@ void main() {
 		vec2 portalCoord = gl_FragCoord.xy / vec2(viewWidth, viewHeight);
 		portalCoord = (portalCoord - 0.5) * vec2(aspectRatio, 1.0);
 
-		vec2 wind = vec2(0.0, frametime * 0.05);
+		vec2 wind = vec2(0.0, frametime * 0.1);
 
 		float portal = texture2D(noisetex, portalCoord * 0.25 + wind * 0.03).r * 0.1;
 			  portal+= texture2D(noisetex, portalCoord * 0.15 + wind * 0.02).r * 0.2;
@@ -558,7 +558,7 @@ void main() {
 		 	vec3 oViewPos = ToNDC(oScreenPos);
 		 	#endif
 
-			float rainFactor = 1.00 - rainStrength * 0.75;
+			float rainFactor = 1.00 - rainStrength * 0.5;
 			float difT = length(oViewPos - viewPos.xyz);
 					
 			vec3 absorbColor = vec3(0.0);
@@ -581,7 +581,7 @@ void main() {
 			newAlbedo *= newAlbedo;
 
 			float absorb = (1.0 - albedo.a);
-			absorb = sqrt(absorb * (1.0 - rainStrength) * lightmap.y);
+			absorb = sqrt(absorb * lightmap.y);
 
 			albedo.rgb = mix(albedo.rgb, newAlbedo / 0.4, absorb);
 		}

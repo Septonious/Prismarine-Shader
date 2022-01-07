@@ -260,8 +260,8 @@ option.DISTANT_FADE=Distant Fade
 option.DISTANT_FADE.comment=Fades far chunk borders. §e[*]§rThis option is affected by fog density.
 value.DISTANT_FADE.0=§cOFF
 value.DISTANT_FADE.1=Overworld Only
-value.DISTANT_FADE.2=Nether & End Only
-value.DISTANT_FADE.3=Full
+value.DISTANT_FADE.2=Nether Only
+value.DISTANT_FADE.3=Overworld & Nether
 
 option.DISTANT_FADE_STYLE=Distant Fade Style
 option.DISTANT_FADE_STYLE.comment=Spherical works like vanilla fog. Cylindrical ignores Y axis.

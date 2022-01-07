@@ -132,7 +132,7 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
 	int speed = frameCounter % 100;
 
     float dither = getRandomNoise(gl_FragCoord.xy);
-	dither = fract(dither + speed);
+	      dither = fract(dither + speed);
 
     vec3 currentPosition = screenPos;
     vec3 hitNormal = normal;

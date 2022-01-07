@@ -347,12 +347,14 @@ void main() {
 		#endif
 
 		#ifdef OVERWORLD
-		float depth = clamp(length(viewPos.xyz), 0.0, 7.0);
-		depth = 8.0 - depth;
 		if (isEyeInWater == 1){
+			float depth = clamp(length(viewPos.xyz), 0.0, 7.0);
+			depth = 8.0 - depth;
+
+			float rainFactor = 1.00 - rainStrength * 0.5;
 			float clampEyeBrightness = clamp(eBS, 0.1, 1.0);
-			albedo.rgb *= waterColor.rgb * (4.0 - rainStrength - rainStrength) * clampEyeBrightness;
-			albedo.rgb *= waterColor.rgb * waterColor.rgb * 64.0 * (0.25 + timeBrightness) + depth;
+			albedo.rgb *= waterColor.rgb * rainFactor * clampEyeBrightness;
+			albedo.rgb *= waterColor.rgb * (0.25 + timeBrightness) + depth;
 		}
 		#endif
 

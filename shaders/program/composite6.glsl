@@ -21,7 +21,7 @@ uniform vec3 cameraPosition;
 
 uniform sampler2D colortex1, colortex9;
 uniform sampler2D noisetex;
-uniform sampler2D depthtex0, depthtex1;
+uniform sampler2D depthtex0;
 
 uniform mat4 gbufferProjectionInverse, gbufferModelViewInverse;
 

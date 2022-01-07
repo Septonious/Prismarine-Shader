@@ -23,9 +23,7 @@ uniform mat4 gbufferProjectionInverse;
 uniform sampler2D colortex6, colortex9, colortex11, colortex12;
 uniform sampler2D depthtex0, depthtex1;
 
-#ifdef TAA
 uniform sampler2D colortex13;
-#endif
 
 //Includes//
 #include "/lib/util/encode.glsl"
@@ -38,16 +36,11 @@ void main() {
     vec3 normal = normalize(DecodeNormal(texture2D(colortex6, texCoord.xy).xy));
     vec3 gi = computeGI(screenPos, normal, float(z0 < 0.56));
 
-    #ifdef TAA
     vec3 temporalColor = texture2D(colortex13, texCoord).gba;
-    #endif
 
-    /* RENDERTARGETS:11 */
-    gl_FragData[0] = vec4(gi, 1.0);
-    #ifdef TAA
     /* RENDERTARGETS:11,13 */
+    gl_FragData[0] = vec4(gi, 1.0);
     gl_FragData[1] = vec4(0.0, temporalColor);
-    #endif
 }
 
 #endif

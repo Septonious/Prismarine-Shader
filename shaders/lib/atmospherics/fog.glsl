@@ -69,7 +69,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 		#else
 		float fogOffset = 12.0;
 		#endif
-		float vanillaFog = 1.0 - (far - (fogFactor + fogOffset)) * 5.0 / (FOG_DENSITY * far);
+		float vanillaFog = 1.0 - (far - (fogFactor + fogOffset)) * 5.0 / (FOG_DENSITY * 0.5 * far);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 	
 		if (vanillaFog > 0.0){
