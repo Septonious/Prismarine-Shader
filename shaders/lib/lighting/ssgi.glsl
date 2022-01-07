@@ -164,5 +164,5 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
         }
     }
 
-    return illumination * illumination;
+    return illumination;
 }

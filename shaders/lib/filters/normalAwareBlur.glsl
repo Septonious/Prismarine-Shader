@@ -41,7 +41,7 @@ vec3 NormalAwareBlur() {
 
 			#ifndef NETHER
 			float currentDepth = GetLinearDepth(texture2D(depthtex0, texCoord + offset).x);
-			float depthWeight = pow(clamp(1.0 - abs(currentDepth - centerDepth1), 0.0001, 1.0), 64.0); 
+			float depthWeight = pow(clamp(1.0 - abs(currentDepth - centerDepth1), 0.0001, 1.0), 256.0); 
 			weight *= depthWeight;
 			#endif			
 

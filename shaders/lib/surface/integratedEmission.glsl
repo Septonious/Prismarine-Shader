@@ -54,24 +54,23 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 		newEmissive = float(albedo.r > albedo.g && albedo.r > albedo.b) * 0.1 * GLOW_STRENGTH;
 		giEmissive = 2.0;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
-		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.5 * GLOW_STRENGTH;
-		giEmissive = 16.0;
+		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.1 * GLOW_STRENGTH;
+		giEmissive = 4.0;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
-		newEmissive = float(albedo.r > 0.65) * 0.5 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > 0.65) * 0.25 * GLOW_STRENGTH;
 		giEmissive = 1.0;
 	} else if (mat > 113.9 && mat < 114.1) { // Glow berries
 		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b) * GLOW_STRENGTH;
 		giEmissive = 2.0;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
-		newEmissive = GLOW_STRENGTH * GLOW_STRENGTH * jitter;
-		giEmissive = 32.0;
-	} else if (mat > 115.9 && mat < 116.1) { // Lantern
-		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * GLOW_STRENGTH * jitter;
-		giEmissive = 8.0;
+		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * 0.1 * GLOW_STRENGTH * jitter;
+		giEmissive = 4.0;
+	} else if (mat > 115.9 && mat < 116.1) { // FREE
+		newEmissive = 0.0;
 	} else if (mat > 116.9 && mat < 117.1) { // Chorus
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25 * GLOW_STRENGTH;
 		giEmissive = 1.0;
-	} else if (mat > 117.9 && mat < 118.1) {
+	} else if (mat > 117.9 && mat < 118.1) { // FREE
 		newEmissive = 0.0;
 	}
 
