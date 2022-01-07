@@ -65,13 +65,15 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * 0.1 * GLOW_STRENGTH * jitter;
 		giEmissive = 4.0;
-	} else if (mat > 115.9 && mat < 116.1) { // FREE
-		newEmissive = 0.0;
+	} else if (mat > 115.9 && mat < 116.1) { // Furnaces
+		newEmissive = float(albedo.r > 0.8) * 0.5 * GLOW_STRENGTH;
+		giEmissive = 1.0;
 	} else if (mat > 116.9 && mat < 117.1) { // Chorus
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25 * GLOW_STRENGTH;
 		giEmissive = 1.0;
-	} else if (mat > 117.9 && mat < 118.1) { // FREE
-		newEmissive = 0.0;
+	} else if (mat > 117.9 && mat < 118.1) { // Enchanting Table
+		newEmissive = float(albedo.b > albedo.r) * 0.25 * GLOW_STRENGTH;
+		giEmissive = 1.0;
 	}
 
 	#ifdef OVERWORLD
@@ -100,6 +102,7 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 }
 #endif
 
+
 #ifdef VSH
 void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	isPlant = 0.0;
@@ -117,7 +120,7 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	if (mc_Entity.x == 20013) mat = 113.0;
 	if (mc_Entity.x == 20014) mat = 114.0;
 	if (mc_Entity.x == 20015) mat = 115.0;
-	if (mc_Entity.x == 10206) mat = 116.0;
+	if (mc_Entity.x == 20016) mat = 116.0;
 	if (mc_Entity.x == 20017) mat = 117.0;
 	if (mc_Entity.x == 20018) mat = 118.0;
 	if (mc_Entity.x == 10101) isPlant = 1.0;
