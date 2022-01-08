@@ -230,10 +230,9 @@ void main() {
 	vec3 vlAlbedo = vec3(1.0);
 
 	float water = float(mat > 0.98 && mat < 1.02);
-
+	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+	
 	if (albedo.a > 0.001) {
-		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-		
 		float glass 	  = float(mat > 1.98 && mat < 2.02);
 		float translucent = float(mat > 2.98 && mat < 3.02) + float(mat > 3.98 && mat < 4.02);
 		
@@ -598,9 +597,9 @@ void main() {
     gl_FragData[0] = albedo;
 	gl_FragData[1] = vec4(vlAlbedo, 1.0);
 
-	#ifdef WATER_REFRACTION
+	#if defined WATER_REFRACTION || defined WATER_LIGHTSHAFTS
 	/* DRAWBUFFERS:019 */
-	gl_FragData[2] = vec4(0.0, 0.0, dist, water);
+	gl_FragData[2] = vec4(0.0, lightmap.y, dist, water);
 	#endif
 }
 

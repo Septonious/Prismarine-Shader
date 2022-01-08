@@ -23,7 +23,7 @@ float GetWaterHeightMap(vec3 waterPos, vec2 offset) {
     return noise * WATER_BUMP;
 }
 
-vec2 getRefraction(vec2 coord, vec3 waterPos, float dist){
+vec2 getRefraction(vec2 coord, vec3 waterPos, float dist, float skylight){
 	float normalOffset = WATER_SHARPNESS;
 	float h1 = GetWaterHeightMap(waterPos, vec2( normalOffset, 0.0));
 	float h2 = GetWaterHeightMap(waterPos, vec2(-normalOffset, 0.0));
@@ -35,7 +35,7 @@ vec2 getRefraction(vec2 coord, vec3 waterPos, float dist){
 
 	vec2 noise = vec2(xDelta, yDelta);
 
-	vec2 waveN = noise * 0.00075 / dist;
+	vec2 waveN = noise * 0.00075 / dist * skylight;
 
 	return coord + waveN;
 }

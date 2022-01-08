@@ -30,25 +30,23 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-	float scattering = pow6(halfVoL);
+	float scattering = pow6(halfVoL) * (1.0 - rainStrength);
 
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
 
-	float maxDist = 512.0 * VCLOUDS_RANGE;
-	float minDist = 0.01 + (dither * VCLOUDS_QUALITY);
+	float height = VCLOUDS_HEIGHT * (1.0 + rainStrength * 0.25);
 
-	float height = VCLOUDS_HEIGHT * (1.0 + rainStrength * 0.2);
-	float rainFactor = (1.0 - rainStrength * 0.4);
+	for (int i = 0; i < VCLOUDS_SAMPLES; i++) {
+		float minDist = (i + dither) * VCLOUDS_RANGE;
 
-	for (minDist; minDist < maxDist; minDist += VCLOUDS_QUALITY) {
-		if (depth1 < minDist || isEyeInWater == 1.0){
+		if (depth1 < minDist || isEyeInWater == 1.0 || minDist > 1024.0){
 			break;
 		}
 		
 		wpos = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord);
 
-		if (length(wpos.xz) < maxDist){
+		if (length(wpos.xz) < 1024.0){
 			#ifdef WORLD_CURVATURE
 			if (length(wpos.xz) < WORLD_CURVATURE_SIZE) wpos.y += length(wpos.xz) * length(wpos.xyz) / WORLD_CURVATURE_SIZE;
 			else break;
@@ -63,7 +61,8 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 
 			//Color calculation and lighting
 			vec4 cloudsColor = vec4(mix(lightCol, ambientCol, noise * density) * (1.0 + scattering), noise);
-			cloudsColor.rgb *= cloudsColor.a * VCLOUDS_OPACITY;
+			cloudsColor.a *= VCLOUDS_OPACITY;
+			cloudsColor.rgb *= cloudsColor.a;
 
 			#if MC_VERSION >= 11800
 			cloudsColor.rgb *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
@@ -76,9 +75,9 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 				cloudsColor *= translucent;
 			}
 
-			finalColor += vec4(cloudsColor.rgb * (1.0 - (rainStrength * 0.85 * (1.0 + moonVisibility))), cloudsColor.a) * (1.0 - finalColor.a);
+			finalColor += cloudsColor * (1.0 - finalColor.a);
 		}
 	}
 
-	return finalColor;
+	return max(finalColor, vec4(0.0));
 }

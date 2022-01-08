@@ -91,7 +91,8 @@ void main() {
 	#else
 	vec4 cloud = texture2D(colortex8, texCoord.xy);
 	#endif
-	color = mix(color, cloud.rgb, cloud.a);
+	float rainFactor = (1.0 - rainStrength * 0.7);
+	color = mix(color, cloud.rgb * rainFactor, cloud.a * cloud.a);
 	#endif
 
 	/*DRAWBUFFERS:0*/

@@ -34,22 +34,6 @@ uniform sampler2D depthtex0;
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 
-//Common Functions//
-void Defog(inout vec3 albedo) {
-	float z = texture2D(depthtex0,gl_FragCoord.xy/vec2(viewWidth,viewHeight)).r;
-	if (z == 1.0) return;
-
-    vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), z, 1.0);
-    vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
-    viewPos /= viewPos.w;
-
-    float fog = length(viewPos) * FOG_DENSITY / 256.0;
-	float clearDay = sunVisibility * (1.0 - rainStrength);
-	fog *= (0.5 * rainStrength + 1.0) / (3.0 * clearDay + 1.0);
-	fog = 1.0 - exp(-2.0 * pow(fog, 0.25 * clearDay + 1.25) * eBS);
-    albedo.rgb /= 1.0 - fog;
-}
-
 //Includes//
 #include "/lib/color/lightColor.glsl"
 #include "/lib/color/blocklightColor.glsl"
@@ -74,10 +58,6 @@ void main() {
 		#if MC_VERSION < 10800
 		albedo.a *= 4.0;
 		albedo.rgb *= 0.525;
-		#endif
-		
-		#if defined FOG && MC_VERSION < 11500
-		if (gl_FragCoord.z > 0.991) Defog(albedo.rgb);
 		#endif
 
 		#if ALPHA_BLEND == 0

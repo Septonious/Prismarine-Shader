@@ -78,7 +78,7 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 
 	#ifdef OVERWORLD
 	if (isPlant > 0.9 && isPlant < 1.1){ // Flowers
-		newEmissive = float(albedo.b > albedo.g || albedo.r > albedo.g) * GLOW_STRENGTH * 0.05;
+		newEmissive = float(albedo.b > albedo.g || albedo.r > albedo.g) * GLOW_STRENGTH * 0.05 * (1.0 - rainStrength);
 		giEmissive = 0.05;
 	}
 	#endif
@@ -87,7 +87,7 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 	if (mat > 997.9 && mat < 998.1){
 		giEmissive = (0.0 + lightmap.y * timeBrightness) * 0.01;
 	} else if (mat > 998.9 && mat < 999.1){
-		newEmissive = 1.0;
+		newEmissive = 0.5;
 		giEmissive = 4.0;
 	}
 	#endif

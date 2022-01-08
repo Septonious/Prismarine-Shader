@@ -227,9 +227,9 @@ float InterleavedGradientNoise() {
 
 vec3 DrawNebula(vec3 viewPos) {
 	#ifdef OVERWORLD
-	int samples = 4;
+	int samples = 3;
 	#else
-	int samples = 8;
+	int samples = 6;
 	#endif
 
 	#ifdef OVERWORLD_NEBULA
@@ -305,7 +305,7 @@ vec3 DrawNebula(vec3 viewPos) {
 				 noise *= max(sqrt(1.0 - length(planeCoord.xz) * 4.0), 0.0);
 
 			#if defined END
-			nebulaColor = mix(vec3(endCol.r, endCol.g, endCol.b * 1.5) * 2.0, vec3(endCol.r * 2.0, endCol.g, endCol.b) * 8.0, currentStep);
+			nebulaColor = mix(vec3(endCol.r, endCol.g, endCol.b * 1.5) * 4.0, vec3(endCol.r * 2.0, endCol.g, endCol.b) * 16.0, currentStep);
 			#elif defined OVERWORLD
 			nebulaColor = mix(nebulaLowCol, nebulaHighCol, currentStep);
 			#endif

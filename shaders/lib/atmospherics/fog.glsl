@@ -13,7 +13,8 @@ vec3 GetFogColor(vec3 viewPos) {
 
 	float baseGradient = exp(-(VoU * 0.5 + 0.5) * 0.5 / density);
 
-    vec3 fog = GetSkyColor(viewPos, false) * 8.0 * baseGradient / (SKY_I * SKY_I);
+    vec3 fog = GetSkyColor(viewPos, false) * vec3(0.6, 0.7, 1.1) * 8.0 * baseGradient / (SKY_I * SKY_I);
+
     fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * (SKY_I * SKY_I);
 
 	float nightGradient = exp(-(VoU * 0.5 + 0.5) * 0.35 / nightDensity);
@@ -48,14 +49,14 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float density = (1.5 - timeBrightness) * FOG_DENSITY * (1.0 + rainStrength);
+	float density = (1.0 - timeBrightness * 0.25) * FOG_DENSITY * (1.0 + rainStrength);
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0) * eBS, eBS);
 	fog = 1.0 - exp(-2.0 * pow(fog, 0.15 * clearDay * eBS + 1.25));
 
 	vec3 pos = ToWorld(viewPos.xyz) + cameraPosition.xyz + 1000.0;
-	float height = (pos.y - LIGHTSHAFT_HEIGHT - 10.0) * 0.001;
+	float height = (pos.y - FOG_ALTITUDE) * 0.001;
 		height = pow16(height);
 		height = clamp(height, 0.0, 1.0);
 	fog *= 1.0 - height;

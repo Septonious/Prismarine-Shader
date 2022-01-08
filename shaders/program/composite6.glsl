@@ -56,7 +56,7 @@ void main() {
         vec3 worldPos = ToWorld(viewPos.xyz);
         vec3 waterPos = worldPos + cameraPosition;
 
-        vec2 refractCoord = getRefraction(texCoord, waterPos, waterData.b);
+        vec2 refractCoord = getRefraction(texCoord, waterPos, waterData.b, waterData.g);
         color = texture2D(colortex1, refractCoord).rgb;
     }
 

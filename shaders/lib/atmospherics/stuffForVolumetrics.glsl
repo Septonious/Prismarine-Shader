@@ -22,10 +22,10 @@ float InterleavedGradientNoiseVL() {
 
 	return fract(n);
 }
-
+uniform sampler2D depthtex2;
 float getCloudNoise(vec3 pos){
 	pos *= 0.35;
-	pos.xz *= 0.3;
+	pos.xz *= 0.25;
 
 	#ifdef END
 	pos.xz *= 0.5;
@@ -38,8 +38,8 @@ float getCloudNoise(vec3 pos){
 	vec2 uv = u.xz + v.xz + u.y * 16.0;
 
 	vec2 coord = uv / 64.0;
-	float a = texture2DLod(noisetex, coord, 4.0).r;
-	float b = texture2DLod(noisetex, coord + 0.25, 4.0).r;
+	float a = texture2DLod(depthtex2, coord, 4.0).r;
+	float b = texture2DLod(depthtex2, coord + 0.25, 4.0).r;
 		
 	return mix(a, b, v.y);
 }

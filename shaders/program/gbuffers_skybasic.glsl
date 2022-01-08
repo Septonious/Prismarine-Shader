@@ -94,7 +94,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
-#if (defined OVERWORLD && CLOUDS == 1) || defined OVERWORLD_NEBULA
+#if (defined OVERWORLD && CLOUDS == 1) || defined OVERWORLD_NEBULA || defined STARS || defined AURORA
 #include "/lib/atmospherics/clouds.glsl"
 #endif
 #include "/lib/atmospherics/sky.glsl"
@@ -116,8 +116,8 @@ void main() {
 	#endif
 
 	#ifdef STARS
-	DrawStars(albedo.rgb, viewPos.xyz, 0.25, 0.9, 1.5);
-	DrawStars(albedo.rgb, viewPos.xyz, 0.75, 1.0, 0.75);
+	DrawStars(albedo.rgb, viewPos.xyz, 0.2, 0.9, 1.5);
+	DrawStars(albedo.rgb, viewPos.xyz, 0.4, 1.0, 0.75);
 	#endif
 
 	float dither = Bayer64(gl_FragCoord.xy);
