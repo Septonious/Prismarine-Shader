@@ -26,7 +26,7 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
 
     if (visibility > 0.0){
         for(int i = 0; i < 4; i++) {
-			float minDist = (i + dither) * 24.0;
+			float minDist = (i + dither) * 16.0;
 
 			wpos = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord.st);
 

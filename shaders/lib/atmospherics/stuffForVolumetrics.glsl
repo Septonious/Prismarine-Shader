@@ -38,8 +38,8 @@ float getCloudNoise(vec3 pos){
 	vec2 uv = u.xz + v.xz + u.y * 16.0;
 
 	vec2 coord = uv / 64.0;
-	float a = texture2DLod(depthtex2, coord, 4.0).r;
-	float b = texture2DLod(depthtex2, coord + 0.25, 4.0).r;
+	float a = texture2D(depthtex2, coord).r;
+	float b = texture2D(depthtex2, coord + 0.25).r;
 		
 	return mix(a, b, v.y);
 }

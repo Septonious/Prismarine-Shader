@@ -78,10 +78,10 @@ vec3 NeighbourhoodClamping(vec3 color, vec3 tempColor, vec2 view, sampler2D colo
 }
 
 vec4 TemporalAA(inout vec3 color, float tempData, sampler2D colortex, sampler2D temptex) {
-	vec3 coord = vec3(texCoord, texture2DLod(depthtex1, texCoord, 0.0).r);
+	vec3 coord = vec3(texCoord, texture2D(depthtex1, texCoord).r);
 	vec2 prvCoord = Reprojection(coord);
 	
-	vec3 tempColor = texture2DLod(temptex, prvCoord, 0.0).gba;
+	vec3 tempColor = texture2D(temptex, prvCoord).gba;
 	vec2 view = vec2(viewWidth, viewHeight);
 
 	if (tempColor == vec3(0.0)) return vec4(tempData, color);

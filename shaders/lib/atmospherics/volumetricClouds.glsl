@@ -5,7 +5,7 @@ float getCloudSample(vec3 pos, float height){
 	
 	float noiseA = 0.0;
 	float mult = 1.0;
-	for (int i = 1; i < 4; i++){
+	for (int i = 1; i <= VCLOUDS_OCTAVES; i++){
 		noiseA += getCloudNoise(pos * (mult * mult * VCLOUDS_DETAIL) - wind * mult) * i * VCLOUDS_HORIZONTAL_THICKNESS;
 		mult *= 0.5;
 	}

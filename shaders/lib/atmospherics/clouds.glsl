@@ -209,7 +209,7 @@ float nebulaSample(vec2 coord, vec2 wind, float VoU) {
 	noise *= NEBULA_AMOUNT;
 	
 	#ifdef END
-	noise *= 1.15;
+	noise *= 1.1;
 	#endif
 
 	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.5), 0.0);
@@ -289,7 +289,7 @@ vec3 DrawNebula(vec3 viewPos) {
 			vec3 planeCoord = wpos * ((6.0 + currentStep * -2.0) / wpos.y) * 0.005 * NEBULA_STRETCHING;
 			#endif
 
-			vec2 coord = (cameraPosition.xz * 0.00001 + planeCoord.xz);
+			vec2 coord = (cameraPosition.xz * 0.000005 + planeCoord.xz);
 
 			#ifdef END
 			coord += vec2(coord.y, -coord.x) * 1.00 * NEBULA_DISTORTION;
