@@ -74,7 +74,7 @@ vec3 CalcLanternMove(vec3 position) {
     return flr + frc - position;
 }
 
-vec3 WavingBlocks(vec3 position, float istopv) {
+vec3 WavingBlocks(vec3 position, float istopv, vec2 lmCoord) {
     vec3 wave = vec3(0.0);
     vec3 worldpos = position + cameraPosition;
 
@@ -110,7 +110,9 @@ vec3 WavingBlocks(vec3 position, float istopv) {
 		wave += CalcLanternMove(worldpos);
     #endif
 
-    position += wave;
+    vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+
+    position += wave * lightmap.y;
 
     return position;
 }

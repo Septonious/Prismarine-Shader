@@ -654,12 +654,14 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 
 //Common Functions//
 #ifdef WAVING_LIQUID
-float WavingWater(vec3 worldPos) {
+float WavingWater(vec3 worldPos, vec2 lmCoord) {
+	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+
 	float fractY = fract(worldPos.y + cameraPosition.y + 0.005);
 		
 	float wave = sin(6.28 * (frametime * 0.7 + worldPos.x * 0.14 + worldPos.z * 0.07)) +
 				 sin(6.28 * (frametime * 0.5 + worldPos.x * 0.10 + worldPos.z * 0.20));
-	if (fractY > 0.01) return wave * 0.0125;
+	if (fractY > 0.01) return wave * 0.0125 * lightmap.y;
 	
 	return 0.0;
 }
@@ -728,7 +730,7 @@ void main() {
 	
 	#ifdef WAVING_LIQUID
 	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
-	if (mc_Entity.x == 10300 || mc_Entity.x == 10302) position.y += WavingWater(position.xyz);
+	if (mc_Entity.x == 10300 || mc_Entity.x == 10302) position.y += WavingWater(position.xyz, lmCoord);
 	#endif
 
     #ifdef WORLD_CURVATURE

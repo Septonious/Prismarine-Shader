@@ -113,6 +113,9 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
 
+	vec2 lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
+
 	color = gl_Color;
 	
 	mat = 0.0;
@@ -127,7 +130,7 @@ void main() {
 	position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 	
 	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
-	position.xyz = WavingBlocks(position.xyz, istopv);
+	position.xyz = WavingBlocks(position.xyz, istopv, lmCoord);
 
 	#ifdef WORLD_CURVATURE
 	position.y -= WorldCurvature(position.xz);

@@ -157,12 +157,10 @@ void main() {
 	vec3 fresnel3 = vec3(0.0);
 	#endif
 
-	vec2 lightmap = vec2(0.0);
+	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 	float emissive = 0.0, lava = 0.0, giEmissive = 0.0;
 
 	if (albedo.a > 0.001) {
-		lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-		
 		float foliage  = float(mat > 0.98 && mat < 1.02);
 		float leaves   = float(mat > 1.98 && mat < 2.02);
 		emissive = float(mat > 2.98 && mat < 3.02);
@@ -529,7 +527,7 @@ void main() {
 	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
 	
 	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
-	position.xyz = WavingBlocks(position.xyz, istopv);
+	position.xyz = WavingBlocks(position.xyz, istopv, lmCoord);
 
     #ifdef WORLD_CURVATURE
 	position.y -= WorldCurvature(position.xz);
