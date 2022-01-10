@@ -83,7 +83,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
                         sqrt(lightmap.x) + lightFlatten;
 
     vec3 desatNight   = lightNight / LIGHT_NI;
-    vec3 desatWeather = weatherCol.rgb / weatherCol.a * 0.5;
+    vec3 desatWeather = weatherCol.rgb / 0.5;
 
     desatNight *= desatNight; desatWeather *= desatWeather;
     
