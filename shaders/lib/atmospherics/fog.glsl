@@ -6,14 +6,14 @@ vec3 GetFogColor(vec3 viewPos) {
 
 	float density = 0.4;
     float nightDensity = 0.65;
-    float weatherDensity = 2.0;
+    float weatherDensity = 1.0;
     
     float exposure = exp2(timeBrightness * 0.75 - 1.00);
     float nightExposure = exp2(-3.5);
 
 	float baseGradient = exp(-(VoU * 0.5 + 0.5) * 0.5 / density);
 
-    vec3 fog = GetSkyColor(viewPos, false) * vec3(0.6, 0.7, 1.1) * 8.0 * baseGradient / (SKY_I * SKY_I);
+    vec3 fog = GetSkyColor(viewPos, false) * vec3(0.5, 0.6, 1.5) * 8.0 * baseGradient / (SKY_I * SKY_I);
 
     fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * (SKY_I * SKY_I);
 
@@ -55,8 +55,8 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0) * eBS, eBS);
 	fog = 1.0 - exp(-2.0 * pow(fog, 0.15 * clearDay * eBS + 1.25));
 
-	vec3 pos = ToWorld(viewPos.xyz) + cameraPosition.xyz + 1000.0;
-	float height = (pos.y - (FOG_ALTITUDE * (1.0 + rainStrength))) * 0.001;
+	vec3 pos = ToWorld(viewPos.xyz) + cameraPosition.xyz + 1100.0;
+	float height = (pos.y - (FOG_ALTITUDE * (1.0 + rainStrength))) * 0.0009;
 		height = pow16(height);
 		height = clamp(height, 0.0, 1.0);
 	fog *= 1.0 - height;

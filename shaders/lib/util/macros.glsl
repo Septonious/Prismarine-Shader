@@ -1,4 +1,5 @@
 #define pow2(x) x*x
+#define pow3(x) x*x*x
 #define pow6(x) x*x*x*x*x*x
 #define pow4(x) pow2(pow2(x))
 #define pow8(x) pow2(pow4(x))

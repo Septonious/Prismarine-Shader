@@ -44,7 +44,7 @@ float getCloudNoise(vec3 pos){
 	return mix(a, b, v.y);
 }
 
-float getFogSample(vec3 pos, float height, float verticalThickness){
+float getFogSample(vec3 pos, float height, float verticalThickness, float thicknessMult) {
 	float sampleHeight = pow(abs(height - pos.y) / verticalThickness, 2.0);
 	vec3 wind = vec3(frametime, 0.0, 0.0);
 
@@ -67,13 +67,7 @@ float getFogSample(vec3 pos, float height, float verticalThickness){
           noise+= getCloudNoise(pos * 0.250 - wind * 0.1);
           noise+= getCloudNoise(pos * 0.125 + wind * 0.4);
 
-	#ifdef NETHER
-	noise *= 0.7;
-	#endif
-
-	#ifdef OVERWORLD
-	noise *= 1.1;
-	#endif
+	noise *= thicknessMult;
 
 	noise = clamp(noise * 0.6 - (1.0 + sampleHeight), 0.0, 1.0);
 

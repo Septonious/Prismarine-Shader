@@ -72,7 +72,7 @@ void ContrastAdaptiveSharpening(inout vec3 outColor){
     adaptiveSharpening = minGreen / maxGreen;
 
     adaptiveSharpening = sqrt(max(0.0, adaptiveSharpening));
-    adaptiveSharpening *= mix(-0.125, -0.2, 0.5);
+    adaptiveSharpening *= mix(-0.125, -0.2, 0.25);
     outColor = (originalColor + modifiedColor * adaptiveSharpening) / (1.0 + 4.0 * adaptiveSharpening);
 }
 #endif
@@ -95,6 +95,9 @@ void main() {
 	color /= vec3(1.5, 2.0, 1.5);
 	#endif
 
+    #if defined CAS || defined TAA
+    ContrastAdaptiveSharpening(color.rgb);
+    #endif
 
 	gl_FragColor = vec4(color, 1.0);
 }

@@ -39,14 +39,19 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	visibility = clamp(visibility + isEyeInWater, 0.0, 1.0);
 	#endif
 
-	#ifdef WATER_LIGHTSHAFTS
-	float isWater = texture2D(colortex9, texCoord.xy).a;
-	visibility += float(isWater > 0.5);
-	#endif
-
 	if (visibility > 0.0) {
+		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE;
+		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
+
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
+
+		float fovFactor = gbufferProjection[1][1] / 1.37;
+		float x = abs(texCoord.x - 0.5);
+		x = 1.0 - x * x;
+		x = pow(x, max(3.0 - fovFactor, 0.0));
+		minDistFactor *= x;
+		maxDist *= x;
 
 		vec4 worldposition = vec4(0.0);
 		vec4 shadowposition = vec4(0.0);
@@ -56,9 +61,9 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 							pow(waterAlpha, 0.25));
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
-			float minDist = LIGHTSHAFT_MIN_DISTANCE * (i + dither) * (1.0 - isEyeInWater * 0.75);
+			float minDist = minDistFactor * (i + dither) * (1.0 - isEyeInWater * 0.75);
 
-			if (depth1 < minDist || minDist >= LIGHTSHAFT_MAX_DISTANCE || (depth0 < minDist && color == vec3(0.0))) {
+			if (depth1 < minDist || minDist >= maxDist || (depth0 < minDist && color == vec3(0.0))) {
 				break;
 			}
 
@@ -87,7 +92,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				
 				#ifdef LIGHTSHAFT_CLOUDY_NOISE
 				if (isEyeInWater == 0){
-					float noise = getFogSample(worldposition.xyz + cameraPosition.xyz, LIGHTSHAFT_HEIGHT, 64.0);
+					float noise = getFogSample(worldposition.xyz + cameraPosition.xyz, LIGHTSHAFT_HEIGHT, 64.0, 1.2);
 					shadow *= noise;
 				}
 				#endif
