@@ -39,13 +39,13 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
                 wpos.xyz += cameraPosition.xyz + vec3(frametime * 0.025, 0.0, 0.0);
 
                 #if defined NETHER_SMOKE
-                float noise = getFogSample(wpos.xyz, 40.0, 256.0, 1.0);
+                float noise = getFogSample(wpos.xyz, 40.0, 256.0, 0.7);
                 #elif defined END_SMOKE
                 float noise = getFogSample(wpos.xyz, 50.0, 128.0, 1.0);
                 #endif
 
                 #if defined NETHER_SMOKE
-                vec4 fogColor = vec4(netherCol.rgb * netherCol.rgb, noise);
+                vec4 fogColor = vec4(netherCol.rgb * netherCol.rgb * 0.25, noise);
                 #elif defined END_SMOKE
                 vec4 fogColor = vec4(endCol.rgb * visibility, noise);
                 #endif

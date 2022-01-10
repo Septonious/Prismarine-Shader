@@ -112,6 +112,8 @@ void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float b
 	star *= amount;
 	star = clamp(star - 0.75, 0.0, 1.0) * multiplier;
 
+	#ifdef OVERWORLD
+
 	#if MC_VERSION >= 11800
 	star *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else
@@ -122,6 +124,8 @@ void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float b
 	star *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 	#endif
 	
+	#endif
+
 	color += star * vec3(0.5, 0.75, 1.00) * brightness;
 }
 

@@ -446,8 +446,8 @@ Please don't edit anything from Undefine section and onwards.
   #endif
 
   #ifdef OVERWORLD
-  #undef NETHER_SMOKE
   #undef END_STARS
+  #undef NETHER_SMOKE
   #undef END_SMOKE
   #undef END_NEBULA
   #endif

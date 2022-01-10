@@ -41,7 +41,7 @@ uniform sampler2D gaux1;
 #define MC_RENDER_STAGE_MOON 1
 #endif
 
-#ifdef END_NEBULA
+#if defined END_NEBULA || defined END_STARS
 uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelViewInverse;
@@ -72,6 +72,48 @@ float GetLuminance(vec3 color) {
 #ifdef END_NEBULA
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/clouds.glsl"
+#endif
+
+#ifdef END_STARS
+void DrawStars2(inout vec3 color, vec3 viewPos, float size, float amount, float brightness) {
+	vec3 wpos = vec3(gbufferModelViewInverse * vec4(viewPos, 1.0));
+	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
+
+	vec2 wind = vec2(frametime, 0.0);
+	vec2 coord = planeCoord.xz * size + cameraPosition.xz * 0.0001 + wind * 0.001;
+		 coord = floor(coord * 1024.0) / 1024.0;
+	
+	float VoU = clamp(dot(normalize(viewPos), upVec), 0.0, 1.0);
+
+	#ifdef END
+	VoU = 1.0;
+	#endif
+
+	float multiplier = VoU * 16.0 * (1.0 - rainStrength) * (1.0 - sunVisibility * 0.5);
+	
+	float star = GetNoise(coord.xy);
+		  star*= GetNoise(coord.xy + 0.10);
+		  star*= GetNoise(coord.xy + 0.23);
+	star *= amount;
+	star = clamp(star - 0.75, 0.0, 1.0) * multiplier;
+
+	#ifdef OVERWORLD
+
+	#if MC_VERSION >= 11800
+	star *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
+	#else
+	star *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
+	#endif
+
+	#ifdef UNDERGROUND_SKY
+	star *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+	#endif
+	
+	#endif
+
+	color += star * vec3(0.5, 0.75, 1.00) * brightness;
+}
+
 #endif
 
 //Program//
@@ -118,8 +160,8 @@ void main() {
 	viewPos /= viewPos.w;
 
 	#ifdef END_STARS
-	DrawStars(albedo.rgb, viewPos.xyz, 0.25, 0.9, 8.0);
-	DrawStars(albedo.rgb, viewPos.xyz, 0.75, 0.9, 7.0);
+	DrawStars2(albedo.rgb, viewPos.xyz, 0.25, 0.9, 8.0);
+	DrawStars2(albedo.rgb, viewPos.xyz, 0.75, 0.9, 7.0);
 	#endif
 
 	#ifdef END_NEBULA

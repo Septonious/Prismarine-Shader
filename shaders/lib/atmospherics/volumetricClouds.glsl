@@ -40,7 +40,7 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 	for (int i = 0; i < VCLOUDS_SAMPLES; i++) {
 		float minDist = (i + dither) * VCLOUDS_RANGE;
 
-		if (depth1 < minDist || isEyeInWater == 1.0 || minDist > 1024.0){
+		if (depth1 < minDist || isEyeInWater == 1.0 || minDist > 1024.0 || finalColor.a > 0.99){
 			break;
 		}
 		
