@@ -17,11 +17,14 @@ varying vec3 sunVec, upVec;
 #endif
 
 //Uniforms//
+#if defined VOLUMETRIC_CLOUDS || defined LIGHT_SHAFT
+uniform float rainStrength;
+#endif
+
 #ifdef LIGHT_SHAFT
 uniform int isEyeInWater;
 
 uniform float blindFactor;
-uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 #endif
