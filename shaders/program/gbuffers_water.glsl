@@ -582,7 +582,7 @@ void main() {
 			float absorb = (1.0 - albedo.a);
 			absorb = sqrt(absorb * lightmap.y);
 
-			albedo.rgb = mix(albedo.rgb, newAlbedo / 0.4, absorb);
+			albedo.rgb = mix(albedo.rgb, newAlbedo * 1.7, absorb);
 		}
 		#endif
 

@@ -44,7 +44,6 @@ Please don't edit anything from Undefine section and onwards.
   #define FOG_ALTITUDE 140.0 //[60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0]
 
   #define TRANSLUCENCY_BLENDING
-  #define WATER_LIGHTSHAFTS
   #define WATER_REFRACTION
   #define WATER_CAUSTICS
   #define WATER_CAUSTICS_STRENGTH 8 //[2 4 6 8 10 12 14 16]  
