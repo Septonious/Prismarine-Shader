@@ -54,12 +54,6 @@ uniform sampler2D noisetex;
 #endif
 
 #ifdef LIGHT_SHAFT
-uniform mat4 gbufferProjection;
-
-#ifdef WATER_LIGHTSHAFTS
-uniform sampler2D colortex9;
-#endif
-
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 

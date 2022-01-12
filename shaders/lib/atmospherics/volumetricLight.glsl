@@ -46,13 +46,6 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
 
-		float fovFactor = gbufferProjection[1][1] / 1.37;
-		float x = abs(texCoord.x - 0.5);
-		x = 1.0 - x * x;
-		x = pow(x, max(3.0 - fovFactor, 0.0));
-		minDistFactor *= x;
-		maxDist *= x;
-
 		vec4 worldposition = vec4(0.0);
 		vec4 shadowposition = vec4(0.0);
 		

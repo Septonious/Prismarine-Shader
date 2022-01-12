@@ -22,12 +22,32 @@ uniform mat4 gbufferProjection;
 uniform sampler2D depthtex1;
 #endif
 
+#ifdef WATER_REFRACTION
+uniform int worldTime;
+
+uniform float frameTimeCounter;
+
+uniform vec3 cameraPosition;
+
+uniform sampler2D depthtex0, colortex9, noisetex;
+
+uniform mat4 gbufferProjectionInverse, gbufferModelViewInverse;
+#endif
+
 uniform sampler2D colortex0;
 
 //Optifine Constants//
 const bool colortex0MipmapEnabled = true;
 
 //Common Variables//
+#ifdef WATER_REFRACTION
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter * ANIMATION_SPEED;
+#endif
+#endif
+
 #ifdef DOF
 vec2 dofOffsets[60] = vec2[60](
 	vec2( 0.0    ,  0.25  ),
@@ -114,14 +134,43 @@ vec3 DepthOfField(vec3 color, float z) {
 }
 #endif
 
+#ifdef WATER_REFRACTION
+vec3 ToWorld(vec3 pos) {
+	return mat3(gbufferModelViewInverse) * pos + gbufferModelViewInverse[3].xyz;
+}
+#endif
+
+//Includes//
+#ifdef WATER_REFRACTION
+#include "/lib/lighting/refraction.glsl"
+#endif
+
 //Program//
 void main() {
 	vec3 color = texture2DLod(colortex0, texCoord, 0.0).rgb;
 	
-	#ifdef DOF
-	float z = texture2D(depthtex1, texCoord.st).x;
+	#ifdef WATER_REFRACTION
+	float z0 = texture2D(depthtex0, texCoord).r;
 
-	color = DepthOfField(color, z);
+    vec4 waterData = texture2D(colortex9, texCoord);
+
+    if (waterData.a > 0.5){
+        vec4 screenPos = vec4(texCoord, z0, 1.0);
+        vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+        viewPos /= viewPos.w;
+
+        vec3 worldPos = ToWorld(viewPos.xyz);
+        vec3 waterPos = worldPos + cameraPosition;
+
+        vec2 refractCoord = getRefraction(texCoord, waterPos, waterData.b, waterData.g);
+        color = texture2D(colortex0, refractCoord).rgb;
+    }
+	#endif
+
+	#ifdef DOF
+	float z1 = texture2D(depthtex1, texCoord.st).x;
+
+	color = DepthOfField(color, z1);
 	#endif
 	
     /*DRAWBUFFERS:0*/
