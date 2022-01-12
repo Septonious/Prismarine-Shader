@@ -12,6 +12,7 @@ https://bitslablab.com
 //Varyings//
 varying vec2 texCoord;
 
+#ifdef SSGI
 //Uniforms//
 #ifdef DENOISE
 uniform float viewHeight, viewWidth;
@@ -47,6 +48,14 @@ void main() {
     /* DRAWBUFFERS:1 */
     gl_FragData[0] = vec4(color, 1.0);
 }
+
+#else
+
+void main(){
+    discard;
+}
+
+#endif
 
 #endif
 

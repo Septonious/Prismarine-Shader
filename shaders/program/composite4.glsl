@@ -17,6 +17,7 @@ uniform float viewHeight, aspectRatio;
 
 uniform sampler2D colortex0;
 
+#ifdef BLOOM
 //Optifine Constants//
 const bool colortex0MipmapEnabled = true;
 
@@ -48,10 +49,13 @@ vec3 BloomTile(float lod, vec2 coord, vec2 offset) {
 	return pow(bloom / 32.0, vec3(0.25));
 }
 
+//Includes//
 #include "/lib/util/dither.glsl"
+#endif
 
 //Program//
 void main() {
+	#ifdef BLOOM
 	vec2 bloomCoord = texCoord * viewHeight * 0.8 / min(360.0, viewHeight);
 	vec3 blur =  BloomTile(1.0, bloomCoord, vec2(0.0      , 0.0   ));
 	     blur += BloomTile(2.0, bloomCoord, vec2(0.51     , 0.0   ));
@@ -62,6 +66,9 @@ void main() {
 	     blur += BloomTile(7.0, bloomCoord, vec2(0.670625 , 0.3325));
 		
 		 blur = clamp(blur + (Bayer64(gl_FragCoord.xy) - 0.5) / 384.0, vec3(0.0), vec3(1.0));
+	#else
+	vec3 blur = texture2D(colortex0, texCoord.xy).rgb;
+	#endif
 
     /* DRAWBUFFERS:1 */
 	gl_FragData[0] = vec4(blur, 1.0);

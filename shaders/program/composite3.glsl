@@ -147,7 +147,7 @@ vec3 ToWorld(vec3 pos) {
 
 //Program//
 void main() {
-	vec3 color = texture2DLod(colortex0, texCoord, 0.0).rgb;
+	vec3 color = texture2D(colortex0, texCoord).rgb;
 	
 	#ifdef WATER_REFRACTION
 	float z0 = texture2D(depthtex0, texCoord).r;

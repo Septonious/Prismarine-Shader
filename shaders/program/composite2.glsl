@@ -57,7 +57,7 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 		for(int i = 0; i < 5; i++, coord += velocity) {
 			vec2 sampleCoord = clamp(coord, doublePixel, 1.0 - doublePixel);
 			float mask = float(texture2D(depthtex1, sampleCoord).r > 0.56);
-			mblur += texture2DLod(colortex0, sampleCoord, 0.0).rgb * mask;
+			mblur += texture2D(colortex0, sampleCoord).rgb * mask;
 			mbwg += mask;
 		}
 		mblur /= max(mbwg, 1.0);
@@ -73,7 +73,7 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 
 //Program//
 void main() {
-    vec3 color = texture2DLod(colortex0, texCoord, 0.0).rgb;
+    vec3 color = texture2D(colortex0, texCoord).rgb;
 	
 	#ifdef MOTION_BLUR
 	float z = texture2D(depthtex1, texCoord.st).x;

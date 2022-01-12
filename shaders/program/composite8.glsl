@@ -9,6 +9,7 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
+#ifdef SSGI
 //Varyings//
 varying vec2 texCoord;
 
@@ -42,6 +43,14 @@ void main() {
     gl_FragData[0] = vec4(gi, 1.0);
     gl_FragData[1] = vec4(0.0, temporalColor);
 }
+
+#else
+
+void main(){
+    discard;
+}
+
+#endif
 
 #endif
 
