@@ -564,9 +564,9 @@ void main() {
 			float absorbDist = 0.0;
 
 			if (isEyeInWater == 0 && water > 0.5){
-				waterColor.g *= 1.25;
-				absorbColor = normalize(waterColor.rgb * WATER_I) * rainFactor * terrainColor * (1.0 + timeBrightness * 1.5);
-				absorbDist = 1.0 - clamp(difT / 12.0, 0.0, 1.0);
+				waterColor.g *= 1.35;
+				absorbColor = normalize(waterColor.rgb * WATER_I) * rainFactor * terrainColor * (1.0 + timeBrightness * 1.35);
+				absorbDist = 1.0 - clamp(difT / 10.0, 0.0, 1.0);
 			}
 
 			if (glass > 0.5){

@@ -14,33 +14,18 @@ varying vec2 texCoord;
 
 #ifdef SSGI
 //Uniforms//
-#ifdef DENOISE
-uniform float viewHeight, viewWidth;
-
-uniform sampler2D colortex6;
-uniform sampler2D depthtex0, depthtex1;
-#endif
+uniform float timeBrightness;
 
 uniform sampler2D colortex1, colortex9, colortex11;
-
-//Includes//
-#ifdef DENOISE
-#include "/lib/util/encode.glsl"
-#include "/lib/filters/normalAwareBlur.glsl"
-#endif
 
 //Program//
 void main() {
     vec3 color = texture2D(colortex1, texCoord).rgb;
     vec3 gi = texture2D(colortex11, texCoord).rgb;
 
-    #ifdef DENOISE
-    gi = NormalAwareBlur(colortex11).rgb;
-    #endif
-
     float skyLightmap = clamp(texture2D(colortex9, texCoord).b, 0.0, 1.0);
 
-    gi *= (1.00 - skyLightmap * 0.5) * 16.0;
+    gi *= (1.00 - skyLightmap * 0.75 * timeBrightness) * 24.0;
     color.rgb *= 1.0 + gi;
 
     /* DRAWBUFFERS:1 */

@@ -93,8 +93,6 @@ void main() {
     vec4 albedo = texture2D(texture, texCoord) * color;
 
 	if (albedo.a > 0.001) {
-		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
 		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
@@ -102,11 +100,15 @@ void main() {
 		vec3 viewPos = ToNDC(screenPos);
 		#endif
 		vec3 worldPos = ToWorld(viewPos);
+	
+		#ifndef SSGI
+		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 		
 		#ifdef DYNAMIC_HANDLIGHT
 		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
 		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
 		lightmap.x = max(lightmap.x, handlight);
+		#endif
 		#endif
 
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
@@ -115,6 +117,7 @@ void main() {
 		albedo.rgb = vec3(0.35);
 		#endif
 
+		#ifndef SSGI
 		float NoL = 1.0;
 
 		float NoU = clamp(dot(normal, upVec), -1.0, 1.0);
@@ -125,6 +128,7 @@ void main() {
 		vec3 shadow = vec3(0.0);
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, 1.0, NoL, 1.0,
 				    1.0, 0.0, 0.0);
+		#endif
 
 		#if defined FOG && MC_VERSION >= 11500
 		Fog(albedo.rgb, viewPos);
@@ -147,6 +151,10 @@ void main() {
 
 	if (albedo.a > 0.999) albedo.a *= float(difference > opaqueThreshold);
 	else albedo.a *= difference;
+	#endif
+
+	#ifdef SSGI
+	albedo *= 0.25;
 	#endif
 	
     /* DRAWBUFFERS:0 */

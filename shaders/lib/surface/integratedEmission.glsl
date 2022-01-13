@@ -54,8 +54,8 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 		newEmissive = float(albedo.r > albedo.g && albedo.r > albedo.b) * 0.1 * GLOW_STRENGTH;
 		giEmissive = 2.0;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
-		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.1 * GLOW_STRENGTH;
-		giEmissive = 4.0;
+		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.05 * GLOW_STRENGTH;
+		giEmissive = 2.0;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
 		newEmissive = float(albedo.r > 0.65) * 0.25 * GLOW_STRENGTH;
 		giEmissive = 1.0;
@@ -63,8 +63,8 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b) * GLOW_STRENGTH;
 		giEmissive = 2.0;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
-		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * 0.1 * GLOW_STRENGTH;
-		giEmissive = 4.0;
+		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1 * GLOW_STRENGTH;
+		giEmissive = 2.0;
 	} else if (mat > 115.9 && mat < 116.1) { // Furnaces
 		newEmissive = float(albedo.r > 0.8) * 0.5 * GLOW_STRENGTH;
 		giEmissive = 1.0;

@@ -30,7 +30,7 @@ uniform sampler2D depthtex0;
 void main() {
     vec3 gi = texture2D(colortex11, texCoord).rgb;
 
-    gi = NormalAwareBlur(colortex11).rgb;
+    gi = NormalAwareBlur(colortex11, vec2(0.0, 1.0)).rgb;
 
     /* RENDERTARGETS:11 */
     gl_FragData[0] = vec4(gi, 1.0);

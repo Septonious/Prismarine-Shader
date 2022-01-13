@@ -63,6 +63,7 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 #ifdef LIGHT_SHAFT
+#include "/lib/color/waterColor.glsl"
 #include "/lib/color/lightColor.glsl"
 #endif
 #endif
@@ -80,7 +81,8 @@ void main() {
 	#endif
 
 	#ifdef LIGHT_SHAFT
-	vl.rgb *= lightCol * 0.25 * (1.0 - isEyeInWater * 0.75);
+	if (isEyeInWater != 1.0) vl.rgb *= lightCol * 0.25;
+	else vl.rgb *= waterColor.rgb * 0.25 * (0.5 + eBS);
     vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
 	#endif
 

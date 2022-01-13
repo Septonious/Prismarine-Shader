@@ -52,6 +52,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 		vec3 watercol = mix(vec3(1.0),
 							waterColor.rgb / (waterColor.a * waterColor.a),
 							pow(waterAlpha, 0.25));
+		watercol.g *= 0.5;
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
 			float minDist = minDistFactor * (i + dither) * (1.0 - isEyeInWater * 0.75);
