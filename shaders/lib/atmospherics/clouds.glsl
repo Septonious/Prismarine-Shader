@@ -231,7 +231,7 @@ float InterleavedGradientNoise() {
 
 vec3 DrawNebula(vec3 viewPos) {
 	#ifdef OVERWORLD
-	int samples = 3;
+	int samples = 4;
 	#else
 	int samples = 6;
 	#endif

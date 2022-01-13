@@ -20,7 +20,7 @@ float getCloudSample(vec3 pos, float height){
 	return clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 }
 
-vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dither, in vec4 translucent){
+vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 translucent){
 	vec4 wpos = vec4(0.0);
 	vec4 finalColor = vec4(0.0);
 
@@ -40,7 +40,7 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 	for (int i = 0; i < VCLOUDS_SAMPLES; i++) {
 		float minDist = (i + dither) * VCLOUDS_RANGE;
 
-		if (depth1 < minDist || isEyeInWater == 1.0 || minDist > 1024.0 || finalColor.a > 0.99){
+		if (depth1 < minDist || minDist > 1024.0 || finalColor.a > 0.99){
 			break;
 		}
 		
@@ -75,7 +75,7 @@ vec4 getVolumetricCloud(in vec3 viewPos, in float z1, in float z0, in float dith
 				cloudsColor *= translucent;
 			}
 
-			finalColor += cloudsColor * (1.0 - finalColor.a);
+			finalColor += cloudsColor * (1.0 - finalColor.a) * (1.0 - isEyeInWater * (1.0 - eBS));
 		}
 	}
 

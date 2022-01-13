@@ -19,8 +19,6 @@ uniform float viewHeight, viewWidth;
 
 uniform sampler2D colortex6;
 uniform sampler2D depthtex0, depthtex1;
-
-uniform mat4 gbufferProjectionInverse;
 #endif
 
 uniform sampler2D colortex1, colortex9, colortex11;
@@ -37,12 +35,12 @@ void main() {
     vec3 gi = texture2D(colortex11, texCoord).rgb;
 
     #ifdef DENOISE
-    gi = NormalAwareBlur();
+    gi = NormalAwareBlur(colortex11).rgb;
     #endif
 
     float skyLightmap = clamp(texture2D(colortex9, texCoord).b, 0.0, 1.0);
 
-    gi *= (1.00 - skyLightmap * 0.5) * 24.0;
+    gi *= (1.00 - skyLightmap * 0.5) * 16.0;
     color.rgb *= 1.0 + gi;
 
     /* DRAWBUFFERS:1 */

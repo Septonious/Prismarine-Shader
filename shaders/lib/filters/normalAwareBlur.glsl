@@ -13,9 +13,12 @@ float GetLinearDepth(float depth) {
 float gaussian(float x, float sigma) {
     return (1.0 / sqrt(TAU * sigma)) * exp(-pow2(x) / (2.0 * pow2(sigma)));
 }
+float gaussian(vec2 i, float sigma) {
+    return exp( -0.5* dot(i/=sigma,i) ) / ( 6.28 * sigma*sigma );
+}
 
-vec3 NormalAwareBlur() {
-    vec3 blur = vec3(0.0);
+vec4 NormalAwareBlur(sampler2D colortex) {
+    vec4 blur = vec4(0.0);
 
 	vec3 normal = normalize(DecodeNormal(texture2D(colortex6, texCoord).xy));
 
@@ -31,9 +34,9 @@ vec3 NormalAwareBlur() {
 
     for(int i = -DENOISE_QUALITY; i <= DENOISE_QUALITY; i++) {
         for(int j = -DENOISE_QUALITY; j <= DENOISE_QUALITY; j++) {
-            float weight = gaussian(i, 1024.0) * gaussian(j, 1024.0);
+            float weight = gaussian(vec2(i, j), 32000);
 
-			vec2 offset = vec2(i, j) * DENOISE_STRENGTH * pixelSize;
+			vec2 offset = vec2(i, j) * pixelSize * DENOISE_STRENGTH;
 
 			vec3 currentNormal = normalize(DecodeNormal(texture2D(colortex6, texCoord + offset).xy));
 			float normalWeight = pow(clamp(dot(normal, currentNormal), 0.0001, 1.0), 8.0);
@@ -45,7 +48,7 @@ vec3 NormalAwareBlur() {
 			weight *= depthWeight;
 			#endif			
 
-            blur += texture2D(colortex11, texCoord + offset).rgb * weight;
+            blur += texture2D(colortex, texCoord + offset) * weight;
             totalWeight += weight;
         }
     }

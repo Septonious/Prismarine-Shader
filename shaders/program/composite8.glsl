@@ -9,39 +9,28 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
-#ifdef SSGI
+#if defined SSGI && defined DENOISE
 //Varyings//
 varying vec2 texCoord;
 
 //Uniforms//
-uniform int frameCounter;
-
 uniform float viewWidth, viewHeight;
 
-uniform mat4 gbufferProjection;
-uniform mat4 gbufferProjectionInverse;
-
-uniform sampler2D colortex6, colortex9, colortex11, colortex12;
-uniform sampler2D depthtex0, depthtex1;
-
-uniform sampler2D colortex13;
+uniform sampler2D colortex6, colortex11;
+uniform sampler2D depthtex0;
 
 //Includes//
 #include "/lib/util/encode.glsl"
-#include "/lib/lighting/ssgi.glsl"
+#include "/lib/filters/normalAwareBlur.glsl"
 
 //Program//
 void main() {
-    float z0 = texture2D(depthtex0, texCoord.xy).x;
-	vec3 screenPos = vec3(texCoord, z0);
-    vec3 normal = normalize(DecodeNormal(texture2D(colortex6, texCoord.xy).xy));
-    vec3 gi = computeGI(screenPos, normal, float(z0 < 0.56));
+    vec3 gi = texture2D(colortex11, texCoord.xy).rgb;
 
-    vec3 temporalColor = texture2D(colortex13, texCoord).gba;
+    gi = NormalAwareBlur(colortex11).rgb;
 
-    /* RENDERTARGETS:11,13 */
+    /* RENDERTARGETS:11 */
     gl_FragData[0] = vec4(gi, 1.0);
-    gl_FragData[1] = vec4(0.0, temporalColor);
 }
 
 #else
