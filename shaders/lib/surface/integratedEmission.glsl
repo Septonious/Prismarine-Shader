@@ -54,8 +54,8 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 		newEmissive = float(albedo.r > albedo.g && albedo.r > albedo.b) * 0.1 * GLOW_STRENGTH;
 		giEmissive = 2.0;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
-		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.05 * GLOW_STRENGTH;
-		giEmissive = 2.0;
+		newEmissive = float(length(albedo.rgb) > 0.75) * 0.025 * GLOW_STRENGTH;
+		giEmissive = 6.0;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
 		newEmissive = float(albedo.r > 0.65) * 0.25 * GLOW_STRENGTH;
 		giEmissive = 1.0;
@@ -63,8 +63,8 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b) * GLOW_STRENGTH;
 		giEmissive = 2.0;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
-		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1 * GLOW_STRENGTH;
-		giEmissive = 2.0;
+		newEmissive = float(albedo.r > 0.65) * 0.1 * GLOW_STRENGTH;
+		giEmissive = 6.0;
 	} else if (mat > 115.9 && mat < 116.1) { // Furnaces
 		newEmissive = float(albedo.r > 0.8) * 0.5 * GLOW_STRENGTH;
 		giEmissive = 1.0;
@@ -74,6 +74,12 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 	} else if (mat > 117.9 && mat < 118.1) { // Enchanting Table
 		newEmissive = float(albedo.b > albedo.r) * 0.25 * GLOW_STRENGTH;
 		giEmissive = 1.0;
+	} else if (mat > 118.9 && mat < 119.1) { // Soul Campfire
+		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.025 * GLOW_STRENGTH;
+		giEmissive = 6.0;
+	} else if (mat > 119.9 && mat < 120.1) { // Normal Campfire
+		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1 * GLOW_STRENGTH;
+		giEmissive = 6.0;
 	}
 
 	#ifdef OVERWORLD
@@ -123,6 +129,8 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	if (mc_Entity.x == 20016) mat = 116.0;
 	if (mc_Entity.x == 20017) mat = 117.0;
 	if (mc_Entity.x == 20018) mat = 118.0;
+	if (mc_Entity.x == 20019) mat = 119.0;
+	if (mc_Entity.x == 20020) mat = 120.0;
 	if (mc_Entity.x == 10101) isPlant = 1.0;
 
 	#if defined SSGI && defined EMISSIVE_CONCRETE

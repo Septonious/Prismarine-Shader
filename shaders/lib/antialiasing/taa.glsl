@@ -93,7 +93,12 @@ vec4 TemporalAA(inout vec3 color, float tempData, sampler2D colortex, sampler2D 
 		prvCoord.x > 0.0 && prvCoord.x < 1.0 &&
 		prvCoord.y > 0.0 && prvCoord.y < 1.0
 	);
+	
+	#ifdef SSGI
 	blendFactor *= exp(-length(velocity));
+	#else
+	blendFactor *= exp(-length(velocity)) * 0.6 + 0.3;
+	#endif
 	
 	color = mix(color, tempColor, blendFactor);
 	return vec4(tempData, color);
