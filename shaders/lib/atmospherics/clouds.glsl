@@ -221,13 +221,11 @@ float nebulaSample(vec2 coord, vec2 wind, float VoU) {
 	return noise;
 }
 
-#ifdef END_NEBULA
-float InterleavedGradientNoise() {
+float InterleavedGradientNoise1() {
 	float n = 52.9829189 * fract(0.06711056 * gl_FragCoord.x + 0.00583715 * gl_FragCoord.y);
 
 	return fract(n);
 }
-#endif
 
 vec3 DrawNebula(vec3 viewPos) {
 	#ifdef OVERWORLD
@@ -236,17 +234,10 @@ vec3 DrawNebula(vec3 viewPos) {
 	int samples = 6;
 	#endif
 
-	#ifdef OVERWORLD_NEBULA
-	float dither = Bayer64(gl_FragCoord.xy) * 0.4;
-	#endif
-
-	#ifdef END_NEBULA
-	float dither = InterleavedGradientNoise();
+	float dither = InterleavedGradientNoise1();
 
 	#ifdef TAA
 	dither = fract(16.0 * frameTimeCounter + dither);
-	#endif
-
 	#endif
 
 	float VoU = dot(normalize(viewPos.xyz), upVec);
@@ -303,8 +294,8 @@ vec3 DrawNebula(vec3 viewPos) {
 			erodeCoord(coord, currentStep, 0.2);
 
 			float noise = nebulaSample(coord, wind, VoU);
-				 noise *= texture2D(noisetex, coord * 0.25 + wind * 0.25).b;
-				 noise *= texture2D(noisetex, coord + wind * 16.0).b + 0.75;
+				 noise *= texture2D(noisetex, coord * 0.25 + wind * 0.25).r;
+				 noise *= texture2D(noisetex, coord + wind * 16.0).r + 0.75;
 				 noise = noise * noise * 2.0 * sampleStep;
 				 noise *= max(sqrt(1.0 - length(planeCoord.xz) * 4.0), 0.0);
 
