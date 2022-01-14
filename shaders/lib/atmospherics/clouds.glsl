@@ -95,7 +95,7 @@ void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float b
 	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
 
 	vec2 wind = vec2(frametime, 0.0);
-	vec2 coord = planeCoord.xz * size + cameraPosition.xz * 0.0001 + wind * 0.001;
+	vec2 coord = planeCoord.xz * size + cameraPosition.xz * 0.000001 + wind * 0.001;
 		 coord = floor(coord * 1024.0) / 1024.0;
 	
 	float VoU = clamp(dot(normalize(viewPos), upVec), 0.0, 1.0);

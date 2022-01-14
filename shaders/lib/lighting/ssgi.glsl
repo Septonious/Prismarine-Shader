@@ -153,7 +153,7 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
         currentPosition = hitPos;
 
         if (hit && hand < 0.5) {
-            vec3 albedo = texture2D(colortex12, currentPosition.xy).rgb * ILLUMINATION_STRENGTH;
+            vec3 albedo = texture2D(colortex1, currentPosition.xy).rgb;
 			//vec3 shadow = texture2D(colortex14, currentPosition.xy).rgb * 0.5;
 
             float isEmissive = texture2D(colortex9, currentPosition.xy).r == 0.0 ? 0.0 : 1.0;

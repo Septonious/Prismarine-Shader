@@ -14,12 +14,19 @@ varying vec2 texCoord;
 
 //Uniforms//
 #ifdef DOF
-uniform float viewWidth, viewHeight, aspectRatio;
 uniform float centerDepthSmooth;
+#endif
+
+#if defined DOF || defined DISTANT_BLUR
+uniform float viewWidth, viewHeight, aspectRatio;
 
 uniform mat4 gbufferProjection;
 
 uniform sampler2D depthtex1;
+#endif
+
+#if defined WATER_REFRACTION || defined DISTANT_BLUR
+uniform mat4 gbufferModelViewInverse;
 #endif
 
 #ifdef WATER_REFRACTION
@@ -31,7 +38,7 @@ uniform vec3 cameraPosition;
 
 uniform sampler2D depthtex0, colortex9, noisetex;
 
-uniform mat4 gbufferProjectionInverse, gbufferModelViewInverse;
+uniform mat4 gbufferProjectionInverse;
 #endif
 
 uniform sampler2D colortex0;
@@ -48,7 +55,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 #endif
 
-#ifdef DOF
+#if defined DOF || defined DISTANT_BLUR
 vec2 dofOffsets[60] = vec2[60](
 	vec2( 0.0    ,  0.25  ),
 	vec2(-0.2165 ,  0.125 ),
@@ -111,15 +118,31 @@ vec2 dofOffsets[60] = vec2[60](
 	vec2( 0.5    ,  0.8660),
 	vec2( 0.2588 ,  0.9659)
 );
+#endif
 
 //Common Functions//
+#if defined WATER_REFRACTION || defined DISTANT_BLUR
+vec3 ToWorld(vec3 pos) {
+	return mat3(gbufferModelViewInverse) * pos + gbufferModelViewInverse[3].xyz;
+}
+#endif
+
+#if defined DOF || defined DISTANT_BLUR
 vec3 DepthOfField(vec3 color, float z) {
 	vec3 dof = vec3(0.0);
 	float hand = float(z < 0.56);
 	
 	float fovScale = gbufferProjection[1][1] / 1.37;
+
+	#ifdef DOF
 	float coc = max(abs(z - centerDepthSmooth) * DOF_STRENGTH - 0.01, 0.0);
 	coc = coc / sqrt(coc * coc + 0.1);
+	#endif
+
+	#ifdef DISTANT_BLUR
+	vec3 worldPos = ToWorld(viewPos.xyz);
+	coc = min(length(worldPos) * DISTANT_BLUR_RANGE * 0.00025, DISTANT_BLUR_STRENGTH * 0.025) * DISTANT_BLUR_STRENGTH;
+	#endif
 	
 	if (coc > 0.0 && hand < 0.5) {
 		for(int i = 0; i < 60; i++) {
@@ -131,12 +154,6 @@ vec3 DepthOfField(vec3 color, float z) {
 	}
 	else dof = color;
 	return dof;
-}
-#endif
-
-#ifdef WATER_REFRACTION
-vec3 ToWorld(vec3 pos) {
-	return mat3(gbufferModelViewInverse) * pos + gbufferModelViewInverse[3].xyz;
 }
 #endif
 
@@ -167,7 +184,7 @@ void main() {
     }
 	#endif
 
-	#ifdef DOF
+	#if defined DOF || defined DISTANT_BLUR
 	float z1 = texture2D(depthtex1, texCoord.st).x;
 
 	color = DepthOfField(color, z1);

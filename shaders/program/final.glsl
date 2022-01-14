@@ -44,35 +44,36 @@ void ContrastAdaptiveSharpening(inout vec3 outColor){
     vec2 uv = texCoord * MC_RENDER_QUALITY;
   
     vec3 originalColor = texture2D(colortex1, uv).rgb;
+    vec3 modifiedColor = vec3(0.0);
+
+    vec4 uvoff = vec4(1.0, 0.0, 1.0, -1.0) / vec4(vec2(viewWidth, viewWidth), vec2(viewHeight, viewHeight));
 
     float maxGreen = originalColor.g;
     float minGreen = originalColor.g;
+    float adaptiveSharpening = 0.0;
 
-    vec4 uvoff = vec4(1.0, 0.0, 1.0, -1.0) / vec4(vec2(viewWidth, viewWidth), vec2(viewHeight, viewHeight));
-    vec3 modifiedColor = vec3(0.0);
     vec3 newColor = texture2D(colortex1, uv + uvoff.yw).rgb;
     maxGreen = max(maxGreen, newColor.g);
     minGreen = min(minGreen, newColor.g);
-    modifiedColor = newColor;
+        modifiedColor = newColor;
     	 newColor = texture2D(colortex1, uv + uvoff.xy).rgb;
     maxGreen = max(maxGreen, newColor.g);
     minGreen = min(minGreen, newColor.g);
-    modifiedColor += newColor;
+        modifiedColor += newColor;
     	 newColor = texture2D(colortex1, uv + uvoff.yz).rgb;
     maxGreen = max(maxGreen, newColor.g);
     minGreen = min(minGreen, newColor.g);
-    modifiedColor += newColor;
+        modifiedColor += newColor;
     	 newColor = texture2D(colortex1, uv - uvoff.xy).rgb;
     maxGreen = max(maxGreen, newColor.g);
     minGreen = min(minGreen, newColor.g);
-    modifiedColor += newColor;
-    float adaptiveSharpening = 0.0;
-    maxGreen = max(0.0, maxGreen);
+        modifiedColor += newColor;
 
-    adaptiveSharpening = minGreen / maxGreen;
+    adaptiveSharpening = minGreen / max(maxGreen, 0.0);
 
     adaptiveSharpening = sqrt(max(0.0, adaptiveSharpening));
     adaptiveSharpening *= mix(-0.125, -0.2, 0.25);
+
     outColor = (originalColor + modifiedColor * adaptiveSharpening) / (1.0 + 4.0 * adaptiveSharpening);
 }
 #endif
@@ -82,7 +83,7 @@ void main() {
     vec2 newTexCoord = texCoord;
 
 	vec3 color = texture2DLod(colortex1, newTexCoord, 0.0).rgb;
-	
+
 	#if CHROMATIC_ABERRATION > 0
 	float caStrength = 0.004 * CHROMATIC_ABERRATION;
 	vec2 caScale = vec2(1.0 / aspectRatio, 1.0);

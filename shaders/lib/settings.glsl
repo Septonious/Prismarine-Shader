@@ -31,11 +31,16 @@ Please don't edit anything from Undefine section and onwards.
 
   #define CUSTOM_NETHER_PORTAL
 
+//#define DISTANT_BLUR
+  #define DISTANT_BLUR_STRENGTH 3.0 //[1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
+  #define DISTANT_BLUR_RANGE 1 //[1 2 3 4 5 6 7 8]
+  #define CAS
+
 //#define SSGI
   #define GI_DEPTH_LENIENCY 5.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
   #define DENOISE
   #define DENOISE_QUALITY 22 //[8 10 12 14 16 18 20 22]
-  #define DENOISE_STRENGTH 3.00 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00]
+  #define DENOISE_STRENGTH 4.00 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00]
   #define BOUNCES 1 //[1 2 3 4]
   #define ILLUMINATION_STRENGTH 6.00 //[1.00 2.00 3.00 4.00 5.00 6.00 7.00 8.00]
   #define STRIDE 96 //[4 8 16 24 32 48 64 96 128]
@@ -64,7 +69,7 @@ Please don't edit anything from Undefine section and onwards.
   #define VCLOUDS_OPACITY 1.00 //[0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
   #define VCLOUDS_RANGE 32.00 //[4.0 8.0 16.0 24.0 32.0 48.0 64.0]
   #define VCLOUDS_AMOUNT 2.00 //[1.00 1.25 1.50 1.75 2.00]
-  #define VCLOUDS_HORIZONTAL_THICKNESS 2.10 //[2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
+  #define VCLOUDS_HORIZONTAL_THICKNESS 2.00 //[2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
   #define VCLOUDS_DETAIL 0.1 //[0.1 0.2 0.3 0.4 0.5]
 
   #define END_STARS

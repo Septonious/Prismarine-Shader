@@ -56,12 +56,13 @@ vec4 NormalAwareBlur(sampler2D colortex, vec2 direction) {
 
 		#ifndef NETHER
 		float currentDepth = GetLinearDepth(texture2D(depthtex0, texCoord + offset).x);
-		float depthWeight = pow(clamp(1.0 - abs(currentDepth - centerDepthLinear), 0.0001, 1.0), 64.0); 
+		float depthWeight = pow(clamp(1.0 - abs(currentDepth - centerDepthLinear), 0.0001, 1.0), 24.0); 
 		     weight *= depthWeight;
 		#endif			
 
         blur += texture2D(colortex, texCoord + offset) * weight;
         totalWeight += weight;
     }
+
     return blur / totalWeight;
 }

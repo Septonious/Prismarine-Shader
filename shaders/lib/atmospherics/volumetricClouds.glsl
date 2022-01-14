@@ -30,7 +30,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-	float scattering = pow6(halfVoL) * (1.0 - rainStrength);
+	float scattering = pow6(halfVoL) * (1.0 - rainStrength) * (0.0 + timeBrightness);
 
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
