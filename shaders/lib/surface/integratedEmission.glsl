@@ -2,12 +2,15 @@
 void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2 lightmap, in vec4 albedo, in vec3 worldPos){
 	float newEmissive = 0.0;
 
+	#ifdef EMISSIVE_ORES
     if (mat > 99.9 && mat < 100.1) { // Emissive Ores
         float stoneDif = max(abs(albedo.r - albedo.g), max(abs(albedo.r - albedo.b), abs(albedo.g - albedo.b)));
         float ore = max(max(stoneDif - 0.175, 0.0), 0.0);
         newEmissive = sqrt(ore) * GLOW_STRENGTH * 0.25;
 		giEmissive = sqrt(ore) * GLOW_STRENGTH;
-    } else if (mat > 100.9 && mat < 101.1) { // Crying Obsidian and Respawn Anchor
+    } 
+	#endif
+	if (mat > 100.9 && mat < 101.1) { // Crying Obsidian and Respawn Anchor
 		newEmissive = (albedo.b - albedo.r) * albedo.r * GLOW_STRENGTH;
         newEmissive *= newEmissive * newEmissive * GLOW_STRENGTH;
 		giEmissive = 2.0;
@@ -21,10 +24,9 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
         if (comPosM < 0.1882) { // Command Block Center
             vec3 dif = vec3(albedo.r - albedo.b, albedo.r - albedo.g, albedo.b - albedo.g);
             dif = abs(dif);
-            newEmissive = float(max(dif.r, max(dif.g, dif.b)) > 0.1) * 25.0;
+            newEmissive = float(max(dif.r, max(dif.g, dif.b)) > 0.1) * 24.0;
             newEmissive *= float(albedo.r > 0.44 || albedo.g > 0.29);
-			newEmissive *= 0.5;
-			giEmissive = 3.0;
+			giEmissive = 1.0;
         }
 
 	} else if (mat > 102.9 && mat < 103.1) { // Warped Stem & Hyphae
@@ -82,7 +84,11 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 		giEmissive = 6.0;
 	}
 
-	#ifdef OVERWORLD
+	#ifdef DEBRIS_HIGHLIGHT
+	if (mat > 120.9 && mat < 121.1) newEmissive = 1.0;
+	#endif
+
+	#if defined OVERWORLD && defined EMISSIVE_FLOWERS
 	if (isPlant > 0.9 && isPlant < 1.1){ // Flowers
 		newEmissive = float(albedo.b > albedo.g || albedo.r > albedo.g) * GLOW_STRENGTH * 0.05 * (1.0 - rainStrength);
 		giEmissive = 0.05;
@@ -112,7 +118,9 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 #ifdef VSH
 void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	isPlant = 0.0;
+	#ifdef EMISSIVE_ORES
 	if (mc_Entity.x == 20000) mat = 100.0;
+	#endif
 	if (mc_Entity.x == 20001) mat = 101.0;
 	if (mc_Entity.x == 20002) mat = 102.0;
 	if (mc_Entity.x == 20003) mat = 103.0;
@@ -131,7 +139,14 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	if (mc_Entity.x == 20018) mat = 118.0;
 	if (mc_Entity.x == 20019) mat = 119.0;
 	if (mc_Entity.x == 20020) mat = 120.0;
+
+	#ifdef DEBRIS_HIGHLIGHT
+	if (mc_Entity.x == 20021) mat = 121.0;
+	#endif
+
+	#if defined EMISSIVE_FLOWERS && defined OVERWORLD
 	if (mc_Entity.x == 10101) isPlant = 1.0;
+	#endif
 
 	#if defined SSGI && defined EMISSIVE_CONCRETE
 	if (mc_Entity.x == 29998) mat = 998.0;
