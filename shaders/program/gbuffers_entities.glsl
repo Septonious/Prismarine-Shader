@@ -289,6 +289,11 @@ void main() {
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
+
+	#ifdef SSGI
+	/* RENDERTARGETS:0,10 */
+	gl_FragData[1] = albedo;
+	#endif
 }
 
 #endif

@@ -14,10 +14,15 @@ https://bitslablab.com
 varying vec2 texCoord;
 
 //Uniforms//
-uniform float viewWidth, viewHeight;
+uniform float viewWidth, viewHeight, aspectRatio;
 
 uniform sampler2D colortex6, colortex11;
 uniform sampler2D depthtex0;
+
+uniform mat4 gbufferProjection;
+
+//Optifine Constants//
+const bool colortex11MipmapEnabled = true;
 
 //Includes//
 #include "/lib/util/encode.glsl"
@@ -27,7 +32,7 @@ uniform sampler2D depthtex0;
 void main() {
     vec3 gi = texture2D(colortex11, texCoord.xy).rgb;
 
-    gi = NormalAwareBlur(colortex11, vec2(1.0, 0.0)).rgb;
+    gi = NormalAwareBlur(colortex11, vec2(1.0f, 0.0f)).rgb;
 
     /* RENDERTARGETS:11 */
     gl_FragData[0] = vec4(gi, 1.0);

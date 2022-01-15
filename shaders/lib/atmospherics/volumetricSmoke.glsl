@@ -39,9 +39,9 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
                 wpos.xyz += cameraPosition.xyz + vec3(frametime * 0.025, 0.0, 0.0);
 
                 #if defined NETHER_SMOKE
-                float noise = getFogSample(wpos.xyz, 40.0, 256.0, 0.7);
+                float noise = getFogSample(wpos.xyz, 40.0, 256.0, 0.8);
                 #elif defined END_SMOKE
-                float noise = getFogSample(wpos.xyz, 50.0, 128.0, 1.0);
+                float noise = getFogSample(wpos.xyz, 50.0, 128.0, 0.9);
                 #endif
 
                 #if defined NETHER_SMOKE
