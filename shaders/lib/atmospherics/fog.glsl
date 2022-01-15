@@ -49,7 +49,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float density = (1.0 - timeBrightness * 0.25) * FOG_DENSITY * (1.0 + rainStrength);
+	float density = (1.0 - timeBrightness * 0.5) * FOG_DENSITY * (1.0 + rainStrength);
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0) * eBS, eBS);
@@ -112,7 +112,7 @@ void BlindFog(inout vec3 color, vec3 viewPos) {
 
 vec3 denseFogColor[2] = vec3[2](
 	vec3(1.0, 0.3, 0.01),
-	vec3(0.1, 0.16, 0.2) * clamp(timeBrightness, 0.1, 1.0)
+	vec3(0.1, 0.14, 0.24) * clamp(timeBrightness, 0.1, 1.0)
 );
 
 void DenseFog(inout vec3 color, vec3 viewPos) {

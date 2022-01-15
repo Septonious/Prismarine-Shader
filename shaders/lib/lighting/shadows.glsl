@@ -65,7 +65,7 @@ vec3 SampleFilteredShadow(vec3 shadowPos, float offset, float biasStep) {
     float dither = InterleavedGradientNoise();
     #endif
     
-    for (int i = 0; i <= 16; i++) {
+    for (int i = 0; i < 16; i++) {
         vec2 shadowOffset = shadowOffsets[i] * offset;
         shadow0 += shadow2D(shadowtex0, vec3(shadowPos.st + shadowOffset, shadowPos.z)).x;
         #if SSS_QUALITY == 1
@@ -77,7 +77,7 @@ vec3 SampleFilteredShadow(vec3 shadowPos, float offset, float biasStep) {
     vec3 shadowCol = vec3(0.0);
     #ifdef SHADOW_COLOR
     if (shadow0 < 0.999) {
-        for (int i = 0; i <= 16; i++) {
+        for (int i = 0; i < 16; i++) {
             vec2 shadowOffset = shadowOffsets[i] * offset;
             shadowCol += texture2D(shadowcolor0, shadowPos.st + shadowOffset).rgb *
                          shadow2D(shadowtex1, vec3(shadowPos.st + shadowOffset, shadowPos.z)).x;

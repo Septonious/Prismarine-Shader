@@ -26,7 +26,9 @@ uniform sampler2D depthtex1;
 #endif
 
 #if defined WATER_REFRACTION || defined DISTANT_BLUR
-uniform mat4 gbufferModelViewInverse;
+uniform sampler2D depthtex0;
+
+uniform mat4 gbufferProjectionInverse;
 #endif
 
 #ifdef WATER_REFRACTION
@@ -36,9 +38,9 @@ uniform float frameTimeCounter;
 
 uniform vec3 cameraPosition;
 
-uniform sampler2D depthtex0, colortex9, noisetex;
+uniform sampler2D colortex9, noisetex;
 
-uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferModelViewInverse;
 #endif
 
 uniform sampler2D colortex0;
@@ -121,27 +123,27 @@ vec2 dofOffsets[60] = vec2[60](
 #endif
 
 //Common Functions//
-#if defined WATER_REFRACTION || defined DISTANT_BLUR
+#ifdef WATER_REFRACTION
 vec3 ToWorld(vec3 pos) {
 	return mat3(gbufferModelViewInverse) * pos + gbufferModelViewInverse[3].xyz;
 }
 #endif
 
 #if defined DOF || defined DISTANT_BLUR
-vec3 DepthOfField(vec3 color, float z) {
+vec3 DepthOfField(vec3 color, vec3 viewPos, float z) {
 	vec3 dof = vec3(0.0);
 	float hand = float(z < 0.56);
 	
 	float fovScale = gbufferProjection[1][1] / 1.37;
+	float coc = 0.0;
 
 	#ifdef DOF
-	float coc = max(abs(z - centerDepthSmooth) * DOF_STRENGTH - 0.01, 0.0);
+	coc = max(abs(z - centerDepthSmooth) * DOF_STRENGTH - 0.01, 0.0);
 	coc = coc / sqrt(coc * coc + 0.1);
 	#endif
 
 	#ifdef DISTANT_BLUR
-	vec3 worldPos = ToWorld(viewPos.xyz);
-	coc = min(length(worldPos) * DISTANT_BLUR_RANGE * 0.00025, DISTANT_BLUR_STRENGTH * 0.025) * DISTANT_BLUR_STRENGTH;
+	coc = min(length(viewPos) * DISTANT_BLUR_RANGE * 0.00025, DISTANT_BLUR_STRENGTH * 0.025) * DISTANT_BLUR_STRENGTH;
 	#endif
 	
 	if (coc > 0.0 && hand < 0.5) {
@@ -165,17 +167,20 @@ vec3 DepthOfField(vec3 color, float z) {
 //Program//
 void main() {
 	vec3 color = texture2D(colortex0, texCoord).rgb;
-	
-	#ifdef WATER_REFRACTION
-	float z0 = texture2D(depthtex0, texCoord).r;
 
+	vec4 viewPos = vec4(0.0);
+
+	#if defined WATER_REFRACTION || defined DISTANT_BLUR
+	float z0 = texture2D(depthtex0, texCoord).r;
+    vec4 screenPos = vec4(texCoord, z0, 1.0);
+    viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+    viewPos /= viewPos.w;
+	#endif
+
+	#ifdef WATER_REFRACTION
     vec4 waterData = texture2D(colortex9, texCoord);
 
     if (waterData.a > 0.5){
-        vec4 screenPos = vec4(texCoord, z0, 1.0);
-        vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
-        viewPos /= viewPos.w;
-
         vec3 worldPos = ToWorld(viewPos.xyz);
         vec3 waterPos = worldPos + cameraPosition;
 
@@ -187,7 +192,7 @@ void main() {
 	#if defined DOF || defined DISTANT_BLUR
 	float z1 = texture2D(depthtex1, texCoord.st).x;
 
-	color = DepthOfField(color, z1);
+	color = DepthOfField(color, viewPos.xyz, z1);
 	#endif
 	
     /*DRAWBUFFERS:0*/
