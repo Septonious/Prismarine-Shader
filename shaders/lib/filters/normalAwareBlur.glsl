@@ -10,7 +10,7 @@ vec2 direction(float i, bool pass){
     else return vec2(i, 0.0);
 }
 
-float sigma = 8.0;
+float sigma = 1024.0; //dont question it
 float multiplier = 0.398942280401 / sigma;
 
 float gaussian(float x) {
@@ -27,7 +27,7 @@ vec3 NormalAwareBlur(sampler2D colortex, bool pass) {
 
     float totalWeight = 0.0;
 
-    for(float i = -DENOISE_QUALITY; i < DENOISE_QUALITY; i++){
+    for(float i = -DENOISE_QUALITY; i <= DENOISE_QUALITY; i++){
         float weight = gaussian(i);
         vec2 offset = direction(i * DENOISE_STRENGTH * float(centerDepth > 0.56), pass) * pixelSize;
 
@@ -36,7 +36,7 @@ vec3 NormalAwareBlur(sampler2D colortex, bool pass) {
 		     weight *= depthWeight;
 
 		vec3 currentNormal = normalize(DecodeNormal(texture2D(colortex6, texCoord + offset).xy));
-		float normalWeight = pow(clamp(dot(normal, currentNormal), 0.0001f, 1.0f), 4.0f);
+		float normalWeight = pow(clamp(dot(normal, currentNormal), 0.0001f, 1.0f), 8.0f);
 		     weight *= normalWeight;
 
         totalWeight += weight;
