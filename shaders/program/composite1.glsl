@@ -82,7 +82,7 @@ void main() {
 
 	#ifdef LIGHT_SHAFT
 	if (isEyeInWater != 1.0) vl.rgb *= lightCol * 0.25;
-	else vl.rgb *= waterColor.rgb * 0.25 * (0.5 + eBS);
+	else vl.rgb *= waterColor.rgb * 0.25 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75);
     vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
 	#endif
 

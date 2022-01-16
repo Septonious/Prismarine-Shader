@@ -31,6 +31,7 @@ Please don't edit anything from Undefine section and onwards.
 
   #define CUSTOM_NETHER_PORTAL
 
+  #define BLOOM_BALANCING
 //#define DISTANT_BLUR
   #define DISTANT_BLUR_STRENGTH 2.0 //[1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
   #define DISTANT_BLUR_RANGE 8 //[1 2 3 4 5 6 7 8]
@@ -58,6 +59,7 @@ Please don't edit anything from Undefine section and onwards.
   #define EMISSIVE_FLOWERS
   #define GLOW_STRENGTH 2 //[1 2 3 4 5 6 7 8]
 
+  #define LIGHTSHAFT_CLOUDY_NOISE
   #define LIGHTSHAFT_SAMPLES 4 //[1 2 3 4 5 6 7 8]
   #define LIGHTSHAFT_MAX_DISTANCE 512.0 //[128.0 256.0 512.0 1024.0]
   #define LIGHTSHAFT_MIN_DISTANCE 32.0 //[1.0 2.0 4.0 8.0 16.0 24.0 32.0 48.0]
@@ -77,7 +79,6 @@ Please don't edit anything from Undefine section and onwards.
   #define END_STARS
   #define NETHER_SMOKE
 //#define END_SMOKE
-  #define LIGHTSHAFT_CLOUDY_NOISE
   #define BLUR_FILTERING
 
   #define END_NEBULA
@@ -186,10 +187,10 @@ Please don't edit anything from Undefine section and onwards.
 
   #define CLOUD_THICKNESS 8 //[1 2 4 8 16]
   #define CLOUD_AMOUNT 11.0 //[12.0 11.0 10.0 9.0 8.0]
-  #define CLOUD_HEIGHT 7.5 //[5.0 7.5 10.0 12.5 15.0]
+  #define CLOUD_HEIGHT 5.0 //[5.0 7.5 10.0 12.5 15.0]
   #define CLOUD_SPEED 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.50 3.00 3.50 4.00]
-  #define CLOUD_OPACITY 0.8 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
-  #define CLOUD_BRIGHTNESS 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+  #define CLOUD_OPACITY 0.9 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+  #define CLOUD_BRIGHTNESS 2.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
 //Water//
   #define WATER_MODE 0 //[0 1 2 3]
@@ -466,3 +467,7 @@ Please don't edit anything from Undefine section and onwards.
   #if MC_VERSION >= 11500 && MC_VERSION < 11605
   #define NORMAL_SKIP
   #endif
+
+//yes//
+#ifdef DENOISE
+#endif

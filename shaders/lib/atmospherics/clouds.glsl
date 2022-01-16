@@ -3,86 +3,89 @@ void erodeCoord(inout vec2 coord, in float currentStep, in float erosionStrength
 }
 
 #if CLOUDS == 1 && defined OVERWORLD
-float CloudSample(vec2 coord, vec2 wind, float sampleStep) {
-	float noise = 0.0;
-	float mult = 1.0;
-	for (int i = 1; i < 7; i++){
-		noise += texture2D(noisetex, coord * mult + wind * mult).r * i;
-		mult *= 0.5;
-	}
-
-	noise *= 1.0 + rainStrength * 0.15;
-	float multiplier = CLOUD_THICKNESS * sampleStep;
-
-	noise = max(noise - CLOUD_AMOUNT, 0.0) * multiplier;
-	noise = noise / sqrt(noise * noise + 0.75);
-
+float CloudNoise(vec2 coord, vec2 wind){
+	float noise = texture2D(noisetex, coord * 0.5      + wind * 0.55).x;
+		  noise+= texture2D(noisetex, coord * 0.25     + wind * 0.45).x * 2.0;
+		  noise+= texture2D(noisetex, coord * 0.125    + wind * 0.35).x * 3.0;
+		  noise+= texture2D(noisetex, coord * 0.0625   + wind * 0.25).x * 4.0;
+		  noise+= texture2D(noisetex, coord * 0.03125  + wind * 0.15).x * 5.0;
+		  noise+= texture2D(noisetex, coord * 0.016125 + wind * 0.05).x * 6.0;
 	return noise;
 }
 
-vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
+float CloudCoverage(float noise, float VoU, float coverage){
+	float noiseMix = mix(noise, 21.0, 0.33 * rainStrength);
+	float noiseFade = clamp(sqrt(VoU * 10.0), 0.0, 1.0);
+	float noiseCoverage = ((coverage * coverage) + CLOUD_AMOUNT);
+	float multiplier = 1.0 - 0.5 * rainStrength;
+
+	return max(noiseMix * noiseFade - noiseCoverage, 0.0) * multiplier;
+}
+
+vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
+	float VoU = dot(normalize(viewPos), upVec);
+	float VoS = dot(normalize(viewPos), sunVec);
+
 	#ifdef TAA
 	dither = fract(16.0 * frameTimeCounter + dither);
 	#endif
 	
-	float cloud = 0.0, cloudLighting = 0.0;
-
-	float currentStep = dither * 0.5;
-	
-	vec3 nViewPos = normalize(viewPos);
-	float VoU = dot(nViewPos, upVec);
-	float VoL = dot(nViewPos, lightVec);
+	float cloud = 0.0;
+	float cloudGradient = 0.0;
+	float gradientMix = dither * 0.1667;
+	float colorMultiplier = CLOUD_BRIGHTNESS * (0.5 - 0.25 * (1.0 - sunVisibility) * (1.0 - rainStrength));
+	float noiseMultiplier = CLOUD_THICKNESS * 0.2;
+	float scattering = pow(VoS * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
 
 	vec2 wind = vec2(
-		frametime * CLOUD_SPEED * 0.0005,
-		sin(frametime * CLOUD_SPEED * 0.001) * 0.005
+		frametime * CLOUD_SPEED * 0.001,
+		sin(frametime * CLOUD_SPEED * 0.05) * 0.002
 	) * CLOUD_HEIGHT / 15.0;
 
 	vec3 cloudColor = vec3(0.0);
 
-	vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
+	if (VoU > 0.1){
+		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
+		for(int i = 0; i < 4; i++) {
+			if (cloud > 0.99) break;
+			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * 0.75) / wpos.y) * 0.0075;
+			vec2 coord = cameraPosition.xz * 0.00015 + planeCoord.xz;
+				 erodeCoord(coord, i + dither, 0.025);
+			float coverage = float(i - 3.0 + dither) * 0.667;
 
-	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-	float halfVoLSqr = halfVoL * halfVoL;
-	float scattering = pow6(halfVoL);
-	float noiseLightFactor = (2.0 - 1.5 * VoL * shadowFade) * CLOUD_THICKNESS * 0.5;
+			float noise = CloudNoise(coord, wind);
+				  noise = CloudCoverage(noise, VoU, coverage) * noiseMultiplier;
+				  noise = noise / pow(pow(noise, 2.5) + 1.0, 0.4);
 
-	for (int i = 0; i < 2; i++) {
-		vec3 planeCoord = wpos * ((CLOUD_HEIGHT + currentStep * 4.0) / wpos.y) * 0.005;
-		vec2 coord = cameraPosition.xz * 0.00025 + planeCoord.xz;
-		erodeCoord(coord, currentStep, 0.05);
+			cloudGradient = mix(
+				cloudGradient,
+				mix(gradientMix * gradientMix, 1.0 - noise, 0.25),
+				noise * (1.0 - cloud * cloud)
+			);
+			cloud = mix(cloud, 1.0, noise);
+			gradientMix += 0.1667;
+		}
+		cloudColor = mix(
+			ambientCol * (0.5 * sunVisibility + 0.5),
+			lightCol * (1.0 + scattering),
+			cloudGradient * cloud
+		);
 
-		float noise = CloudSample(coord, wind, 0.5);
+		#if MC_VERSION >= 11800
+		cloudColor *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
+		#else
+		cloudColor *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
+		#endif
+		
+		#ifdef UNDERGROUND_SKY
+		cloud *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+		#endif
 
-		float sampleLighting = pow(currentStep, 1.125 * halfVoLSqr + 0.875) * 0.8 + 0.2;
-		sampleLighting *= 1.0 - pow(noise, noiseLightFactor);
+		cloudColor *= 1.0 - 0.6 * rainStrength;
+		cloud *= sqrt(sqrt(clamp(VoU * 10.0 - 1.0, 0.0, 1.0))) * (1.0 - 0.6 * rainStrength);
+	}
 
-		cloudLighting = mix(cloudLighting, sampleLighting, noise * (1.0 - cloud * cloud));
-		cloud = mix(cloud, 1.0, noise);
-
-		currentStep += 0.5;
-	}	
-	cloudLighting = mix(cloudLighting, 1.0, (1.0 - cloud * cloud) * scattering * 0.5);
-	cloudColor = mix(
-		ambientCol * (0.5 * sunVisibility + 0.5),
-		lightCol * (0.85 + 1.15 * scattering),
-		cloudLighting
-	);
-	cloudColor *= 1.0 - 0.6 * rainStrength;
-	cloud *= clamp(1.0 - exp(-24.0 * VoU + 0.5), 0.0, 1.0) * (1.0 - 0.6 * rainStrength);
-	cloudColor *= CLOUD_BRIGHTNESS * (0.5 - 0.25 * (1.0 - sunVisibility) * (1.0 - rainStrength));
-
-	#if MC_VERSION >= 11800
-	cloudColor *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
-	#else
-	cloudColor *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
-	#endif
-	
-	#ifdef UNDERGROUND_SKY
-	cloud *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
-	#endif
-	
-	return vec4(cloudColor, cloud * cloud * CLOUD_OPACITY);
+	return vec4(cloudColor * colorMultiplier, cloud * cloud * CLOUD_OPACITY);
 }
 #endif
 

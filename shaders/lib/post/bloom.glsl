@@ -37,6 +37,10 @@ void Bloom(inout vec3 color, vec2 coord) {
 
 	float strength = BLOOM_STRENGTH;
 
+	#ifdef BLOOM_BALANCING
+	strength *= (1.0 - eBS * 0.75) * (2.0 - sunVisibility);
+	#endif
+
 	#ifdef NETHER
 	strength *= 2.0;
 	#endif

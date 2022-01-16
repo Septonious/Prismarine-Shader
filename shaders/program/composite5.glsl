@@ -12,7 +12,7 @@ https://bitslablab.com
 //Varyings//
 varying vec2 texCoord;
 
-#ifdef LENS_FLARE
+#if defined BLOOM || defined LENS_FLARE
 varying vec3 sunVec, upVec;
 #endif
 
@@ -25,7 +25,7 @@ uniform float frameTimeCounter;
 uniform float rainStrength;
 uniform float viewWidth, viewHeight;
 
-#ifdef LENS_FLARE
+#if defined BLOOM || defined LENS_FLARE
 uniform ivec2 eyeBrightnessSmooth;
 #endif
 
@@ -60,7 +60,7 @@ const bool colortex0MipmapEnabled = true;
 #endif
 
 //Common Variables//
-#ifdef LENS_FLARE
+#if defined BLOOM || defined LENS_FLARE
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
@@ -206,7 +206,7 @@ void main() {
 //Varyings//
 varying vec2 texCoord;
 
-#ifdef LENS_FLARE
+#if defined BLOOM || defined LENS_FLARE
 varying vec3 sunVec, upVec;
 
 //Uniforms//
