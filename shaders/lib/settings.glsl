@@ -37,7 +37,7 @@ Please don't edit anything from Undefine section and onwards.
   #define DISTANT_BLUR_RANGE 8 //[1 2 3 4 5 6 7 8]
   #define CAS
 
-//#define SSGI
+  #define SSGI
   #define GI_DEPTH_LENIENCY 1.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
   #define DENOISE
   #define DENOISE_QUALITY 16 //[8 10 12 14 16 18 20 22 24 26 28 30 32]
