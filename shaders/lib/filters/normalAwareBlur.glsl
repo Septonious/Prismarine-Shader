@@ -32,7 +32,12 @@ float[22] KernelOffsets = float[22](
     0.0001014935746937502
 );
 
-vec4 NormalAwareBlur(sampler2D colortex, vec2 direction) {
+vec2 direction(float i, bool pass){
+    if (pass) return vec2(0.0, i);
+    else return vec2(i, 0.0);
+}
+
+vec4 NormalAwareBlur(sampler2D colortex, bool pass) {
     vec4 blur = vec4(0.0);
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	vec3 normal = normalize(DecodeNormal(texture2D(colortex6, texCoord).xy));
@@ -44,7 +49,7 @@ vec4 NormalAwareBlur(sampler2D colortex, vec2 direction) {
 
     for(int i = -DENOISE_QUALITY; i < DENOISE_QUALITY; i++) {
         float weight = KernelOffsets[abs(i)];
-        vec2 offset = (direction * i * pixelSize) * DENOISE_STRENGTH * float(centerDepth > 0.56);
+        vec2 offset = (direction(i, pass) * pixelSize) * DENOISE_STRENGTH * float(centerDepth > 0.56);
 
 		vec3 currentNormal = normalize(DecodeNormal(texture2D(colortex6, texCoord + offset).xy));
 		float normalWeight = pow(clamp(dot(normal, currentNormal), 0.0001f, 1.0f), 8.0f);

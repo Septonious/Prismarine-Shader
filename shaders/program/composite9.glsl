@@ -35,7 +35,7 @@ const bool colortex11MipmapEnabled = true;
 void main() {
     vec3 gi = texture2D(colortex11, texCoord).rgb;
 
-    gi = NormalAwareBlur(colortex11, vec2(0.0f, 1.0f)).rgb;
+    gi = NormalAwareBlur(colortex11, false).rgb;
 
     /* RENDERTARGETS:11 */
     gl_FragData[0] = vec4(gi, 1.0);
