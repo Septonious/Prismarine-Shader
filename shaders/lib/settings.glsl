@@ -43,7 +43,7 @@ Please don't edit anything from Undefine section and onwards.
   #define DENOISE_QUALITY 16 //[8 10 12 14 16 18 20 22 24 26 28 30 32]
   #define DENOISE_STRENGTH 4.00 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00]
   #define BOUNCES 1 //[1 2 3 4]
-  #define ILLUMINATION_STRENGTH 5.00 //[1.00 2.00 3.00 4.00 5.00 6.00 7.00 8.00]
+  #define ILLUMINATION_STRENGTH 6.00 //[1.00 2.00 3.00 4.00 5.00 6.00 7.00 8.00]
   #define STRIDE 96 //[4 8 16 24 32 48 64 96 128]
   #define EMISSIVE_CONCRETE
 
@@ -461,6 +461,11 @@ Please don't edit anything from Undefine section and onwards.
 
   #if !defined LIGHT_SHAFT && !defined END_SMOKE && !defined NETHER_SMOKE && !defined VOLUMETRIC_CLOUDS
   #undef BLUR_FILTERING
+  #endif
+
+  #ifdef SSGI
+  #undef ADVANCED_MATERIALS
+  #undef BLOOM
   #endif
 
 //Normal Skip for 1.15 - 1.16 G7
