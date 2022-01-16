@@ -101,7 +101,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	vec3 fogColor = vec3(0.0);
 	#endif
 
-	color = mix(color, fogColor, fog);
+	color = mix(color, fogColor, fog * (1.0 - float(isEyeInWater > 0.9 && isEyeInWater < 1.1)));
 }
 
 void BlindFog(inout vec3 color, vec3 viewPos) {

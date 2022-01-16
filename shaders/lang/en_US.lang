@@ -67,6 +67,7 @@ screen.PCLOUDS=Planar Clouds
 screen.VCLOUDS=Volumetric Clouds
 screen.LIGHT_SHAFT=Light Shafts Config
 screen.BLUR=Blur Effects
+screen.EMISSIVES=Emissives Config
 
 screen.WORLD=World
 screen.WAVING=Waving Blocks
@@ -78,14 +79,14 @@ option.ABOUT.comment=https://www.curseforge.com/minecraft/customization/prismari
 value.ABOUT.0=By Septonious
 
 #Lighting
-option.shadowMapResolution=Shadowmap Quality
+option.shadowMapResolution=Shadow Quality
 option.shadowMapResolution.comment=Adjusts shadowmap size. §e[*]§rHigher resolution gives sharper shadows, but reduces performance.
 value.shadowMapResolution.512=Very Low (512)
 value.shadowMapResolution.1024=Low (1024)
 value.shadowMapResolution.2048=Medium (2048)
 value.shadowMapResolution.3072=High (3072)
 value.shadowMapResolution.4096=Very High (4096)
-value.shadowMapResolution.8192=Ultra High (8192)
+value.shadowMapResolution.8192="looks like real life wait what the-" (8192)
 
 option.shadowDistance=Shadow Distance
 option.shadowDIstance.comment=Adsusts shadow distance.
@@ -149,6 +150,11 @@ option.MATERIAL_FORMAT.comment=Determines the specular and normal map format use
 value.MATERIAL_FORMAT.0=SEUS/Old PBR
 value.MATERIAL_FORMAT.1=labPBR 1.3
 
+option.EMISSIVE_ORES=Glowing Ores
+option.EMISSIVE_FLOWERS=Glowing Flowers
+option.POWDER_SNOW_HIGHLIGHT=Powder Snow Highlight
+option.DEBRIS_HIGHLIGHT=Debris Highlight
+
 option.SSS=Subsurface Scattering
 option.SSS.comment=Allows light to penetrate and scatter through certain blocks.
 value.SSS.0=§cOFF
@@ -174,6 +180,9 @@ option.GLOW_STRENGTH.comment=Adjusts glow strength of emissive blocks which are 
 
 option.ALBEDO_BALANCING=Albedo Balancing
 option.ALBEDO_BALANCING.comment=Reduces brightness of very bright colored surfaces.
+
+option.BLUR_FILTERING=Blur Filtering
+option.BLUR_FILTERING.comment=Filters volumetrics dither patterns using single pass gaussian blur.
 
 option.ALPHA_BLEND=Alpha Blending
 option.ALPHA_BLEND.comment=TBA. 
@@ -270,6 +279,10 @@ value.CLOUDS.0=§cOFF
 value.CLOUDS.1=Planar
 value.CLOUDS.2=Vanilla
 value.CLOUDS.3=Volumetric
+
+option.END_NEBULA=Ender Nebula
+option.OVERWORLD_NEBULA=Overworld Nebula
+option.OVERWORLD_NEBULA.comment=Visible only at night.
 
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
@@ -527,6 +540,7 @@ option.BLOOM_BALANCING=Bloom Balancing
 option.BLOOM_BALANCING.comment=Reduces bloom strength when you're outdoors in order to prevent leaves from literally being lit up.
 option.BLOOM_STRENGTH=Strength
 option.BLOOM_STRENGTH.comment=Adjusts bloom intensity.
+value.BLOOM_STRENGTH.8.00=https://youtu.be/76bREM5NK70
 
 option.BLOOM_CONTRAST=Contrast
 value.BLOOM_CONTRAST.-4=-1.00

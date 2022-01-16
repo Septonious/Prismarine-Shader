@@ -30,7 +30,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-	float scattering = pow6(halfVoL) * (1.0 - rainStrength) * (0.0 + timeBrightness);
+	float scattering = pow6(halfVoL) * (1.0 - rainStrength) * clamp((1.0 - cameraPosition.y * 0.004), 0.0, 1.0);
 
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
@@ -59,6 +59,12 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 
 			//Color calculation and lighting
 			vec4 cloudsColor = vec4(mix(lightCol, ambientCol, noise * density) * (1.0 + scattering), noise);
+
+			//Translucency blending, works half correct
+			if (depth0 < minDist){
+				cloudsColor *= translucent;
+			}
+
 			cloudsColor.a *= VCLOUDS_OPACITY;
 			cloudsColor.rgb *= cloudsColor.a;
 
@@ -67,11 +73,6 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 			#else
 			cloudsColor.rgb *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
 			#endif
-
-			//Translucency blending, works half correct
-			if (depth0 < minDist){
-				cloudsColor *= translucent;
-			}
 
 			finalColor += cloudsColor * (1.0 - finalColor.a) * (1.0 - isEyeInWater * (1.0 - eBS));
 		}

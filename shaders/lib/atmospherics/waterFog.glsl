@@ -6,10 +6,13 @@ vec4 GetWaterFog(vec3 viewPos) {
     float clampEyeBrightness = clamp(eBS, 0.25, 1.0);
 
     #if defined OVERWORLD || defined END
-    float clampTimeBrightness = pow(clamp(timeBrightness, 0.25, 1.0), 2.0);
+    float clampTimeBrightness = pow(clamp(timeBrightness, 0.5, 1.0), 2.0);
     #endif
 
     float fog = length(viewPos) / waterFogRange;
+    #ifdef OVERWORLD
+    fog *= (0.5 + timeBrightness * 0.5);
+    #endif
     fog = 1.0 - exp(-3.0 * fog);
 
     #ifdef OVERWORLD

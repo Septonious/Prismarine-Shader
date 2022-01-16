@@ -349,10 +349,7 @@ void main() {
 			float depth = clamp(length(viewPos.xyz), 0.0, 7.0);
 			depth = 8.0 - depth;
 
-			float rainFactor = 1.00 - rainStrength * 0.5;
-			float clampEyeBrightness = clamp(eBS, 0.1, 1.0);
-			albedo.rgb *= waterColor.rgb * rainFactor * clampEyeBrightness;
-			albedo.rgb *= waterColor.rgb * (0.25 + timeBrightness) + depth;
+			albedo.rgb *= mix(waterColor.rgb * depth, vec3(1.0), lightmap.y);
 		}
 		#endif
 

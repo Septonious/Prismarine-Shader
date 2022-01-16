@@ -91,13 +91,15 @@ void main() {
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
+	
 	#ifdef BLUR_FILTERING
 	vec4 cloud = GaussianBlur(colortex8, texCoord.xy);
 	#else
 	vec4 cloud = texture2D(colortex8, texCoord.xy);
 	#endif
+
 	float rainFactor = (1.0 - rainStrength * 0.7);
-	color = mix(color, cloud.rgb * rainFactor, cloud.a * cloud.a);
+	color = mix(color, cloud.rgb * rainFactor, clamp(cloud.a * cloud.a, 0.0, 0.999));
 	#endif
 
 	/*DRAWBUFFERS:0*/

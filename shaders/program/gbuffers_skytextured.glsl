@@ -97,7 +97,6 @@ void DrawStars2(inout vec3 color, vec3 viewPos, float size, float amount, float 
 
 	color += star * vec3(0.5, 0.75, 1.00) * brightness;
 }
-
 #endif
 
 //Program//
