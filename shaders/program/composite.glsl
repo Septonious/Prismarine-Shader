@@ -131,19 +131,19 @@ void main() {
 
 	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	vl += GetLightShafts(viewPos.xyz, z0, z1, translucent.rgb, dither);
+	vl = GetLightShafts(viewPos.xyz, z0, z1, translucent.rgb, dither);
 	#endif
 	
 	//Nether & End Smoke
 	#if defined NETHER_SMOKE || defined END_SMOKE
-	vl += GetVolumetricSmoke(z0, z1, viewPos.xyz);
+	vl = GetVolumetricSmoke(z0, z1, viewPos.xyz);
 	#endif
 
 	//Volumetric Clouds
 	vec4 cloud = vec4(0.0);
 
 	#ifdef VOLUMETRIC_CLOUDS
-	cloud = getVolumetricCloud(viewPos.xyz, z1, z0, InterleavedGradientNoiseVL(), translucent);
+	cloud = getVolumetricCloud(viewPos.xyz, z1, z0, dither, translucent);
 	#endif
 
 	#if ALPHA_BLEND == 0

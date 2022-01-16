@@ -209,6 +209,9 @@ option.ALBEDO_METAL=Albedo Tinted Hardcoded Metal*
 option.ALBEDO_METAL.comment=Applies base texture as tint on hardcoded metallic surfaces. §e[*]§rWorks on labPBR material format only.
 
 #Normals & Parallax
+option.CUSTOM_NETHER_PORTAL=Custom Nether Portal
+option.CUSTOM_NETHER_PORTAL.comment=Adds custom texture to the nether portal.
+
 option.PARALLAX=Parallax Occlusion Mapping*
 option.PARALLAX.comment=Adds displacement on a surface using height map.
 
@@ -445,7 +448,7 @@ option.WATER_OCTAVE=Octaves
 option.WATER_OCTAVE.comment=Adjusts how many layers of noise used for custom water normals.
 
 option.WATER_CAUSTICS=Caustics
-option.CAUSTICS_STRENGTH=Caustics Strength
+option.WATER_CAUSTICS_STRENGTH=Caustics Strength
 
 option.WATER_REFRACTION=Refraction
 option.WATER_REFRACTION.comment=Distorts things behind water.
@@ -454,8 +457,8 @@ option.REFRACTION_STRENGTH=Refraction Strength
 option.BLENDING_STRENGTH=Blending Strength
 option.BLENDING_STRENGTH.comment=Adjusts translucency blending strength. Higher values give brighter and more defined color.
 
-option.TRANSLUENCY_BLENDING=Translucency Blending
-option.TRANSLUENCY_BLENDING.comment=Makes colored glass and water blend with things behind it. Also adds water absorption.
+option.TRANSLUCENCY_BLENDING=Translucency Blending
+option.TRANSLUCENCY_BLENDING.comment=Makes colored glass and water blend with things behind it. Also adds water absorption.
 
 option.WATER_BUMP=Bumpiness
 option.WATER_BUMP.comment=Adjusts the intensity of custom water normals.

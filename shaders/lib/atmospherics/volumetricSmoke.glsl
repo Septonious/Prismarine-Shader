@@ -18,7 +18,7 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
     float VoL = dot(normalize(viewPos.xyz), lightVec);
     float scatter = pow(VoL * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 8.0) * 0.1;
 
-    float visibility = 0.025 + scatter;
+    float visibility = 0.05 + scatter;
     #endif
 
 	vec4 vf = vec4(0.0);

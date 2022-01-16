@@ -481,3 +481,12 @@ Please don't edit anything from Undefine section and onwards.
 
 #ifdef TRANSLUCENCY_BLENDING
 #endif
+
+#ifdef CAS
+#endif
+
+#ifdef END_NEBULA
+#endif
+
+#ifdef OVERWORLD_NEBULA
+#endif
