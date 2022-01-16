@@ -10,7 +10,7 @@ vec2 direction(float i, bool pass){
     else return vec2(i, 0.0);
 }
 
-float sigma = 1024.0; //dont question it
+float sigma = 8.0;
 float multiplier = 0.398942280401 / sigma;
 
 float gaussian(float x) {
@@ -31,13 +31,13 @@ vec3 NormalAwareBlur(sampler2D colortex, bool pass) {
         float weight = gaussian(i);
         vec2 offset = direction(i * DENOISE_STRENGTH * float(centerDepth > 0.56), pass) * pixelSize;
 
-		float currentDepth = GetLinearDepth(texture2D(depthtex0, texCoord + offset).x);
-		float depthWeight = pow(clamp(1.0 - abs(currentDepth - centerDepthLinear), 0.0001f, 1.0f), 16.0f); 
-		     weight *= depthWeight;
-
 		vec3 currentNormal = normalize(DecodeNormal(texture2D(colortex6, texCoord + offset).xy));
 		float normalWeight = pow(clamp(dot(normal, currentNormal), 0.0001f, 1.0f), 8.0f);
 		     weight *= normalWeight;
+
+		float currentDepth = GetLinearDepth(texture2D(depthtex0, texCoord + offset).x);
+		float depthWeight = pow(clamp(1.0 - abs(currentDepth - centerDepthLinear), 0.0001f, 1.0f), 64.0f); 
+		     weight *= depthWeight;
 
         totalWeight += weight;
         blur += weight * texture2D(colortex, texCoord + offset).rgb;

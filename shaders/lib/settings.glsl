@@ -37,20 +37,22 @@ Please don't edit anything from Undefine section and onwards.
   #define DISTANT_BLUR_RANGE 8 //[1 2 3 4 5 6 7 8]
   #define CAS
 
-  #define SSGI
-  #define GI_DEPTH_LENIENCY 1.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
+//#define SSGI
+  #define GI_DEPTH_LENIENCY 5.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
   #define DENOISE
   #define DENOISE_QUALITY 16 //[8 10 12 14 16 18 20 22 24 26 28 30 32]
   #define DENOISE_STRENGTH 3.00 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00]
   #define BOUNCES 1 //[1 2 3 4]
-  #define ILLUMINATION_STRENGTH 8.00 //[1.00 2.00 3.00 4.00 5.00 6.00 7.00 8.00 9.00 10.00 11.00 12.00 13.00 14.00 15.00 16.00]
+  #define ILLUMINATION_STRENGTH 4.00 //[1.00 2.00 3.00 4.00 5.00 6.00 7.00 8.00]
   #define STRIDE 128 //[4 8 16 24 32 48 64 96 128]
   #define EMISSIVE_CONCRETE
 
   #define FOG_ALTITUDE 140.0 //[60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0]
 
+  #define BLENDING_STRENGTH 1.5 //[1.0 1.5 2.0 2.5 3.0 3.5 4.0]
   #define TRANSLUCENCY_BLENDING
   #define WATER_REFRACTION
+  #define REFRACTION_STRENGTH 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0]
   #define WATER_CAUSTICS
   #define WATER_CAUSTICS_STRENGTH 4 //[1 2 3 4 5 6 7 8]  
 
@@ -475,4 +477,7 @@ Please don't edit anything from Undefine section and onwards.
 
 //yes//
 #ifdef DENOISE
+#endif
+
+#ifdef TRANSLUCENCY_BLENDING
 #endif

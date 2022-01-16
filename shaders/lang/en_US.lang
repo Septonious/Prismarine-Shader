@@ -63,6 +63,10 @@ screen.NETHER_C=Crimson Forest
 screen.NETHER_W=Warped Forest
 screen.NETHER_B=Basalt Deltas
 screen.END_COLOR=End Color
+screen.PCLOUDS=Planar Clouds
+screen.VCLOUDS=Volumetric Clouds
+screen.LIGHT_SHAFT=Light Shafts Config
+screen.BLUR=Blur Effects
 
 screen.WORLD=World
 screen.WAVING=Waving Blocks
@@ -70,7 +74,7 @@ screen.CURVATURE=Curvature
 
 #Settings
 option.ABOUT=Prismarine Shader
-option.ABOUT.comment=https://www.curseforge.com/minecraft/customization/prismarine-shader/
+option.ABOUT.comment=https://www.curseforge.com/minecraft/customization/prismarine-shader/. If you downloaded Prismarine from a different site, please download it from the link above.
 value.ABOUT.0=By Septonious
 
 #Lighting
@@ -91,6 +95,17 @@ option.SHADOW_COLOR.comment=Enables tinted shadow from translucents. §a[+]§rUs
 
 option.SHADOW_FILTER=Shadow Filtering
 option.SHADOW_FILTER.comment=Enables shadow filtering. §a[+]§rThis effect benefits from TAA.
+
+option.SSGI=Screen Space Path Tracing
+option.SSGI.comment=Provides per-block realistic colored lighting. §f[§c-§f] Causes a massive FPS drop! Don't enable it if you have a low-end PC!!!
+option.BOUNCES=GI Bounces
+option.DENOISE=Denoising
+option.DENOISE_QUALITY=Denoising Quality
+option.DENOISE_STRENGTH=Denoising Strength
+option.GI_DEPTH_LENIENCY=Depth Leniency
+option.STRIDE=GI Raytracer Stride
+option.ILLUMINATION_STRENGTH=Illumination Strength
+option.EMISSIVE_CONCRETE=Emissive Concrete
 
 option.sunPathRotation=Sun Path Rotation
 option.sunPathRotation.comment=Adjusts sun angle.
@@ -150,6 +165,12 @@ option.EMISSIVE.comment=Allows certain surfaces to be brighter.
 value.EMISSIVE.0=§cOFF
 value.EMISSIVE.1=AdvMat Only*
 value.EMISSIVE.2=Full
+
+option.INTEGRATED_EMISSION=Integrated Emissives
+option.INTEGRATED_EMISSION.comment=Makes certain blocks glowy.
+
+option.GLOW_STRENGTH=I.E. Glow Strength
+option.GLOW_STRENGTH.comment=Adjusts glow strength of emissive blocks which are added by integrated emission option.
 
 option.ALBEDO_BALANCING=Albedo Balancing
 option.ALBEDO_BALANCING.comment=Reduces brightness of very bright colored surfaces.
@@ -250,6 +271,12 @@ value.CLOUDS.3=Volumetric
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
 
+option.NETHER_SMOKE=Nether Smoke
+option.NETHER_SMOKE.comment=Adds volumetric smoke to the nether.
+
+option.END_SMOKE=End Smoke
+option.END_SMOKE.comment=Adds volumetric smoke to the end.
+
 option.AURORA=Aurora
 option.AURORA.comment=Enables aurora. §a[+]§rThis effect benefits from TAA.
 
@@ -276,6 +303,12 @@ option.UNDERGROUND_SKY.comment=Hides the sky when the player is in dark area and
 
 option.LIGHT_SHAFT=Light Shafts
 option.LIGHT_SHAFT.comment=Adds volumetric rays from sun / moon. §a[+]§rThis effect benefits from TAA. §e[*]§rPerformance depends on Shadowmap Resolution.
+option.LIGHTSHAFT_SAMPLES=Samples
+option.LIGHTSHAFT_SAMPLES.comment=Controls light shafts sample count. Higher values increase quality at cost of performance.
+option.LIGHTSHAFT_MIN_DISTANCE=Range
+option.LIGHTSHAFT_MIN_DISTANCE.comment=Adjusts light shafts render distance. Big performance impact! §cDo not adjust it together with sample count if you want to keep the shader playable.
+option.LIGHTSHAFT_MAX_DISTANCE=Max Distance
+option.LIGHTSHAFT_MAX_DISTANCE.comment=Controls how far can the light shafts go (limits their render distance).
 
 option.LIGHT_SHAFT_STRENGTH=Light Shaft Strength
 option.LIGHT_SHAFT_STRENGTH.comment=Adjusts light shaft strength.
@@ -305,12 +338,38 @@ option.SKYBOX_BRIGHTNESS=Skybox Brightness
 option.SKYBOX_BRIGHTNESS.comment=Adjusts skybox brightness. §e[*]§rSet to 1.00 when subtractive skybox exists.
 
 #Cloud Config
+option.VCLOUDS_HEIGHT=Height
+option.VCLOUDS_HEIGHT.comment=Adjusts cloud height.
+
+option.VCLOUDS_SAMPLES=Samples
+option.VCLOUDS_SAMPLES.comment=Controls clouds sample count. Higher values increase quality at cost of performance.
+
+option.VCLOUDS_OCTAVES=Noise Octaves
+option.VCLOUDS_NOISE_OCTAVES.comment=Increases the amount of noise octaves used in cloud shaping. Higher values make clouds more detailed at cost of performance.
+
+option.VCLOUDS_DETAIL=Detail
+option.VCLOUDS_DETAIL.comment=Increases clouds detalization at minimal performance cost. Higher values can turn clouds into a foggy mess.
+
+option.VCLOUDS_OPACITY=Opacity
+
+option.VCLOUDS_SPEED=Wind Speed
+option.VCLOUDS_SPEED.comment=Adjusts clouds speed.
+
+option.VCLOUDS_RANGE=Range
+option.VCLOUDS_RANGE.comment=Adjusts clouds render distance. Big performance impact! §cDo not adjust it together with sample count if you want to keep the shader playable.
+
+option.VCLOUDS_HORIZONTAL_THICKNESS=Horizontal Thickness
+option.VCLOUDS_HORIZONTAL_THICKNESS.comment=Adjusts clouds thickness. Higher values make clouds way longer and more obstructive.
+
+option.VCLOUDS_VERTICAL_THICKNESS=Vertical Thickness
+option.VCLOUDS_VERTICAL_THICKNESS.comment=Adjusts clouds stretching factor. Higher values make clouds way taller and more obstructive.
+
 option.CLOUD_THICKNESS=Thickness
 option.CLOUD_THICKNESS.comment=Adjusts cloud thickness, higher thickness makes artifacts more visible.
-value.CLOUD_THICKNESS.1 =Very Low
-value.CLOUD_THICKNESS.2 =Low
-value.CLOUD_THICKNESS.4 =Medium
-value.CLOUD_THICKNESS.8 =High
+value.CLOUD_THICKNESS.1=Very Low
+value.CLOUD_THICKNESS.2=Low
+value.CLOUD_THICKNESS.4=Medium
+value.CLOUD_THICKNESS.8=High
 value.CLOUD_THICKNESS.16=Very High
 
 option.CLOUD_AMOUNT=Amount
@@ -329,7 +388,7 @@ value.CLOUD_HEIGHT.10.0=Medium
 value.CLOUD_HEIGHT.12.5=High
 value.CLOUD_HEIGHT.15.0=Very High
 
-option.CLOUD_SPEED=Speed
+option.CLOUD_SPEED=Wind Speed
 option.CLOUD_SPEED.comment=Adjusts cloud speed.
 
 option.CLOUD_OPACITY=Opacity
@@ -382,8 +441,36 @@ value.WATER_SHARPNESS.0.8=Low
 value.WATER_SHARPNESS.0.5=Medium
 value.WATER_SHARPNESS.0.2=High
 
+option.WATER_OCTAVE=Octaves
+option.WATER_OCTAVE.comment=Adjusts how many layers of noise used for custom water normals.
+
+option.WATER_CAUSTICS=Caustics
+option.CAUSTICS_STRENGTH=Caustics Strength
+
+option.WATER_REFRACTION=Refraction
+option.WATER_REFRACTION.comment=Distorts things behind water.
+option.REFRACTION_STRENGTH=Refraction Strength
+
+option.BLENDING_STRENGTH=Blending Strength
+option.BLENDING_STRENGTH.comment=Adjusts translucency blending strength. Higher values give brighter and more defined color.
+
+option.TRANSLUENCY_BLENDING=Translucency Blending
+option.TRANSLUENCY_BLENDING.comment=Makes colored glass and water blend with things behind it. Also adds water absorption.
+
+option.WATER_BUMP=Bumpiness
+option.WATER_BUMP.comment=Adjusts the intensity of custom water normals.
+
+option.WATER_LACUNARITY=Lacunarity
+option.WATER_LACUNARITY.comment=Adjusts noise size reduction each octave.
+
+option.WATER_PERSISTANCE=Persistance
+option.WATER_PERSISTANCE.comment=Adjusts noise intensity reduction each octave.
+
+option.WATER_SIZE=Size
+option.WATER_SIZE.comment=Adjusts the base noise size for custom water normals.
+
 option.WATER_SPEED=Speed
-option.WATER_SPEED.comment=Adjusts the noise speed for water normals.
+option.WATER_SPEED.comment=Adjusts the noise speed for custom water normals.
 
 option.WATER_FOG_DENSITY=Water Fog Density
 option.WATER_FOG_DENSITY.comment=Adjusts water fog density.
@@ -393,6 +480,10 @@ option.WATER_PIXEL.comment=Applies pixelation effect on water normals.
 value.WATER_PIXEL.0=OFF
 
 #Post Effects
+option.DISTANT_BLUR=Distant Blur
+option.DISTANT_BLUR.comment=Blurs far objects.
+option.DISTANT_BLUR_RANGE=Dist. Blur Range
+option.DISTANT_BLUR_STRENGTH=Dist. Blur Strength
 option.DOF=Depth of Field
 options.DOF.comment=Enables camera focus effect.
 option.DOF_STRENGTH=DoF Strength
@@ -422,20 +513,6 @@ option.TAA.comment=Enables temporal anti-aliasing, done by smart frame blending 
 option.VIGNETTE=Vignette
 option.Vignette.comment=Fades the edge of the screen to black. §e[*]§rDisable for 360 imaging.
 
-option.DIRTY_LENS=Dirty Lens
-option.DIRTY_LENS.comment=Adds dusty particle effect to bloom. §e[*]§rRequires bloom.
-
-option.RETRO_FILTER=Retro Filter
-option.RETRO_FILTER.comment=Adds pixelation and dithering. §e[*]§rLower render quality for stronger pixelation. §c[-]§rIncompatible with anti-aliasing.
-
-option.OUTLINE=Outline
-option.OUTLINE.comment=Enables outline effect.
-value.OUTLINE.0=OFF
-value.OUTLINE.1=Black
-value.OUTLINE.2=Colored
-value.OUTLINE.3=1.12 Update Art
-value.OUTLINE.4=Dungeons
-
 option.CHROMATIC_ABERRATION=Chromatic Aberration
 option.CHROMATIC_ABERRATION.comment=
 value.CHROMATIC_ABERRATION.0=OFF
@@ -443,6 +520,8 @@ value.CHROMATIC_ABERRATION.1=Weak
 value.CHROMATIC_ABERRATION.2=Strong
 
 #Bloom
+option.BLOOM_BALANCING=Bloom Balancing
+option.BLOOM_BALANCING.comment=Reduces bloom strength when you're outdoors in order to prevent leaves from literally being lit up.
 option.BLOOM_STRENGTH=Strength
 option.BLOOM_STRENGTH.comment=Adjusts bloom intensity.
 

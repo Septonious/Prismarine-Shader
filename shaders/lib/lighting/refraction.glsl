@@ -35,7 +35,7 @@ vec2 getRefraction(vec2 coord, vec3 waterPos, float dist, float skylight){
 
 	vec2 noise = vec2(xDelta, yDelta);
 
-	vec2 waveN = noise * 0.00075 / dist * skylight;
+	vec2 waveN = noise * 0.00075 * REFRACTION_STRENGTH / dist;
 
-	return coord + waveN;
+	return coord + waveN * skylight;
 }

@@ -96,9 +96,7 @@ void getIntegratedEmission(inout float emission, inout float giEmissive, in vec2
 	#endif
 
 	#if defined SSGI && defined EMISSIVE_CONCRETE
-	if (mat > 997.9 && mat < 998.1){
-		giEmissive = (0.0 + lightmap.y * timeBrightness) * 0.01;
-	} else if (mat > 998.9 && mat < 999.1){
+	if (mat > 998.9 && mat < 999.1){
 		newEmissive = 0.5;
 		giEmissive = 4.0;
 	}
@@ -149,7 +147,6 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	#endif
 
 	#if defined SSGI && defined EMISSIVE_CONCRETE
-	if (mc_Entity.x == 29998) mat = 998.0;
 	if (mc_Entity.x == 29999) mat = 999.0;
 	#endif
 
