@@ -5,7 +5,6 @@ profile.LOW=Low
 profile.MEDIUM=Medium
 profile.HIGH=High
 profile.ULTRA=Ultra
-profile.comment=Low : low shadows, no extra effects. Medium : medium shadows, no extra effects. High : medium shadows, AO and light shafts. Ultra : high shadows, AO, and light shafts.
 
 #Screens
 screen.LIGHTING=Lighting
@@ -356,6 +355,8 @@ option.SKYBOX_BRIGHTNESS.comment=Adjusts skybox brightness. §e[*]§rSet to 1.00
 #Cloud Config
 option.VCLOUDS_HEIGHT=Height
 option.VCLOUDS_HEIGHT.comment=Adjusts cloud height.
+
+option.VCLOUDS_AMOUNT=Amount
 
 option.VCLOUDS_SAMPLES=Samples
 option.VCLOUDS_SAMPLES.comment=Controls clouds sample count. Higher values increase quality at cost of performance.

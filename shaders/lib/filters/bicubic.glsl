@@ -13,7 +13,7 @@ vec4 getCubicBSplineWeights(float v) {
 // Source: https://stackoverflow.com/questions/13501081/efficient-bicubic-filtering-code-in-glsl
 vec4 textureBicubic(sampler2D sampler, vec2 coord){
 	vec2 res = textureSize(sampler, 0);
-	vec2 texelSize = 1.0/ res;
+	vec2 texelSize = 1.0 / res;
 
 	coord = coord * res - 0.5;
 

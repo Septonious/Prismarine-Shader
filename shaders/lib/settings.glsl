@@ -40,8 +40,8 @@ Please don't edit anything from Undefine section and onwards.
 //#define SSGI
   #define GI_DEPTH_LENIENCY 5.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
   #define DENOISE
-  #define DENOISE_QUALITY 16 //[8 10 12 14 16 18 20 22 24 26 28 30 32]
-  #define DENOISE_STRENGTH 3.00 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00]
+  #define DENOISE_QUALITY 32 //[8 12 16 20 24 28 32 36 40 44 48 52 56 60 64]
+  #define DENOISE_STRENGTH 4.50 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00 4.50 5.00 5.50 6.00 6.50 7.00 7.50 8.00]
   #define BOUNCES 1 //[1 2 3 4]
   #define ILLUMINATION_STRENGTH 4.00 //[1.00 2.00 3.00 4.00 5.00 6.00 7.00 8.00]
   #define STRIDE 128 //[4 8 16 24 32 48 64 96 128]
@@ -74,8 +74,8 @@ Please don't edit anything from Undefine section and onwards.
   #define VCLOUDS_SPEED 0.25 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
   #define VCLOUDS_OPACITY 1.00 //[0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
   #define VCLOUDS_RANGE 32.0 //[4.0 8.0 16.0 24.0 32.0 48.0 64.0]
-  #define VCLOUDS_AMOUNT 1.75 //[1.00 1.25 1.50 1.75 2.00]
-  #define VCLOUDS_HORIZONTAL_THICKNESS 2.00 //[2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
+  #define VCLOUDS_AMOUNT 1.75 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
+  #define VCLOUDS_HORIZONTAL_THICKNESS 2.10 //[2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
   #define VCLOUDS_DETAIL 0.1 //[0.1 0.2 0.3 0.4 0.5]
 
   #define END_STARS
@@ -172,7 +172,7 @@ Please don't edit anything from Undefine section and onwards.
   #define UNDERGROUND_SKY
   #define LIGHT_SHAFT
   #define LIGHT_SHAFT_STRENGTH 0.3 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-  #define FOG_DENSITY 1.50 //[0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+  #define FOG_DENSITY 1.25 //[0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
   #define WEATHER
   #define WEATHER_OPACITY 2.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
