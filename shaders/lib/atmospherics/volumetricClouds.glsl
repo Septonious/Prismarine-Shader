@@ -24,7 +24,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	vec4 wpos = vec4(0.0);
 	vec4 finalColor = vec4(0.0);
 
-	vec2 scaledCoord = texCoord * (1.0 / RENDER_RESOLUTION);
+	vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
 
 	#ifdef TAA
 	dither = fract(dither + frameCounter / 32.0);
@@ -37,7 +37,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
 
-	if (clamp(texCoord, vec2(0.0), vec2(RENDER_RESOLUTION + 1e-3)) == texCoord){
+	if (clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord){
 		for (int i = 0; i < VCLOUDS_SAMPLES; i++) {
 			float minDist = (i + dither) * VCLOUDS_RANGE;
 

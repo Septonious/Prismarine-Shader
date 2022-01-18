@@ -25,7 +25,7 @@ Read lang/en_US.lang to get the description of what every option does.
 Please don't edit anything from Undefine section and onwards.
 */
 
-#define RENDER_RESOLUTION 0.5 //[0.5 0.6 0.7 0.8 0.9 1.0]
+#define VOLUMETRICS_RENDER_RESOLUTION 1.0 //[0.5 0.6 0.7 0.8 0.9 1.0]
 
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
 //#define POWDER_SNOW_HIGHLIGHT

@@ -91,11 +91,11 @@ void main() {
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
-	
+
 	#ifdef BLUR_FILTERING
-	vec4 cloud = GaussianBlur(colortex8, texCoord.xy * RENDER_RESOLUTION);
+	vec4 cloud = GaussianBlur(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
 	#else
-	vec4 cloud = texture2D(colortex8, texCoord.xy * RENDER_RESOLUTION);
+	vec4 cloud = texture2D(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
 	#endif
 
 	float rainFactor = (1.0 - rainStrength * 0.7);

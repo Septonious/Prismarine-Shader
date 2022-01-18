@@ -106,7 +106,6 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 //Program//
 void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
-
 	float z0 = texture2D(depthtex0, texCoord).r;
 
 	vec4 screenPos = vec4(texCoord, z0, 1.0);
