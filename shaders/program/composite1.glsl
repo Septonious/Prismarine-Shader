@@ -74,9 +74,9 @@ void main() {
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	#ifdef BLUR_FILTERING
-	vec3 vl = GaussianBlur(colortex1, texCoord.xy).rgb;
+	vec3 vl = GaussianBlur(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION).rgb;
 	#else
-	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.0).rgb;
+	vec3 vl = texture2DLod(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
 	#endif
 	#endif
 

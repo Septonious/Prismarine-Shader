@@ -22,6 +22,8 @@ vec4 GetShadowSpace(vec4 wpos) {
 vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
+	vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
+
 	#ifdef TAA
 	dither = fract(dither + frameCounter / 32.0);
 	#endif
@@ -39,7 +41,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	visibility = clamp(visibility + isEyeInWater, 0.0, 1.0);
 	#endif
 
-	if (visibility > 0.0) {
+	if (visibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {
 		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE;
 		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 
@@ -61,7 +63,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				break;
 			}
 
-			worldposition = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord.st);
+			worldposition = GetWorldSpace(GetLogarithmicDepth(minDist), scaledCoord);
 			shadowposition = GetShadowSpace(worldposition);
 			shadowposition.z += 0.0512 / shadowMapResolution;
 

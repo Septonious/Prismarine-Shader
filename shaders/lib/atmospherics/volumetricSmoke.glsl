@@ -21,14 +21,16 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
     float visibility = 0.05 + scatter;
     #endif
 
+    vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
+
 	vec4 vf = vec4(0.0);
     vec4 wpos = vec4(0.0);
 
-    if (visibility > 0.0){
+    if (visibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {
         for(int i = 0; i < 4; i++) {
 			float minDist = (i + dither) * 16.0;
 
-			wpos = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord.st);
+			wpos = GetWorldSpace(GetLogarithmicDepth(minDist), scaledCoord);
 
             if (length(wpos.xz) < maxDist && depth1 > minDist){
                 #ifdef WORLD_CURVATURE
@@ -59,4 +61,3 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
 	
 	return vf.rgb;
 }
-

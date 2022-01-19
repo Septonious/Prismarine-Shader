@@ -18,7 +18,7 @@ uniform sampler2D texture;
 //Program//
 void main() {
     vec4 albedo = texture2D(texture, texCoord);
-    albedo.rgb = pow(albedo.rgb,vec3(2.2)) * 4.0;
+    albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 4.0;
 	
     #ifdef WHITE_WORLD
 	albedo.rgb = vec3(2.0);

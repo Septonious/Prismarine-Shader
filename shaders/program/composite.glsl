@@ -120,29 +120,34 @@ void main() {
 	}
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
-    vec4 translucent = texture2D(colortex1, texCoord);
+    vec4 translucent = texture2D(colortex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION));
 
 	float dither = InterleavedGradientNoiseVL();
-	float z1 = texture2D(depthtex1, texCoord).r;
+	float z0Scaled = texture2D(depthtex0, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION)).r;
+	float z1Scaled = texture2D(depthtex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION)).r;
+
+	vec4 screenPosScaled = vec4(texCoord, z0Scaled, 1.0);
+	vec4 viewPosScaled = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+	viewPosScaled /= viewPosScaled.w;
 	#endif
 
 	vec3 vl = vec3(0.0);
 
 	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	vl += GetLightShafts(viewPos.xyz, z0, z1, translucent.rgb, dither);
+	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither);
 	#endif
 	
 	//Nether & End Smoke
 	#if defined NETHER_SMOKE || defined END_SMOKE
-	vl += GetVolumetricSmoke(z0, z1, viewPos.xyz);
+	vl += GetVolumetricSmoke(z0Scaled, z1Scaled, viewPosScaled.xyz);
 	#endif
 
 	//Volumetric Clouds
 	vec4 cloud = vec4(0.0);
 
 	#ifdef VOLUMETRIC_CLOUDS
-	cloud += getVolumetricCloud(viewPos.xyz, z1, z0, dither, translucent);
+	cloud += getVolumetricCloud(viewPosScaled.xyz, z1Scaled, z0Scaled, dither, translucent);
 	#endif
 
 	#if ALPHA_BLEND == 0

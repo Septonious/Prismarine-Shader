@@ -40,8 +40,8 @@ const float wetnessHalflife = 300.0;
 
 //Common Functions//
 #if defined CAS || defined TAA
-void ContrastAdaptiveSharpening(inout vec3 outColor){
-    vec2 uv = texCoord * MC_RENDER_QUALITY;
+void ContrastAdaptiveSharpening(inout vec3 outColor, vec2 coord){
+    vec2 uv = coord * MC_RENDER_QUALITY;
   
     vec3 originalColor = texture2D(colortex1, uv).rgb;
     vec3 modifiedColor = vec3(0.0);
@@ -78,42 +78,6 @@ void ContrastAdaptiveSharpening(inout vec3 outColor){
 }
 #endif
 
-/*
-#include "/lib/util/dither.glsl"
-uniform sampler2D colortex2;
-#define dot2( a) dot(a,a)
-uniform int frameCounter;
-#define RENDERSCALE 0.03125
-
-#define phi2 1.32471795724474602596090885447809734
-#define phi2sq phi2*phi2
-
-void mainImage(out vec4 outColor){
-    vec2 imageResolution = vec2(viewWidth, viewHeight);
-    vec2 coord = imageResolution * gl_FragCoord.xy;
-
-    float k = 80.0;
-    int kernell = 1;
-    float s = min(3.14 / k * float(frameCounter), 15.0);
-    
-    outColor = texture2D(colortex2, gl_FragCoord.xy / imageResolution) * s;
-    
-    for(int x = -kernell; x <= kernell; x++){
-        for(int y = -kernell; y <= kernell; y++){
-            vec2 offset = vec2(x, y);
-            vec2 offsetNew = fract(Bayer16(coord + offset) + float(frameCounter) / vec2(phi2sq, phi2)) + offset;
-
-            float weight = exp2(-(s <= 1e-3 ? 0.25 / RENDERSCALE : k) * dot2(offsetNew - fract(coord)));
-            vec4 color = texture2D(colortex1, (coord + offset) / imageResolution);
-            
-            outColor += color * weight;
-            s += weight;
-    	}
-    }
-    outColor /= max(s, 1e-6);
-}
-*/
-
 //Program//
 void main() {
     vec2 newTexCoord = texCoord;
@@ -133,7 +97,7 @@ void main() {
 	#endif
 
     #if defined CAS || defined TAA
-    ContrastAdaptiveSharpening(color.rgb);
+    ContrastAdaptiveSharpening(color.rgb, newTexCoord);
     #endif
 
 	gl_FragColor = vec4(color, 1.0);
