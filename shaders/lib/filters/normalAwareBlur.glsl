@@ -36,7 +36,7 @@ vec3 NormalAwareBlur(sampler2D colortex, bool pass) {
 		     weight *= depthWeight;
 
 		vec3 currentNormal = normalize(DecodeNormal(texture2D(colortex6, texCoord + offset).xy));
-		float normalWeight = pow(clamp(dot(normal, currentNormal), 0.0001f, 1.0f), 8.0);
+		float normalWeight = pow(clamp(dot(normal, currentNormal), 0.0001f, 1.0f), 16.0);
 		     weight *= normalWeight;
 
         blur += weight * texture2D(colortex, texCoord + offset).rgb;

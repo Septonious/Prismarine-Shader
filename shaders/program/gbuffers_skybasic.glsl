@@ -55,7 +55,7 @@ float GetLuminance(vec3 color) {
 }
 
 void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor) {
-	float VoL = dot(normalize(viewPos),sunVec);
+	float VoL = dot(normalize(viewPos), sunVec);
 	float isMoon = float(VoL < 0.0);
 	float sun = pow(abs(VoL), 800.0 * isMoon + 800.0) * (1.0 - sqrt(rainStrength));
 
@@ -99,6 +99,26 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #endif
 #include "/lib/atmospherics/sky.glsl"
 
+#if defined OVERWORLD && defined MOON_SMOKE
+vec3 GetGalaxy(vec3 viewPos) {
+	float VoL = dot(normalize(viewPos.xyz), -sunVec);
+	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
+	float visibility = pow16(halfVoL) * (1.0 - rainStrength) * (1.0 - timeBrightness);
+
+	vec3 wpos = mat3(gbufferModelViewInverse) * viewPos;
+
+	vec2 planeCoord = wpos.xz / (wpos.y + length(wpos.xz) * 0.5);
+
+	float galaxyNoise = texture2D(noisetex, planeCoord * 0.075).r * 0.1;
+		  galaxyNoise+= texture2D(noisetex, planeCoord * 0.050).r * 0.2;
+		  galaxyNoise+= texture2D(noisetex, planeCoord * 0.025).r * 0.3;
+
+	vec3 galaxy = galaxyNoise * lightNight * visibility;
+
+	return galaxy * MOON_SMOKE_BRIGHTNESS * MOON_SMOKE_BRIGHTNESS;
+}
+#endif
+
 //Program//
 void main() {
 	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
@@ -106,7 +126,11 @@ void main() {
 	viewPos /= viewPos.w;
 	
 	vec3 albedo = GetSkyColor(viewPos.xyz, false);
-	
+
+	#if defined OVERWORLD && defined MOON_SMOKE
+	albedo += GetGalaxy(viewPos.xyz);
+	#endif
+
 	#ifdef ROUND_SUN_MOON
 	vec3 lightMA = mix(lightMorning, lightEvening, mefade);
     vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);

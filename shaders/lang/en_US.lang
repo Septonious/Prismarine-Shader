@@ -106,6 +106,7 @@ option.GI_DEPTH_LENIENCY=Depth Leniency
 option.STRIDE=GI Raytracer Stride
 option.ILLUMINATION_STRENGTH=Illumination Strength
 option.EMISSIVE_CONCRETE=Emissive Concrete
+option.GI_ACCUMULATION=GI Temporal Accumulation
 
 option.sunPathRotation=Sun Path Rotation
 option.sunPathRotation.comment=Adjusts sun angle.
@@ -353,6 +354,9 @@ option.SKYBOX_BRIGHTNESS=Skybox Brightness
 option.SKYBOX_BRIGHTNESS.comment=Adjusts skybox brightness. §e[*]§rSet to 1.00 when subtractive skybox exists.
 
 #Cloud Config
+option.VOLUMETRICS_RENDER_RESOLUTION=Render Resolution
+option.VOLUMETRICS_RENDER_RESOLUTION.comment=Decreases render resolution of volumetric effects. Lower resolution increase performance at cost of quality.
+
 option.VCLOUDS_HEIGHT=Height
 option.VCLOUDS_HEIGHT.comment=Adjusts cloud height.
 
@@ -521,11 +525,13 @@ option.LENS_FLARE.comment=Enables lens flare.
 option.LENS_FLARE_STRENGTH=Lens Flare Strength
 option.LENS_FLARE_STRENGTH.comment=Adjusts lens flare intensity.
 
+option.CAS=Contrast Adaptive Sharpening
+
 option.FXAA=FXAA
 option.FXAA.comment=Enables fast approximate anti-aliasing, done by smoothing out edges with minimal performance cost. §e[*]§rPlease disable Antialiasing in Shaders menu while this option is enabled.
 
 option.TAA=TAA
-option.TAA.comment=Enables temporal anti-aliasing, done by smart frame blending which captures improves tiny details and some effects. §e[*]§rSharpening included. §e[*]§rPlease disable Antialiasing in Shaders menu while this option is enabled.
+option.TAA.comment=Enables temporal anti-aliasing, done by smart frame blending which captures improves tiny details and some effects. §e[*]§rPlease disable Antialiasing in Shaders menu while this option is enabled.
 
 option.VIGNETTE=Vignette
 option.Vignette.comment=Fades the edge of the screen to black. §e[*]§rDisable for 360 imaging.

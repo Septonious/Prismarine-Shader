@@ -26,6 +26,10 @@ uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
 uniform sampler2D colortex2;
 uniform sampler2D depthtex1;
 
+#if defined SSGI && defined GI_ACCUMULATION
+uniform sampler2D depthtex0;
+#endif
+
 //Optifine Constants//
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 const bool colortex1MipmapEnabled = true;
@@ -38,8 +42,8 @@ const bool colortex1MipmapEnabled = true;
 void main() {
 	vec3 color = texture2DLod(colortex1, texCoord, 0.0).rgb;
     vec4 prev = vec4(texture2DLod(colortex2, texCoord, 0.0).r, 0.0, 0.0, 0.0);
-	
-	#ifdef TAA
+
+	#if (defined TAA && !defined GI_ACCUMULATION) || (defined SSGI && (defined GI_ACCUMULATION || defined TAA))
 	prev = TemporalAA(color, prev.r, colortex1, colortex2);
 	#endif
 

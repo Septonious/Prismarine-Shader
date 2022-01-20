@@ -20,6 +20,7 @@ vec2 Reprojection(vec3 pos) {
 	return previousPosition.xy / previousPosition.w * 0.5 + 0.5;
 }
 
+#if !defined GI_ACCUMULATION && defined TAA
 vec2 neighbourhoodOffsets[8] = vec2[8](
 	vec2( 0.0, -1.0),
 	vec2(-1.0,  0.0),
@@ -94,12 +95,47 @@ vec4 TemporalAA(inout vec3 color, float tempData, sampler2D colortex, sampler2D 
 		prvCoord.y > 0.0 && prvCoord.y < 1.0
 	);
 	
-	#ifdef SSGI
-	blendFactor *= exp(-length(velocity));
-	#else
 	blendFactor *= exp(-length(velocity)) * 0.6 + 0.3;
-	#endif
 	
 	color = mix(color, tempColor, blendFactor);
+
 	return vec4(tempData, color);
 }
+#endif
+
+#if defined SSGI && defined GI_ACCUMULATION && !defined TAA
+vec4 getViewPos(vec2 coord, float z0){
+	vec4 screenPos = vec4(coord, z0, 1.0);
+	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+	return viewPos /= viewPos.w;
+}
+
+vec3 ToWorld(vec3 pos) {
+	return mat3(gbufferModelViewInverse) * pos + gbufferModelViewInverse[3].xyz;
+}
+
+vec4 TemporalAA(inout vec3 color, float tempData, sampler2D colortex, sampler2D temptex) {
+	float z0 = texture2D(depthtex0, texCoord).r;
+
+	vec3 coord = vec3(texCoord, texture2DLod(depthtex1, texCoord, 0.0).r);
+	vec2 prvCoord = Reprojection(coord);
+	vec2 view = vec2(viewWidth, viewHeight);
+	vec2 velocity = (texCoord - prvCoord.xy) * view;
+
+	vec3 tempColor = texture2DLod(temptex, prvCoord, 0.0).gba;
+	vec3 viewPos = getViewPos(texCoord, z0).xyz;
+	
+    float totalWeight = float(clamp(prvCoord, vec2(0.0), vec2(1.0)) == prvCoord);
+
+	vec3 prevPos = ToWorld(getViewPos(prvCoord, z0).xyz);
+    vec3 delta = ToWorld(viewPos.xyz) - prevPos;
+	
+    float posWeight = max(exp(-dot(delta, delta) * 3.0), 0.0);
+    totalWeight *= GI_ACCUMULATION_STRENGTH * posWeight;
+	totalWeight *= exp(-length(velocity));
+	
+	color = clamp(mix(color, tempColor, totalWeight), vec3(0.0), vec3(65e3));
+
+	return vec4(tempData, color);
+}
+#endif

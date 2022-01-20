@@ -34,9 +34,9 @@ uniform sampler2D colortex1;
 uniform sampler2D noisetex;
 uniform sampler2D depthtex0;
 
-#ifdef TAA
+
 uniform sampler2D colortex2;
-#endif
+
 
 #ifdef LENS_FLARE
 uniform float timeAngle, timeBrightness;
@@ -51,9 +51,9 @@ uniform vec3 cameraPosition;
 #endif
 
 //Optifine Constants//
-#ifdef TAA
+
 const bool colortex2Clear = false;
-#endif
+
 
 #ifdef AUTO_EXPOSURE
 const bool colortex0MipmapEnabled = true;
@@ -119,7 +119,7 @@ void main() {
 	
 	float tempVisibleSun = 0.0; float tempExposure = 0.0;
 
-	#ifdef TAA
+
 	#ifdef AUTO_EXPOSURE
 	tempExposure = texture2D(colortex2, vec2(pw, ph)).r;
 	#endif
@@ -129,7 +129,7 @@ void main() {
 	#endif
 
 	vec3 temporalColor = texture2D(colortex2, texCoord).gba;
-	#endif
+
 	
 	#ifdef BLOOM
 	Bloom(color, newTexCoord);
@@ -164,7 +164,7 @@ void main() {
 	if (multiplier > 0.001) LensFlare(color, lightPos, truePos, multiplier);
 	#endif
 	
-	#ifdef TAA
+
 	float temporalData = 0.0;
 	
 	#ifdef AUTO_EXPOSURE
@@ -176,7 +176,7 @@ void main() {
 	if (texCoord.x > 2.0 * pw && texCoord.x < 4.0 * pw && texCoord.y < 2.0 * ph)
 		temporalData = mix(tempVisibleSun, visibleSun, 0.125);
 	#endif
-	#endif
+
 	
     #ifdef VIGNETTE
     color *= 1.0 - length(texCoord - 0.5) * (1.0 - GetLuminance(color));
@@ -192,10 +192,10 @@ void main() {
 	/* DRAWBUFFERS:1 */
 	gl_FragData[0] = vec4(color, 1.0);
 
-	#ifdef TAA
+
 	/* DRAWBUFFERS:12 */
 	gl_FragData[1] = vec4(temporalData, temporalColor);
-	#endif
+
 }
 
 #endif
