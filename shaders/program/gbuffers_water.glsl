@@ -598,7 +598,7 @@ void main() {
 	gl_FragData[1] = vec4(vlAlbedo, 1.0);
 
 	#if defined WATER_REFRACTION || defined WATER_LIGHTSHAFTS
-	/* DRAWBUFFERS:019 */
+	/* RENDERTARGETS:0,1,13 */
 	gl_FragData[2] = vec4(0.0, lightmap.y, dist, water);
 	#endif
 }

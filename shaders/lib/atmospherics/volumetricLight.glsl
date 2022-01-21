@@ -88,7 +88,9 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				
 				#ifdef LIGHTSHAFT_CLOUDY_NOISE
 				if (isEyeInWater == 0){
-					float noise = getFogSample(worldposition.xyz + cameraPosition.xyz, LIGHTSHAFT_HEIGHT, 64.0, 1.2);
+					vec3 fogPosition = worldposition.xyz + cameraPosition.xyz;
+					float theLowerTheDenser = 1.2 + (0.2 - clamp(fogPosition.y, 0.0, 1.0) * 0.002);
+					float noise = getFogSample(fogPosition, LIGHTSHAFT_HEIGHT, 64.0, theLowerTheDenser);
 					shadow *= noise;
 				}
 				#endif

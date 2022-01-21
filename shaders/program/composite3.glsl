@@ -38,7 +38,7 @@ uniform float frameTimeCounter;
 
 uniform vec3 cameraPosition;
 
-uniform sampler2D colortex9, noisetex;
+uniform sampler2D colortex13, noisetex;
 
 uniform mat4 gbufferModelViewInverse;
 #endif
@@ -178,7 +178,7 @@ void main() {
 	#endif
 
 	#ifdef WATER_REFRACTION
-    vec4 waterData = texture2D(colortex9, texCoord);
+    vec4 waterData = texture2D(colortex13, texCoord);
 
     if (waterData.a > 0.5){
         vec3 worldPos = ToWorld(viewPos.xyz);

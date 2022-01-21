@@ -31,13 +31,11 @@ vec3 NormalAwareBlur(sampler2D colortex, bool pass) {
         float weight = gaussian(i);
         vec2 offset = direction(i * DENOISE_STRENGTH * float(centerDepth > 0.56), pass) * pixelSize;
 
-		float currentDepth = GetLinearDepth(texture2D(depthtex0, texCoord + offset).x);
-		float depthWeight = pow(clamp(1.0 - abs(currentDepth - centerDepthLinear), 0.0001f, 1.0f), 64.0); 
-		     weight *= depthWeight;
-
 		vec3 currentNormal = normalize(DecodeNormal(texture2D(colortex6, texCoord + offset).xy));
-		float normalWeight = pow(clamp(dot(normal, currentNormal), 0.0001f, 1.0f), 16.0);
-		     weight *= normalWeight;
+
+        float currentDepth = texture2D(depthtex0, texCoord.xy).x;
+        float currentDepthLinear = GetLinearDepth(currentDepth);
+        weight *= pow(clamp((1.0 - abs(currentDepthLinear - centerDepthLinear)) * dot(normal, currentNormal), 0.001, 1.0), 16.0);
 
         blur += weight * texture2D(colortex, texCoord + offset).rgb;
         totalWeight += weight;

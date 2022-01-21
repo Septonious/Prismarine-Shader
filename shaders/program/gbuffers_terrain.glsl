@@ -138,6 +138,7 @@ float GetLuminance(vec3 color) {
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * vec4(color.rgb, 1.0);
 	vec3 newNormal = normal;
+	vec3 shadow = vec3(0.0);
 	float smoothness = 0.0;
 
 	#ifdef ADVANCED_MATERIALS
@@ -268,7 +269,6 @@ void main() {
 		#endif
 		#endif
 		
-		vec3 shadow = vec3(0.0);
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, color.a, NoL, vanillaDiffuse,
 					parallaxShadow, emission, subsurface);
 					
@@ -368,11 +368,12 @@ void main() {
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
 
-	#ifdef SSGI
+	#if defined SSGI && !defined ADVANCED_MATERIALS
 	/* RENDERTARGETS:0,6,9,10 */
 	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[2] = vec4(emissive + lava + giEmissive, mat, lightmap.y, 0.0);
+	gl_FragData[2] = vec4(lava * 0.25 + giEmissive, mat, lightmap.y, 0.0);
 	gl_FragData[3] = albedo;
+	//gl_FragData[4] = vec4(shadow, 1.0);
 	#endif
 }
 

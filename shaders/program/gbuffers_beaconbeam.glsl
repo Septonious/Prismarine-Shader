@@ -17,6 +17,10 @@ varying vec4 color;
 //Uniforms//
 uniform sampler2D texture;
 
+#ifdef CUSTOM_BEACON_BEAM
+uniform sampler2D noisetex;
+#endif
+
 //Program//
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
@@ -30,6 +34,14 @@ void main() {
 	albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
 	albedo.a = sqrt(albedo.a);
 	#endif
+
+	#ifdef CUSTOM_BEACON_BEAM
+	float noise = texture2D(noisetex, texCoord * 0.0500).r * 0.1;
+		  noise+= texture2D(noisetex, texCoord * 0.0250).r * 0.2;
+		  noise+= texture2D(noisetex, texCoord * 0.0125).r * 0.3;
+		
+	albedo.rgb *= noise;
+	#endif
     
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;
@@ -39,6 +51,12 @@ void main() {
 	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[2] = vec4(0.0, 0.0, float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+	#endif
+
+	#if defined SSGI && !defined ADVANCED_MATERIALS
+	/* RENDERTARGETS:0,9,10*/
+	gl_FragData[1] = vec4(1.0);
+	gl_FragData[2] = albedo;
 	#endif
 }
 

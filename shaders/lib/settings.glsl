@@ -25,12 +25,13 @@ Read lang/en_US.lang to get the description of what every option does.
 Please don't edit anything from Undefine section and onwards.
 */
 
-#define VOLUMETRICS_RENDER_RESOLUTION 0.5 //[0.5 0.6 0.7 0.8 0.9 1.0]
+#define VOLUMETRICS_RENDER_RESOLUTION 0.7 //[0.5 0.6 0.7 0.8 0.9 1.0]
 
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
 //#define POWDER_SNOW_HIGHLIGHT
 //#define ENTITY_HIGHLIGHT
 
+  #define CUSTOM_BEACON_BEAM
   #define CUSTOM_NETHER_PORTAL
 
   #define BLOOM_BALANCING
@@ -41,10 +42,10 @@ Please don't edit anything from Undefine section and onwards.
 
 //#define SSGI
   #define GI_ACCUMULATION
-  #define GI_ACCUMULATION_STRENGTH 0.97 //[0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99]
-  #define GI_DEPTH_LENIENCY 10.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
+  #define GI_ACCUMULATION_STRENGTH 0.92 //[0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99]
+  #define GI_DEPTH_LENIENCY 1.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
   #define DENOISE
-  #define DENOISE_QUALITY 16 //[8 12 16 20 24 28 32 36 40 44 48 52 56 60 64]
+  #define DENOISE_QUALITY 64 //[8 12 16 20 24 28 32 36 40 44 48 52 56 60 64]
   #define DENOISE_STRENGTH 3.00 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00 4.50 5.00 5.50 6.00 6.50 7.00 7.50 8.00]
   #define BOUNCES 1 //[1 2 3 4]
   #define ILLUMINATION_STRENGTH 5.00 //[1.00 2.00 3.00 4.00 5.00 6.00 7.00 8.00]
@@ -221,7 +222,7 @@ Please don't edit anything from Undefine section and onwards.
   #define MOTION_BLUR
   #define MOTION_BLUR_STRENGTH 0.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
   #define BLOOM
-  #define BLOOM_STRENGTH 0.75 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 8.00]
+  #define BLOOM_STRENGTH 0.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00 8.00]
   #define BLOOM_CONTRAST 4 //[-4 -3 -2 -1 0 1 2 3 4 5 6 7 8]
   #define BLOOM_RADIUS 4 //[1 2 3 4 5 6 7]
 //#define LENS_FLARE

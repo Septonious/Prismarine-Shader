@@ -18,13 +18,10 @@ uniform float timeBrightness;
 
 uniform sampler2D colortex1, colortex9, colortex11;
 
-//Includes//
-#include "/lib/filters/bicubic.glsl"
-
 //Program//
 void main() {
     vec3 color = texture2D(colortex1, texCoord).rgb;
-    vec3 gi = textureCatmullRom(colortex11, texCoord).rgb;
+    vec3 gi = texture2D(colortex11, texCoord).rgb;
 
     float skyLightmap = clamp(texture2D(colortex9, texCoord).b, 0.0, 1.0);
 

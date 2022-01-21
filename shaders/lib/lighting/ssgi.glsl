@@ -133,6 +133,7 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
 
     float dither = getRandomNoise(gl_FragCoord.xy);
           dither = fract(speed + dither);
+
     vec3 currentPosition = screenPos;
     vec3 hitNormal = normal;
 
@@ -153,13 +154,12 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
 
         if (hit && hand < 0.5) {
             vec3 albedo = texture2D(colortex10, currentPosition.xy).rgb * 2.0;
-			//vec3 shadow = texture2D(colortex14, currentPosition.xy).rgb * 0.5;
+			//vec3 shadow = texture2D(colortex12, currentPosition.xy).rgb * 0.5;
 
             float isEmissive = texture2D(colortex9, currentPosition.xy).r == 0.0 ? 0.0 : 1.0;
 
             weight *= albedo * albedo;
-            //illumination += weight * (shadow + isEmissive);
-			illumination += weight * isEmissive;
+            illumination += weight * isEmissive;
         }
     }
 
