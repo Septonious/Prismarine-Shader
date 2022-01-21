@@ -40,7 +40,7 @@ void main() {
 		  noise+= texture2D(noisetex, texCoord * 0.0250).r * 0.2;
 		  noise+= texture2D(noisetex, texCoord * 0.0125).r * 0.3;
 		
-	albedo.rgb *= noise;
+	albedo.rgb *= noise * noise;
 	#endif
     
     /* DRAWBUFFERS:0 */

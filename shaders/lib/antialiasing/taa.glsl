@@ -20,7 +20,7 @@ vec2 Reprojection(vec3 pos) {
 	return previousPosition.xy / previousPosition.w * 0.5 + 0.5;
 }
 
-#if !defined GI_ACCUMULATION && defined TAA
+#if !defined GI_ACCUMULATION && !defined SSGI && defined TAA
 vec2 neighbourhoodOffsets[8] = vec2[8](
 	vec2( 0.0, -1.0),
 	vec2(-1.0,  0.0),
@@ -95,7 +95,7 @@ vec4 TemporalAA(inout vec3 color, float tempData, sampler2D colortex, sampler2D 
 		prvCoord.y > 0.0 && prvCoord.y < 1.0
 	);
 	
-	blendFactor *= exp(-length(velocity)) * 0.6 + 0.3;
+	blendFactor *= exp(-length(velocity)) * 0.89 + 0.11;
 	
 	color = mix(color, tempColor, blendFactor);
 
