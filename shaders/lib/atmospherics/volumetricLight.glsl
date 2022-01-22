@@ -35,10 +35,9 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	float visibility = 1.0;
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75);
 	visibility *= clamp(cameraPosition.y * 0.01, 0.0, 1.0);
-	visibility *= (1.0 - rainStrength) * (1.0 - timeBrightness) * (1.0 - moonVisibility);
-	visibility = clamp(visibility + isEyeInWater, 0.0, 1.0);
+	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility) * (1.0 - timeBrightness * pow4(eBS));
+	visibility = clamp(visibility + isEyeInWater * 0.5, 0.0, 1.0);
 	#endif
 
 	if (visibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {

@@ -25,13 +25,16 @@ vec3 GetFogColor(vec3 viewPos) {
     vec3 weatherFog = weatherCol.rgb * weatherCol.rgb;
     weatherFog *= GetLuminance(ambientCol / (weatherFog)) * (0.4 * sunVisibility + 0.2);
     fog = mix(fog, weatherFog * rainGradient, rainStrength);
-	fog = mix(minLightCol * 0.5, fog * eBS, eBS);
 
 	#if MC_VERSION >= 11800
-	fog *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
+	float altitudeFactor = clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else
-	fog *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
+	float altitudeFactor = clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
 	#endif
+
+	fog = mix(minLightCol * 0.5, fog, altitudeFactor * clamp(eBS + 0.25, 0.0, 1.0));
+
+	fog *= altitudeFactor;
 
 	return fog;
 }

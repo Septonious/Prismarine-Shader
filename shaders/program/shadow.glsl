@@ -10,6 +10,8 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
+uniform int worldTime;
+
 varying float mat;
 
 varying vec2 texCoord;
@@ -17,10 +19,13 @@ varying vec2 texCoord;
 varying vec4 color;
 
 #ifdef WATER_CAUSTICS
-varying vec4 position;
-uniform sampler2D noisetex;
-uniform vec3 cameraPosition;
 uniform float frameTimeCounter, timeBrightness;
+
+varying vec4 position;
+
+uniform vec3 cameraPosition;
+
+uniform sampler2D noisetex;
 
 #ifdef WORLD_TIME_ANIMATION
 float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;

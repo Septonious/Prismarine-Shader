@@ -67,10 +67,10 @@ Please don't edit anything from Undefine section and onwards.
   #define GLOW_STRENGTH 2 //[1 2 3 4 5 6 7 8]
 
   #define LIGHTSHAFT_CLOUDY_NOISE
-  #define LIGHTSHAFT_SAMPLES 4 //[1 2 3 4 5 6 7 8]
+  #define LIGHTSHAFT_SAMPLES 6 //[1 2 3 4 5 6 7 8]
   #define LIGHTSHAFT_MAX_DISTANCE 512.0 //[128.0 256.0 512.0 1024.0]
-  #define LIGHTSHAFT_MIN_DISTANCE 32.0 //[1.0 2.0 4.0 8.0 16.0 24.0 32.0 48.0]
-  #define LIGHTSHAFT_HEIGHT 80 //[5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100]
+  #define LIGHTSHAFT_MIN_DISTANCE 24.0 //[1.0 2.0 4.0 8.0 16.0 24.0 32.0 48.0]
+  #define LIGHTSHAFT_HEIGHT 60 //[5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100]
 
   #define VCLOUDS_OCTAVES 3 //[1 2 3 4 5]
   #define VCLOUDS_SAMPLES 10 //[2 4 6 8 10 12 14 16]
@@ -88,7 +88,7 @@ Please don't edit anything from Undefine section and onwards.
 //#define END_SMOKE
   #define BLUR_FILTERING
 
-  #define MOON_SMOKE
+//#define MOON_SMOKE
   #define MOON_SMOKE_BRIGHTNESS 0.3 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
   #define END_NEBULA
   #define OVERWORLD_NEBULA
