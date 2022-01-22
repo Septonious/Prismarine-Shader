@@ -510,3 +510,12 @@ Please don't edit anything from Undefine section and onwards.
 
 #ifdef GI_ACCUMULATION
 #endif
+
+#ifdef BLOOM_BALANCING
+#endif
+
+#ifdef EMISSIVE_CONCRETE
+#endif
+
+#ifdef DEBRIS_HIGHLIGHT
+#endif

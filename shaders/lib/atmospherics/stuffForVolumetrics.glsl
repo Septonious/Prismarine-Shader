@@ -18,8 +18,6 @@ vec4 GetWorldSpace(float shadowdepth, vec2 texCoord) {
 
 #if defined LIGHTSHAFT_CLOUDY_NOISE || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
 /*
-
-
 uniform sampler2D depthtex2;
 
 float InterleavedGradientNoiseVL() {
@@ -28,13 +26,13 @@ float InterleavedGradientNoiseVL() {
 
     return noise;
 }
-
 */
 float InterleavedGradientNoiseVL() {
 	float n = 52.9829189 * fract(0.06711056 * gl_FragCoord.x + 0.00583715 * gl_FragCoord.y);
 
 	return fract(n);
 }
+
 float getCloudNoise(vec3 pos){
 	pos *= 0.35;
 	pos.xz *= 0.25;

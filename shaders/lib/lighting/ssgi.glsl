@@ -13,10 +13,6 @@ vec3 hash(uvec3 x){
     
     return vec3(x) * (1.0 / float(0xffffffffU));
 }
-
-float getRandomNoise(vec2 pos){
-	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
-}
 //
 
 //Space conversions
@@ -128,11 +124,20 @@ vec3 generateCosineVector(vec3 vector, vec2 xy) {
     return normalize(vector + dir);
 }
 
+uniform sampler2D depthtex2;
+
+float blueNoise() {
+    float noise = texelFetch2D(depthtex2, ivec2(gl_FragCoord.xy) & 255, 0).r;
+    noise = fract(noise);
+
+    return noise;
+}
+
 vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
 	int speed = frameCounter % 100;
 
-    float dither = getRandomNoise(gl_FragCoord.xy);
-          dither = fract(speed + dither);
+    float dither = blueNoise();
+          dither = fract(frameCounter / 6.0 + dither);
 
     vec3 currentPosition = screenPos;
     vec3 hitNormal = normal;
