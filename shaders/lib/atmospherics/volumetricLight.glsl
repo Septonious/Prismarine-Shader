@@ -36,7 +36,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility *= clamp(cameraPosition.y * 0.01, 0.0, 1.0);
-	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility) * (1.0 - timeBrightness * pow4(eBS));
+	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility) * (1.0 - timeBrightness * 0.75);
 	visibility = clamp(visibility + isEyeInWater * 0.5, 0.0, 1.0);
 	#endif
 
@@ -89,7 +89,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				if (isEyeInWater == 0){
 					vec3 fogPosition = worldposition.xyz + cameraPosition.xyz;
 					float theLowerTheDenser = 1.2 + (0.2 - clamp(fogPosition.y, 0.0, 1.0) * 0.002);
-					float noise = getFogSample(fogPosition, LIGHTSHAFT_HEIGHT, 64.0, theLowerTheDenser);
+					float noise = getFogSample(fogPosition, LIGHTSHAFT_HEIGHT * (1.0 - timeBrightness * 0.25), 64.0, theLowerTheDenser);
 					shadow *= noise;
 				}
 				#endif

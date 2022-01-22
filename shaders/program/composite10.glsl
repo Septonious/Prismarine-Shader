@@ -24,8 +24,9 @@ void main() {
     vec3 gi = texture2D(colortex11, texCoord).rgb;
 
     float skyLightmap = clamp(texture2D(colortex9, texCoord).b, 0.0, 1.0);
+    float blockLightmap = clamp(texture2D(colortex9, texCoord).a, 0.0, 1.0);
 
-    gi *= (1.00 - skyLightmap * 0.8 * (0.5 + timeBrightness * 0.5)) * (ILLUMINATION_STRENGTH * ILLUMINATION_STRENGTH);
+    gi *= (1.00 - skyLightmap * 0.85 * (0.5 + timeBrightness * 0.5)) * (1.0 - blockLightmap * 0.85) * (ILLUMINATION_STRENGTH * ILLUMINATION_STRENGTH);
     color.rgb *= 1.0 + gi;
 
     /* DRAWBUFFERS:1 */

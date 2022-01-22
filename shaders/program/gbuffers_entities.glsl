@@ -300,7 +300,7 @@ void main() {
 	#if defined SSGI && !defined ADVANCED_MATERIALS
 	/* RENDERTARGETS:0,6,9,10*/
 	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[2] = vec4(emission, 0.0, lightmap.y, 0.0);
+	gl_FragData[2] = vec4(emission, 0.0, lightmap);
 	gl_FragData[3] = albedo;
 	#endif
 }
