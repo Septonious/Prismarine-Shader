@@ -52,7 +52,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float density = (1.0 - timeBrightness * 0.5) * FOG_DENSITY * (1.0 + rainStrength);
+	float density = (1.0 - timeBrightness * 0.75) * FOG_DENSITY * (1.0 + rainStrength);
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0) * eBS, eBS);

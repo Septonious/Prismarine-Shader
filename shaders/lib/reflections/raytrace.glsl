@@ -10,6 +10,7 @@ float cdist(vec2 coord) {
 	return max(abs(coord.x - 0.5), abs(coord.y - 0.5)) * 1.85;
 }
 
+
 vec4 Raytrace(sampler2D depthtex, vec3 viewPos, vec3 normal, float dither, out float border, 
 			  float maxf, float stp, float ref, float inc) {
 	vec3 pos = vec3(0.0);

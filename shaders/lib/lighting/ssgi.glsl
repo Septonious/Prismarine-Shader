@@ -158,13 +158,13 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
         currentPosition = hitPos;
 
         if (hit && hand < 0.5) {
-            vec3 albedo = texture2D(colortex10, currentPosition.xy).rgb * 2.0;
+            vec3 albedo = texture2D(colortex10, currentPosition.xy).rgb * 16.0;
 			//vec3 shadow = texture2D(colortex12, currentPosition.xy).rgb * 0.5;
 
             float isEmissive = texture2D(colortex9, currentPosition.xy).r == 0.0 ? 0.0 : 1.0;
 
             weight *= albedo * albedo;
-            illumination += weight * isEmissive;
+            illumination += weight * isEmissive * 16;
         }
     }
 

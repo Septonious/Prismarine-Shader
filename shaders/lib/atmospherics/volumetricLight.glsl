@@ -19,7 +19,7 @@ vec4 GetShadowSpace(vec4 wpos) {
 }
 
 //Light shafts from Robobo1221 (modified)
-vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
+vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 color, float dither, float waterData) {
 	vec3 vl = vec3(0.0);
 
 	vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
@@ -35,7 +35,6 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	float visibility = 1.0;
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility *= clamp(cameraPosition.y * 0.01, 0.0, 1.0);
 	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility) * (1.0 - timeBrightness * 0.75);
 	visibility = clamp(visibility + isEyeInWater * 0.5, 0.0, 1.0);
 	#endif
@@ -83,7 +82,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol * 256.0 * (0.5 + eBS) * (0.05 + timeBrightness * 0.95);
+				else if ((depth0 < minDist && waterData > 0.5) || isEyeInWater == 1.0) shadow *= watercol * 256.0 * (0.5 + eBS) * (0.05 + timeBrightness * 0.95) * pow16((3.5 - isEyeInWater - isEyeInWater - isEyeInWater));
 				
 				#ifdef LIGHTSHAFT_CLOUDY_NOISE
 				if (isEyeInWater == 0){

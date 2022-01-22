@@ -159,7 +159,7 @@ void main() {
 	#endif
 
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-	float emissive = 0.0, lava = 0.0, giEmissive = 0.0;
+	float emissive = 0.0, lava = 0.0;
 
 	if (albedo.a > 0.001) {
 		float foliage  = float(mat > 0.98 && mat < 1.02);
@@ -184,7 +184,7 @@ void main() {
 		vec3 worldPos = ToWorld(viewPos);
 
 		#ifdef INTEGRATED_EMISSION
-		getIntegratedEmission(emission, giEmissive, lightmap, albedo, worldPos);
+		getIntegratedEmission(emission, lightmap, albedo, worldPos);
 		#endif
 
 		#ifdef ADVANCED_MATERIALS
@@ -371,9 +371,8 @@ void main() {
 	#if defined SSGI && !defined ADVANCED_MATERIALS
 	/* RENDERTARGETS:0,6,9,10 */
 	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[2] = vec4(lava * 0.25 + giEmissive, mat, lightmap);
+	gl_FragData[2] = vec4(lava * 0.25 + emissive, mat, lightmap);
 	gl_FragData[3] = albedo;
-	//gl_FragData[4] = vec4(shadow, 1.0);
 	#endif
 }
 

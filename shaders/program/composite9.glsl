@@ -15,11 +15,9 @@ https://bitslablab.com
 varying vec2 texCoord;
 
 //Uniforms//
-uniform sampler2D colortex11;
-
 uniform float viewWidth, viewHeight, aspectRatio;
 
-uniform sampler2D colortex6;
+uniform sampler2D colortex6, colortex11;
 uniform sampler2D depthtex0;
 
 uniform mat4 gbufferProjection;

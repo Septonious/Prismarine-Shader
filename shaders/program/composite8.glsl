@@ -30,7 +30,7 @@ const bool colortex11MipmapEnabled = true;
 
 //Program//
 void main() {
-    vec3 gi = texture2D(colortex11, texCoord.xy).rgb;
+    vec3 gi = texture2D(colortex11, texCoord).rgb;
 
     gi = NormalAwareBlur(colortex11, true).rgb;
 

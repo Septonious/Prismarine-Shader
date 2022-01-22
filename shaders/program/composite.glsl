@@ -60,6 +60,10 @@ uniform mat4 shadowProjection;
 uniform sampler2DShadow shadowtex0;
 uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
+
+#ifdef WATER_LIGHTSHAFTS
+uniform sampler2D colortex12;
+#endif
 #endif
 
 //Optifine Constants//
@@ -135,7 +139,13 @@ void main() {
 
 	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither);
+	float waterData = 0.0;
+
+	#ifdef WATER_LIGHTSHAFTS
+	waterData = texture2D(colortex12, texCoord).a;
+	#endif
+
+	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither, waterData);
 	#endif
 	
 	//Nether & End Smoke

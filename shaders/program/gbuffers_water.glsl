@@ -230,10 +230,11 @@ void main() {
 	vec3 vlAlbedo = vec3(1.0);
 
 	float water = float(mat > 0.98 && mat < 1.02);
+	float glass = float(mat > 1.98 && mat < 2.02);
+
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 	
 	if (albedo.a > 0.001) {
-		float glass 	  = float(mat > 1.98 && mat < 2.02);
 		float translucent = float(mat > 2.98 && mat < 3.02) + float(mat > 3.98 && mat < 4.02);
 		
 		float metalness      = 0.0;
@@ -570,7 +571,7 @@ void main() {
 			}
 
 			if (glass > 0.5){
-				albedo.a += albedo.a * 0.75;
+				albedo.a += albedo.a;
 				albedo.a = clamp(albedo.a, 0.5, 0.95);
 				absorbColor = normalize(albedo.rgb * albedo.rgb) * terrainColor * 1.25;
 				absorbDist = 1.0 - clamp(difT, 0.0, 1.0);
@@ -582,7 +583,7 @@ void main() {
 			float absorb = (1.0 - albedo.a);
 			absorb = sqrt(absorb * lightmap.y);
 
-			albedo.rgb = mix(albedo.rgb, newAlbedo * BLENDING_STRENGTH, absorb);
+			albedo.rgb = mix(albedo.rgb, newAlbedo * (1.0 + (float(glass > 0.5) * BLENDING_STRENGTH * 0.25)), absorb);
 		}
 		#endif
 
@@ -598,7 +599,7 @@ void main() {
 	gl_FragData[1] = vec4(vlAlbedo, 1.0);
 
 	#if defined WATER_REFRACTION || defined WATER_LIGHTSHAFTS
-	/* RENDERTARGETS:0,1,13 */
+	/* RENDERTARGETS:0,1,12 */
 	gl_FragData[2] = vec4(0.0, lightmap.y, dist, water);
 	#endif
 }
@@ -711,8 +712,8 @@ void main() {
 	
 	if (mc_Entity.x == 10300 || mc_Entity.x == 10303) mat = 1.0;
 	if (mc_Entity.x == 10301) mat = 2.0;
-	if (mc_Entity.x == 10302) 						  mat = 3.0;
-	if (mc_Entity.x == 10304)						  mat = 4.0;
+	if (mc_Entity.x == 10302) mat = 3.0;
+	if (mc_Entity.x == 10304) mat = 4.0;
 	if (mc_Entity.x == 10303) color.a = 1.0;
 
 	const vec2 sunRotationData = vec2(
