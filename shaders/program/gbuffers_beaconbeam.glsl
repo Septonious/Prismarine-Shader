@@ -56,7 +56,7 @@ void main() {
 	#if defined SSGI && !defined ADVANCED_MATERIALS
 	/* RENDERTARGETS:0,9,10*/
 	gl_FragData[1] = vec4(1.0);
-	gl_FragData[2] = albedo;
+	gl_FragData[2] = albedo * 0.25;
 	#endif
 }
 

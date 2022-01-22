@@ -196,6 +196,10 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector, vec2 lightmap)
 #include "/lib/util/jitter.glsl"
 #endif
 
+#ifdef SSGI
+#include "/lib/util/encode.glsl"
+#endif
+
 #ifdef ADVANCED_MATERIALS
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/directionalLightmap.glsl"
@@ -382,21 +386,21 @@ void main() {
 		
 		float fresnel = pow(clamp(1.0 + dot(newNormal, normalize(viewPos)), 0.0, 1.0), 5.0);
 
-	#ifdef CUSTOM_NETHER_PORTAL
-	if (mat > 3.98 && mat < 4.02) {
-		vec2 portalCoord = gl_FragCoord.xy / vec2(viewWidth, viewHeight);
-		portalCoord = (portalCoord - 0.5) * vec2(aspectRatio, 1.0);
+		#ifdef CUSTOM_NETHER_PORTAL
+		if (mat > 3.98 && mat < 4.02) {
+			vec2 portalCoord = gl_FragCoord.xy / vec2(viewWidth, viewHeight);
+			portalCoord = (portalCoord - 0.5) * vec2(aspectRatio, 1.0);
 
-		vec2 wind = vec2(0.0, frametime * 0.1);
+			vec2 wind = vec2(0.0, frametime * 0.1);
 
-		float portal = texture2D(noisetex, portalCoord * 0.25 + wind * 0.03).r * 0.1;
-			  portal+= texture2D(noisetex, portalCoord * 0.15 + wind * 0.02).r * 0.2;
-			  portal+= texture2D(noisetex, portalCoord * 0.05 + wind * 0.01).r * 0.3;
-		
-		albedo.rgb = portal * portal * vec3(0.75, 0.25, 1.5);
-		albedo.a = 0.25;
-	}
-	#endif
+			float portal = texture2D(noisetex, portalCoord * 0.25 + wind * 0.03).r * 0.1;
+				portal+= texture2D(noisetex, portalCoord * 0.15 + wind * 0.02).r * 0.2;
+				portal+= texture2D(noisetex, portalCoord * 0.05 + wind * 0.01).r * 0.3;
+			
+			albedo.rgb = portal * portal * vec3(0.75, 0.25, 1.5);
+			albedo.a = 0.25;
+		}
+		#endif
 
 		if (water > 0.5 || ((translucent + glass) > 0.5 && albedo.a < 0.95)) {
 			#if REFLECTION > 0
@@ -581,7 +585,7 @@ void main() {
 			newAlbedo *= newAlbedo;
 
 			float absorb = (1.0 - albedo.a);
-			absorb = sqrt(absorb * lightmap.y);
+			absorb = sqrt(absorb * clamp(lightmap.y + glass, 0, 1));
 
 			albedo.rgb = mix(albedo.rgb, newAlbedo * (1.0 + (float(glass > 0.5) * BLENDING_STRENGTH * 0.25)), absorb);
 		}
@@ -601,6 +605,13 @@ void main() {
 	#if defined WATER_REFRACTION || defined WATER_LIGHTSHAFTS
 	/* RENDERTARGETS:0,1,12 */
 	gl_FragData[2] = vec4(0.0, lightmap.y, dist, water);
+	#endif
+
+	#ifdef SSGI
+	/* RENDERTARGETS:0,1,12,3,6,10 */
+	gl_FragData[3] = vec4(0.0, 0.0, 0.0, float(mat > 3.98 && mat < 4.02) * 0.25);
+	gl_FragData[4] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+	gl_FragData[5] = albedo * 0.25 * pow16(1.0 - lightmap.y);
 	#endif
 }
 

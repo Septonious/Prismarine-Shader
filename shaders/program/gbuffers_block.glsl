@@ -98,8 +98,11 @@ float GetLuminance(vec3 color) {
 #include "/lib/util/jitter.glsl"
 #endif
 
-#ifdef ADVANCED_MATERIALS
+#if defined SSGI || defined ADVANCED_MATERIALS
 #include "/lib/util/encode.glsl"
+#endif
+
+#ifdef ADVANCED_MATERIALS
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/materialGbuffers.glsl"
 #include "/lib/surface/parallax.glsl"
@@ -138,11 +141,11 @@ void main() {
 	vec3 fresnel3 = vec3(0.0);
 	#endif
 
+	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+
 	if(blockEntityId == 10402) albedo.a = 0.0;
 
 	if (albedo.a > 0.001) {
-		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-		
 		float metalness      = 0.0;
 		float emission       = float(blockEntityId == 10205);
 		float subsurface     = float(blockEntityId == 10109) * 0.5;
@@ -300,6 +303,12 @@ void main() {
 	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[3] = vec4(fresnel3, 1.0);
+	#endif
+
+	#ifdef SSGI
+	/* RENDERTARGETS:0,6,10*/
+	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+	gl_FragData[2] = albedo * pow16(1.0 - lightmap.y);
 	#endif
 }
 

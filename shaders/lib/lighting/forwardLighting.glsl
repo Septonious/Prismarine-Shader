@@ -31,7 +31,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #ifdef OVERWORLD
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
     vec3 sceneLighting = mix(ambientCol, lightCol, fullShadow * shadowMult);
-    sceneLighting *= (4.0 - 3.0 * eBS) * lightmap.y * lightmap.y * lightmap.y * (1.0 + scattering * shadow);
+    sceneLighting *= (4.0 - 3.0 * eBS) * pow8(lightmap.y) * (1.0 + scattering * shadow);
     #endif
 
     #ifdef END
@@ -46,7 +46,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     vec3 blockLighting = blocklightCol * newLightmap * newLightmap;
 
     #ifdef SSGI
-    blockLighting *= 0.1;
+    blockLighting *= 0.0 + lightmap.y;
     #endif
 
     vec3 minLighting = minLightCol * (1.0 - eBS);

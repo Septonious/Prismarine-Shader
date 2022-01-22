@@ -32,7 +32,9 @@ vec3 GetFogColor(vec3 viewPos) {
 	float altitudeFactor = clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
 	#endif
 
-	fog = mix(minLightCol * 0.5, fog, altitudeFactor * clamp(eBS + 0.25, 0.0, 1.0));
+	float altitudeFactor2 = pow2(clamp(cameraPosition.y * 0.075, 0.0, 1.0));
+
+	fog = mix(minLightCol * 0.5, fog, altitudeFactor2 * clamp(eBS + 0.25, 0.0, 1.0));
 
 	fog *= altitudeFactor;
 

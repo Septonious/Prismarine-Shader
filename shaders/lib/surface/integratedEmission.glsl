@@ -22,7 +22,7 @@ void getIntegratedEmission(inout float emission, in vec2 lightmap, in vec4 albed
         if (comPosM < 0.1882) { // Command Block Center
             vec3 dif = vec3(albedo.r - albedo.b, albedo.r - albedo.g, albedo.b - albedo.g);
             dif = abs(dif);
-            newEmissive = float(max(dif.r, max(dif.g, dif.b)) > 0.1) * 24.0;
+            newEmissive = float(max(dif.r, max(dif.g, dif.b)) > 0.1);
             newEmissive *= float(albedo.r > 0.44 || albedo.g > 0.29);
         }
 
