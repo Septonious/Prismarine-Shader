@@ -26,7 +26,7 @@ uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
 uniform sampler2D colortex2;
 uniform sampler2D depthtex1;
 
-#ifdef GI_ACCUMULATION
+#if defined GI_ACCUMULATION && defined SSGI
 uniform sampler2D depthtex0;
 #endif
 
@@ -47,7 +47,7 @@ void main() {
 	prev = TemporalAA(color, prev.r, colortex1, colortex2);
 	#endif
 
-	#ifdef GI_ACCUMULATION
+	#if defined GI_ACCUMULATION && defined SSGI
 	prev = TemporalAccumulation(color, prev.r, colortex1, colortex2);
 	#endif
 
