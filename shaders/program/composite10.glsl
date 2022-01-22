@@ -16,18 +16,14 @@ varying vec2 texCoord;
 //Uniforms//
 uniform float timeBrightness;
 
-uniform sampler2D colortex1, colortex9, colortex11;
+uniform sampler2D colortex1, colortex11;
 
 //Program//
 void main() {
     vec3 color = texture2D(colortex1, texCoord).rgb;
     vec3 gi = texture2D(colortex11, texCoord).rgb;
 
-    float skyLightmap = clamp(texture2D(colortex9, texCoord).b, 0.0, 1.0);
-    float blockLightmap = clamp(texture2D(colortex9, texCoord).a, 0.0, 1.0);
-
-    gi *= (ILLUMINATION_STRENGTH * ILLUMINATION_STRENGTH) * (1.00 - skyLightmap * 0.85 * (0.5 + timeBrightness * 0.5)) * (1.0 - blockLightmap * 0.5);
-    color.rgb *= 1.0 + gi;
+    color.rgb += gi;
 
     /* DRAWBUFFERS:1 */
     gl_FragData[0] = vec4(color, 1.0);

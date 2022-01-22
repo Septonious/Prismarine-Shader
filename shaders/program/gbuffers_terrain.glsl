@@ -16,6 +16,10 @@ varying float mat, recolor;
 varying float isPlant;
 #endif
 
+#ifdef SSGI
+varying float isConcrete;
+#endif
+
 varying vec2 texCoord, lmCoord;
 
 varying vec3 normal;
@@ -159,19 +163,23 @@ void main() {
 	#endif
 
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-	float emissive = 0.0, lava = 0.0;
+	float emission = 0.0;
 
 	if (albedo.a > 0.001) {
 		float foliage  = float(mat > 0.98 && mat < 1.02);
 		float leaves   = float(mat > 1.98 && mat < 2.02);
-		emissive = float(mat > 2.98 && mat < 3.02);
-		lava     = float(mat > 3.98 && mat < 4.02);
+		float emissive = float(mat > 2.98 && mat < 3.02);
+		float lava     = float(mat > 3.98 && mat < 4.02);
 		float candle   = float(mat > 4.98 && mat < 5.02);
 
 		float metalness      = 0.0;
-		float emission       = (emissive + candle + lava) * 0.4;
+			  emission       = (emissive + candle + lava) * 0.4;
 		float subsurface     = (foliage + candle) * 0.5 + leaves;
 		vec3 baseReflectance = vec3(0.04);
+
+		#if defined SSGI && defined EMISSIVE_CONCRETE
+		emission += isConcrete * 2.0;
+		#endif
 
 		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 		
@@ -229,7 +237,7 @@ void main() {
 		float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
 		float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
-			  vanillaDiffuse*= vanillaDiffuse;
+			  vanillaDiffuse *= vanillaDiffuse;
 		
 		#ifndef NORMAL_PLANTS
 		if (foliage > 0.5) vanillaDiffuse *= 1.8;
@@ -368,11 +376,19 @@ void main() {
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
 
-	#if defined SSGI && !defined ADVANCED_MATERIALS
-	/* RENDERTARGETS:0,6,9,10 */
-	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[2] = vec4(lava * 0.25 + emissive, mat, lightmap);
+	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
+	/* RENDERTARGETS:0,3,6,10 */
+	gl_FragData[1] = vec4(0.0, 0.0, 0.0, emission * 2048.0);
+	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
 	gl_FragData[3] = albedo;
+	#endif
+
+	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
+	/* RENDERTARGETS:0,3,6,7,10 */
+	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, emission * 2048.0);
+	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
+	gl_FragData[3] = vec4(fresnel3, 0.0);
+	gl_FragData[4] = albedo;
 	#endif
 }
 
@@ -386,6 +402,10 @@ varying float mat, recolor;
 
 #ifdef INTEGRATED_EMISSION
 varying float isPlant;
+#endif
+
+#ifdef SSGI
+varying float isConcrete;
 #endif
 
 varying vec2 texCoord, lmCoord;
@@ -484,6 +504,10 @@ void main() {
 	
 	mat = 0.0; recolor = 0.0;
 
+	#ifdef SSGI
+	isConcrete = 0.0;
+	#endif
+
 	if (mc_Entity.x >= 10100 && mc_Entity.x < 10200)
 		mat = 1.0;
 	if (mc_Entity.x == 10105 || mc_Entity.x == 10106){
@@ -508,6 +532,10 @@ void main() {
 
 	if (mc_Entity.x == 10400)
 		color.a = 1.0;
+
+	#if defined SSGI && defined EMISSIVE_CONCRETE
+	if (mc_Entity.x == 29999) isConcrete = 1.0;
+	#endif
 
 	#ifdef INTEGRATED_EMISSION
 	getIntegratedEmissionMaterials(mat, isPlant);

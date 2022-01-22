@@ -75,12 +75,6 @@ void getIntegratedEmission(inout float emission, in vec2 lightmap, in vec4 albed
 	}
 	#endif
 
-	#if defined SSGI && defined EMISSIVE_CONCRETE
-	if (mat > 998.9 && mat < 999.1){
-		newEmissive = 0.5;
-	}
-	#endif
-
 	#ifdef POWDER_SNOW_HIGHLIGHT
 	if (mat > 29999.9 && mat < 30000.1){
 		newEmissive = 1.0;
@@ -123,10 +117,6 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 
 	#if defined EMISSIVE_FLOWERS && defined OVERWORLD
 	if (mc_Entity.x == 10101) isPlant = 1.0;
-	#endif
-
-	#if defined SSGI && defined EMISSIVE_CONCRETE
-	if (mc_Entity.x == 29999) mat = 999.0;
 	#endif
 
 	#ifdef POWDER_SNOW_HIGHLIGHT

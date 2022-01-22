@@ -20,7 +20,6 @@ vec2 Reprojection(vec3 pos) {
 	return previousPosition.xy / previousPosition.w * 0.5 + 0.5;
 }
 
-#ifdef TAA
 vec2 neighbourhoodOffsets[8] = vec2[8](
 	vec2( 0.0, -1.0),
 	vec2(-1.0,  0.0),
@@ -101,9 +100,8 @@ vec4 TemporalAA(inout vec3 color, float tempData, sampler2D colortex, sampler2D 
 
 	return vec4(tempData, color);
 }
-#endif
 
-#ifdef GI_ACCUMULATION1
+#ifdef GI_ACCUMULATION
 vec4 getViewPos(vec2 coord, float z0){
 	vec4 screenPos = vec4(coord, z0, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
@@ -114,7 +112,7 @@ vec3 ToWorld(vec3 pos) {
 	return mat3(gbufferModelViewInverse) * pos + gbufferModelViewInverse[3].xyz;
 }
 
-vec4 TemporalAA(inout vec3 color, float tempData, sampler2D colortex, sampler2D temptex) {
+vec4 TemporalAccumulation(inout vec3 color, float tempData, sampler2D colortex, sampler2D temptex) {
 	float z0 = texture2D(depthtex0, texCoord).r;
 
 	vec3 coord = vec3(texCoord, texture2DLod(depthtex1, texCoord, 0.0).r);

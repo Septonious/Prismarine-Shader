@@ -21,7 +21,7 @@ uniform float viewWidth, viewHeight;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 
-uniform sampler2D colortex6, colortex9, colortex10;
+uniform sampler2D colortex6, colortex3, colortex10;
 uniform sampler2D depthtex0, depthtex1;
 
 //Includes//
@@ -31,8 +31,10 @@ uniform sampler2D depthtex0, depthtex1;
 //Program//
 void main() {
     float z0 = texture2D(depthtex0, texCoord.xy).x;
+
 	vec3 screenPos = vec3(texCoord, z0);
     vec3 normal = normalize(DecodeNormal(texture2D(colortex6, texCoord.xy).xy));
+
     vec3 gi = computeGI(screenPos, normal, float(z0 < 0.56));
 
     /* RENDERTARGETS:11 */
