@@ -17,6 +17,10 @@ varying vec3 sunVec, upVec, eastVec;
 
 varying vec4 color;
 
+#ifdef INTEGRATED_EMISSION
+varying float mat;
+#endif
+
 #ifdef ADVANCED_MATERIALS
 varying float dist;
 
@@ -95,6 +99,10 @@ float GetLuminance(vec3 color) {
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 
+#ifdef INTEGRATED_EMISSION
+#include "/lib/surface/integratedEmissionEntities.glsl"
+#endif
+
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
 #endif
@@ -162,6 +170,10 @@ void main() {
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
 		
+		#ifdef INTEGRATED_EMISSION
+		getIntegratedEmission(emission, lightmap, albedo);
+		#endif
+
 		#ifdef ENTITY_HIGHLIGHT
 		emission = 0.75;
 		albedo.rgb *= albedo.rgb;
@@ -313,6 +325,10 @@ varying vec3 sunVec, upVec, eastVec;
 
 varying vec4 color;
 
+#ifdef INTEGRATED_EMISSION
+varying float mat;
+#endif
+
 #ifdef ADVANCED_MATERIALS
 varying float dist;
 
@@ -339,6 +355,10 @@ uniform float viewWidth, viewHeight;
 #endif
 
 //Attributes//
+#ifdef INTEGRATED_EMISSION
+uniform int entityId;
+#endif
+
 attribute vec4 mc_Entity;
 
 #ifdef ADVANCED_MATERIALS
@@ -354,6 +374,10 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
 //Includes//
+#ifdef INTEGRATED_EMISSION
+#include "/lib/surface/integratedEmissionEntities.glsl"
+#endif
+
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
 #endif
@@ -370,6 +394,11 @@ void main() {
 	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
 
 	normal = normalize(gl_NormalMatrix * gl_Normal);
+
+	#ifdef INTEGRATED_EMISSION
+	mat = 0.0;
+	getIntegratedEmissionEntities(mat);
+	#endif
 
 	#ifdef ADVANCED_MATERIALS
 	tangent  = normalize(gl_NormalMatrix * at_tangent.xyz);

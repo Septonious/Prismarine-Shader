@@ -101,7 +101,7 @@ vec4 TemporalAA(inout vec3 color, float tempData, sampler2D colortex, sampler2D 
 	return vec4(tempData, color);
 }
 
-#ifdef GI_ACCUMULATION
+#if defined GI_ACCUMULATION && defined SSGI
 vec4 getViewPos(vec2 coord, float z0){
 	vec4 screenPos = vec4(coord, z0, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);

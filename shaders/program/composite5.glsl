@@ -34,7 +34,7 @@ uniform sampler2D colortex1;
 uniform sampler2D noisetex;
 uniform sampler2D depthtex0;
 
-#ifdef TAA
+#if defined TAA || (defined SSGI && defined GI_ACCUMULATION)
 uniform sampler2D colortex2;
 #endif
 
@@ -51,7 +51,7 @@ uniform vec3 cameraPosition;
 #endif
 
 //Optifine Constants//
-#ifdef TAA
+#if defined TAA || (defined SSGI && defined GI_ACCUMULATION)
 const bool colortex2Clear = false;
 #endif
 
@@ -119,7 +119,7 @@ void main() {
 	
 	float tempVisibleSun = 0.0; float tempExposure = 0.0;
 
-	#ifdef TAA
+	#if defined TAA || (defined SSGI && defined GI_ACCUMULATION)
 	#ifdef AUTO_EXPOSURE
 	tempExposure = texture2D(colortex2, vec2(pw, ph)).r;
 	#endif
@@ -164,7 +164,7 @@ void main() {
 	if (multiplier > 0.001) LensFlare(color, lightPos, truePos, multiplier);
 	#endif
 	
-	#ifdef TAA
+	#if defined TAA || (defined SSGI && defined GI_ACCUMULATION)
 	float temporalData = 0.0;
 	
 	#ifdef AUTO_EXPOSURE
@@ -192,7 +192,7 @@ void main() {
 	/* DRAWBUFFERS:1 */
 	gl_FragData[0] = vec4(color, 1.0);
 
-	#ifdef TAA
+	#if defined TAA || (defined SSGI && defined GI_ACCUMULATION)
 	/* DRAWBUFFERS:12 */
 	gl_FragData[1] = vec4(temporalData, temporalColor);
 	#endif

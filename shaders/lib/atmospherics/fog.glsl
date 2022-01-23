@@ -5,7 +5,7 @@ vec3 GetFogColor(vec3 viewPos) {
     float VoU = clamp(dot(nViewPos,  upVec), -1.0, 1.0);
 
 	float density = 0.4;
-    float nightDensity = 0.65;
+    float nightDensity = 0.75;
     float weatherDensity = 1.0;
     
     float exposure = exp2(timeBrightness * 0.75 - 1.00);

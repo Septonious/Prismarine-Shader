@@ -13,6 +13,9 @@ screen.MATERIAL=Material
 screen.SPECULAR=Specular & Reflections
 screen.NORMALS=Normals & Parallax
 
+screen.SSGI=Path Tracing Config
+screen.NEBULAS=Nebula Config
+screen.SMOKE=Smoke Config
 screen.ATMOSPHERICS=Atmospherics
 screen.SKY=Sky Config
 screen.CLOUDS=Cloud Config
@@ -98,7 +101,7 @@ option.SHADOW_FILTER.comment=Enables shadow filtering. §a[+]§rThis effect bene
 
 option.SSGI=Screen Space Path Tracing
 option.SSGI.comment=Provides per-block realistic colored lighting. §f[§c-§f] Causes a massive FPS drop! Don't enable it if you have a low-end PC!!!
-option.BOUNCES=GI Bounces
+option.BOUNCES=Bounces
 option.DENOISE=Denoising
 option.DENOISE_QUALITY=Denoising Quality
 option.DENOISE_STRENGTH=Denoising Strength
@@ -106,7 +109,8 @@ option.GI_DEPTH_LENIENCY=Depth Leniency
 option.STRIDE=GI Raytracer Stride
 option.ILLUMINATION_STRENGTH=Illumination Strength
 option.EMISSIVE_CONCRETE=Emissive Concrete
-option.GI_ACCUMULATION=GI Temporal Accumulation
+option.GI_ACCUMULATION=Temporal Accumulation
+option.GI_ACCUMULATION_STRENGTH=Accumulation Strength
 
 option.sunPathRotation=Sun Path Rotation
 option.sunPathRotation.comment=Adjusts sun angle.
@@ -284,8 +288,26 @@ option.END_NEBULA=Ender Nebula
 option.OVERWORLD_NEBULA=Overworld Nebula
 option.OVERWORLD_NEBULA.comment=Visible only at night.
 
+option.NEBULA_AMOUNT=Amount
+option.NEBULA_AURORA_CHECK=Aurora Visibility Check
+option.NEBULA_AURORA_CHECK.comment=Disables nebulas when auroras are visible.
+option.NEBULA_SPEED=Wind Speed
+option.NEBULA_BRIGHTNESS=Brightness
+option.NEBULA_DISTORTION=Distortion
+option.NEBULA_STRETCHING=Stretching
+
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
+
+option.MOON_SMOKE=Moon Smoke
+option.MOON_SMOKE.comment=Adds smoke around the moon.
+option.MOON_SMOKE_BRIGHTNESS=Moon Smoke Brightness
+
+option.SMOKE_AMOUNT=Amount
+option.SMOKE_FREQUENCY=Frequency
+option.SMOKE_FREQUENCY.comment=Increases smoke noise frequency.
+option.SMOKE_BRIGHTNESS=Brightness
+option.SMOKE_SPEED=Wind Speed
 
 option.NETHER_SMOKE=Nether Smoke
 option.NETHER_SMOKE.comment=Adds volumetric smoke to the nether.
@@ -368,8 +390,8 @@ option.VCLOUDS_SAMPLES.comment=Controls clouds sample count. Higher values incre
 option.VCLOUDS_OCTAVES=Noise Octaves
 option.VCLOUDS_NOISE_OCTAVES.comment=Increases the amount of noise octaves used in cloud shaping. Higher values make clouds more detailed at cost of performance.
 
-option.VCLOUDS_DETAIL=Detail
-option.VCLOUDS_DETAIL.comment=Increases clouds detalization at minimal performance cost. Higher values can turn clouds into a foggy mess.
+option.VCLOUDS_FREQUENCY=Frequency
+option.VCLOUDS_FREQUENCY.comment=Increases clouds noise frequency. Higher values can turn clouds into a foggy mess.
 
 option.VCLOUDS_OPACITY=Opacity
 

@@ -56,10 +56,14 @@ float getCloudNoise(vec3 pos){
 
 float getFogSample(vec3 pos, float height, float verticalThickness, float thicknessMult) {
 	float sampleHeight = pow(abs(height - pos.y) / verticalThickness, 2.0);
-	vec3 wind = vec3(frametime, 0.0, 0.0);
+	vec3 wind = vec3(frametime * SMOKE_SPEED, 0.0, 0.0);
 
 	#ifdef OVERWORLD
 	wind *= 0.5;
+	#endif
+
+	#ifdef NETHER
+	wind *= 1.5;
 	#endif
 
 	pos *= 0.1;

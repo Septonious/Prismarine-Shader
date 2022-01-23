@@ -135,7 +135,7 @@ void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float b
 #ifdef AURORA
 #include "/lib/color/auroraColor.glsl"
 
-float AuroraSample(vec2 coord, vec2 wind, float VoU) {
+float AuroraSample(vec2 coord, vec2 wind) {
 	float noise = texture2D(noisetex, coord * 0.04 + wind * 0.25).b * 3.0;
 		  noise+= texture2D(noisetex, coord * 0.02 + wind * 0.15).b * 3.0;
 
@@ -152,8 +152,6 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	float sampleStep = 1.0 / samples;
 	float currentStep = dither * sampleStep;
 
-	float VoU = dot(normalize(viewPos), upVec);
-
 	float visibility = moonVisibility * (1.0 - rainStrength) * (1.0 - rainStrength);
 
 	#ifdef WEATHER_PERBIOME
@@ -167,7 +165,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 
 	vec3 aurora = vec3(0.0);
 
-	if (VoU > 0.0 && visibility > 0.0) {
+	if (visibility > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
 			vec3 planeCoord = wpos * ((6.0 + currentStep * 16.0) / wpos.y) * 0.003;
@@ -175,7 +173,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 			vec2 coord = cameraPosition.xz * 0.00004 + planeCoord.xz;
 			coord += vec2(coord.y, -coord.x) * 0.6;
 
-			float noise = AuroraSample(coord, wind, VoU);
+			float noise = AuroraSample(coord, wind);
 			
 			if (noise > 0.0) {
 				noise *= texture2D(noisetex, coord * 0.125 + wind * 0.25).b;

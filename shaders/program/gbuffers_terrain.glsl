@@ -116,7 +116,7 @@ float GetLuminance(vec3 color) {
 #endif
 
 #ifdef INTEGRATED_EMISSION
-#include "/lib/surface/integratedEmission.glsl"
+#include "/lib/surface/integratedEmissionTerrain.glsl"
 #endif
 
 #ifdef TAA
@@ -467,7 +467,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
 #ifdef INTEGRATED_EMISSION
-#include "/lib/surface/integratedEmission.glsl"
+#include "/lib/surface/integratedEmissionTerrain.glsl"
 #endif
 
 //Program//
