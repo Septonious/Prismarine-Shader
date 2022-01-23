@@ -31,7 +31,7 @@ Please don't edit anything from Undefine section and onwards.
 //#define POWDER_SNOW_HIGHLIGHT
 //#define ENTITY_HIGHLIGHT
 //#define DEBRIS_HIGHLIGHT
-//#define BLUE_NOISE_DITHERING
+  #define BLUE_NOISE_DITHERING
 //#define ALTERNATIVE_SKY
 
   #define CUSTOM_BEACON_BEAM
@@ -88,14 +88,15 @@ Please don't edit anything from Undefine section and onwards.
   #define VCLOUDS_FREQUENCY 0.1 //[0.1 0.2 0.3 0.4 0.5]
 
   #define END_STARS
-//#define NETHER_SMOKE
+  #define NETHER_SMOKE
 //#define END_SMOKE
   #define SMOKE_BRIGHTNESS 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
   #define SMOKE_SPEED 1.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
-  #define SMOKE_FREQUENCY 0.8 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+  #define SMOKE_FREQUENCY 0.9 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
   #define SMOKE_AMOUNT 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
 
   #define BLUR_FILTERING
+  #define BILATERAL_UPSCALING
 
 //#define MOON_SMOKE
   #define MOON_SMOKE_BRIGHTNESS 0.3 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]

@@ -185,6 +185,8 @@ option.GLOW_STRENGTH.comment=Adjusts glow strength of emissive blocks which are 
 option.ALBEDO_BALANCING=Albedo Balancing
 option.ALBEDO_BALANCING.comment=Reduces brightness of very bright colored surfaces.
 
+option.BILATERAL_UPSCALING=Bilateral Upscaling
+
 option.BLUR_FILTERING=Blur Filtering
 option.BLUR_FILTERING.comment=Filters volumetrics dither patterns using single pass gaussian blur.
 
