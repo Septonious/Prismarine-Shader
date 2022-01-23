@@ -24,6 +24,20 @@ uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
 uniform sampler2D depthtex1;
 #endif
 
+#ifdef VOLUMETRIC_CLOUDS
+uniform float rainStrength;
+
+#ifdef BILATERAL_UPSCALING
+uniform int frameCounter;
+
+uniform float far, near;
+
+uniform sampler2D depthtex0;
+#endif
+
+uniform sampler2D colortex8;
+#endif
+
 uniform sampler2D colortex0;
 
 #ifdef MOTION_BLUR
@@ -57,7 +71,7 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 		for(int i = 0; i < 5; i++, coord += velocity) {
 			vec2 sampleCoord = clamp(coord, doublePixel, 1.0 - doublePixel);
 			float mask = float(texture2D(depthtex1, sampleCoord).r > 0.56);
-			mblur += texture2DLod(colortex0, sampleCoord, 0.0).rgb * mask;
+			mblur += texture2D(colortex0, sampleCoord).rgb * mask;
 			mbwg += mask;
 		}
 		mblur /= max(mbwg, 1.0);
@@ -71,6 +85,10 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 #include "/lib/util/dither.glsl"
 #endif
 
+#if defined VOLUMETRIC_CLOUDS && defined BILATERAL_UPSCALING
+#include "/lib/filters/bilateralUpscaling.glsl"
+#endif
+
 //Program//
 void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
@@ -82,6 +100,17 @@ void main() {
 	color = MotionBlur(color, z, dither);
 	#endif
 	
+	#ifdef VOLUMETRIC_CLOUDS
+	vec4 cloud = texture2D(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
+
+	#ifdef BILATERAL_UPSCALING
+	cloud = BilateralUpscaling(colortex8, texCoord.xy, VOLUMETRICS_RENDER_RESOLUTION);
+	#endif
+
+	float rainFactor = (1.0 - rainStrength * 0.7);
+	color = mix(color, cloud.rgb * rainFactor, clamp(cloud.a * cloud.a, 0.0, 0.999));
+	#endif
+
 	/*DRAWBUFFERS:0*/
 	gl_FragData[0] = vec4(color, 1.0);
 }

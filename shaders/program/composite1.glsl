@@ -76,11 +76,10 @@ void main() {
 	#ifdef BLUR_FILTERING
 	vec3 vl = GaussianBlur(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION).rgb;
 	#else
-	vec3 vl = texture2DLod(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
-	#endif
+	vec3 vl = texture2D(colortex1, texCoord * VOLUMETRICS_RENDER_RESOLUTION).rgb;
 	#endif
 
-	#ifdef LIGHT_SHAFT
+	#if defined LIGHT_SHAFT && defined OVERWORLD
 	if (isEyeInWater != 1.0) vl.rgb *= lightCol * 0.25;
 	else vl.rgb *= waterColor.rgb * 0.25 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75);
     vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
@@ -89,21 +88,22 @@ void main() {
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	color += vl;
 	#endif
+	#endif
+
+	/* DRAWBUFFERS:08 */
+	gl_FragData[0] = vec4(color, 1.0);
 
 	#ifdef VOLUMETRIC_CLOUDS
 
 	#ifdef BLUR_FILTERING
-	vec4 cloud = GaussianBlur(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
+	vec4 cloud = GaussianBlur(colortex8, texCoord.xy);
 	#else
-	vec4 cloud = texture2D(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
+	vec4 cloud = texture2D(colortex8, texCoord.xy);
 	#endif
 
-	float rainFactor = (1.0 - rainStrength * 0.7);
-	color = mix(color, cloud.rgb * rainFactor, clamp(cloud.a * cloud.a, 0.0, 0.999));
+	gl_FragData[1] = cloud;
 	#endif
 
-	/*DRAWBUFFERS:0*/
-	gl_FragData[0] = vec4(color, 1.0);
 }
 
 #endif
