@@ -19,12 +19,12 @@ void getIntegratedEmission(inout float emission, inout vec2 lightmap, in vec4 al
         lightmap.x *= newEmissive;
     }
 
-    if (mat > 103.9 && mat < 104.1){ // Drowned
+    if (mat > 103.9 && mat < 104.1){ // Drowned && Shulker
         newEmissive = float(length(albedo.rgb) > 0.99) * 0.25;
     }
 
     if (mat > 104.9 && mat < 105.1){ // JellySquid
-        newEmissive = 0.05 + float(length(albedo.rgb) > 0.99) * 0.25;
+        newEmissive = 0.025 + float(length(albedo.rgb) > 0.99) * 0.25;
         lightmap.x *= newEmissive;
     }
 
