@@ -3,9 +3,9 @@ BSL Shaders v8 Series by Capt Tatsu
 https://bitslablab.com 
 */ 
 
-#version 130 
+#version 120 
 
-#define OVERWORLD
+#define END
 #define VSH
 
-#include "/program/composite2.glsl"
+#include "/program/composite6.glsl"

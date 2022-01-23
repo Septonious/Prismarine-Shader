@@ -5,7 +5,9 @@ https://bitslablab.com
 
 #version 120 
 
-#define NETHER
-#define VSH
+#extension GL_ARB_shader_texture_lod : enable
 
-#include "/program/composite1.glsl"
+#define NETHER
+#define FSH
+
+#include "/program/composite6.glsl"
