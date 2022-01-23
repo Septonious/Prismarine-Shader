@@ -1,7 +1,7 @@
 float getCloudSample(vec3 pos){
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
-	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.20);
+	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.30);
 	
 	float noiseA = 0.0;
 	float mult = 1.0;

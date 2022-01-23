@@ -54,14 +54,14 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float density = (1.0 - timeBrightness * 0.75) * FOG_DENSITY * (1.0 + rainStrength);
+	float density = (1.0 - timeBrightness * 0.75) * FOG_DENSITY * (1.0 + rainStrength * 0.25);
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0) * eBS, eBS);
 	fog = 1.0 - exp(-2.0 * pow(fog, 0.15 * clearDay * eBS + 1.25));
 
 	vec3 pos = ToWorld(viewPos.xyz) + cameraPosition.xyz + 1100.0;
-	float height = (pos.y - (FOG_ALTITUDE * (1.0 + rainStrength))) * 0.0009;
+	float height = (pos.y - (FOG_ALTITUDE * (1.0 + rainStrength * 0.5))) * 0.0009;
 		height = pow16(height);
 		height = clamp(height, 0.0, 1.0);
 	fog *= 1.0 - height;
@@ -75,6 +75,9 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 		#else
 		float fogOffset = 12.0;
 		#endif
+
+		fogOffset *= 1.0 - rainStrength * 0.75;
+
 		float vanillaFog = 1.0 - (far - (fogFactor + fogOffset)) * 5.0 / (FOG_DENSITY * 0.5 * far);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 	
