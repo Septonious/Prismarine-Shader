@@ -30,6 +30,9 @@ Please don't edit anything from Undefine section and onwards.
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
 //#define POWDER_SNOW_HIGHLIGHT
 //#define ENTITY_HIGHLIGHT
+//#define DEBRIS_HIGHLIGHT
+//#define BLUE_NOISE_DITHERING
+//#define ALTERNATIVE_SKY
 
   #define CUSTOM_BEACON_BEAM
   #define CUSTOM_NETHER_PORTAL
@@ -89,7 +92,7 @@ Please don't edit anything from Undefine section and onwards.
 //#define END_SMOKE
   #define SMOKE_BRIGHTNESS 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
   #define SMOKE_SPEED 1.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
-  #define SMOKE_FREQUENCY //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+  #define SMOKE_FREQUENCY 0.8 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
   #define SMOKE_AMOUNT 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
 
   #define BLUR_FILTERING
@@ -442,6 +445,13 @@ Please don't edit anything from Undefine section and onwards.
   #if CLOUDS == 3
   #define VOLUMETRIC_CLOUDS
   #endif
+  #if CLOUDS == 1
+  #define PLANAR_CLOUDS
+  #endif
+  #if CLOUDS == 4
+  #define VOLUMETRIC_CLOUDS
+  #define PLANAR_CLOUDS
+  #endif
   #endif
 
   #ifdef NETHER
@@ -516,4 +526,16 @@ Please don't edit anything from Undefine section and onwards.
 #endif
 
 #ifdef MOON_SMOKE
+#endif
+
+#ifdef ENTITY_HIGHLIGHT
+#endif
+
+#ifdef ALTERNATIVE_SKY
+#endif
+
+#ifdef BLUE_NOISE_DITHERING
+#endif
+
+#ifdef POWDER_SNOW_HIGHLIGHT
 #endif

@@ -76,10 +76,10 @@ screen.WAVING=Waving Blocks
 screen.CURVATURE=Curvature
 
 #Settings
-option.ABOUT=Prismarine Shader
-option.ABOUT.comment=https://www.curseforge.com/minecraft/customization/prismarine-shader/. If you downloaded Prismarine from a different site, please download it from the link above.
-value.ABOUT.0=By Septonious
-
+screen.ABOUT=Prismarine Shader
+screen.ABOUT.comment=https://www.curseforge.com/minecraft/customization/prismarine-shader/. If you downloaded Prismarine from a different site, please download it from the link above.
+option.ABOUT=§cSuper Secret Settings
+value.ABOUT.0=ඞ
 #Lighting
 option.shadowMapResolution=Shadow Quality
 option.shadowMapResolution.comment=Adjusts shadowmap size. §e[*]§rHigher resolution gives sharper shadows, but reduces performance.
@@ -225,6 +225,9 @@ option.ALBEDO_METAL.comment=Applies base texture as tint on hardcoded metallic s
 option.CUSTOM_NETHER_PORTAL=Custom Nether Portal
 option.CUSTOM_NETHER_PORTAL.comment=Adds custom texture to the nether portal.
 
+option.CUSTOM_BEACON_BEAM=Custom Beacon Beam
+option.CUSTOM_BEACON_BEAM.comment=Adds custom texture to the beacon beam.
+
 option.PARALLAX=Parallax Occlusion Mapping*
 option.PARALLAX.comment=Adds displacement on a surface using height map.
 
@@ -283,6 +286,7 @@ value.CLOUDS.0=§cOFF
 value.CLOUDS.1=Planar
 value.CLOUDS.2=Vanilla
 value.CLOUDS.3=Volumetric
+value.CLOUDS.4=Volumetric + Planar
 
 option.END_NEBULA=Ender Nebula
 option.OVERWORLD_NEBULA=Overworld Nebula

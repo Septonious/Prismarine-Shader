@@ -452,7 +452,7 @@ void main() {
 				skyReflection.rgb += DrawNebula(skyRefPos.xyz * 100.0);
 				#endif
 
-				#if CLOUDS == 1
+				#if defined PLANAR_CLOUDS
 				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
 				#endif
@@ -511,7 +511,7 @@ void main() {
 					skyReflection.rgb += DrawNebula(skyRefPos.xyz * 100.0);
 					#endif
 
-					#if CLOUDS == 1
+					#if defined PLANAR_CLOUDS
 					vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
 					skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
 					#endif

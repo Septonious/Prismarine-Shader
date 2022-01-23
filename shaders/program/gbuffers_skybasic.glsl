@@ -94,7 +94,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
-#if (defined OVERWORLD && CLOUDS == 1) || defined OVERWORLD_NEBULA || defined STARS || defined AURORA
+#if (defined OVERWORLD && defined PLANAR_CLOUDS) || defined OVERWORLD_NEBULA || defined STARS || defined AURORA
 #include "/lib/atmospherics/clouds.glsl"
 #endif
 #include "/lib/atmospherics/sky.glsl"
@@ -154,7 +154,7 @@ void main() {
 	albedo.rgb += DrawNebula(viewPos.xyz);
 	#endif
 
-	#if CLOUDS == 1
+	#if defined PLANAR_CLOUDS
 	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
 	#endif
@@ -170,7 +170,7 @@ void main() {
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
-    #if defined OVERWORLD && CLOUDS == 1
+    #if defined OVERWORLD && defined PLANAR_CLOUDS
     /* DRAWBUFFERS:04 */
 	gl_FragData[1] = vec4(cloud.a, 0.0, 0.0, 0.0);
     #endif

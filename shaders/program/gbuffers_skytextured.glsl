@@ -107,7 +107,7 @@ void main() {
 	albedo *= color;
 	albedo.rgb = pow(albedo.rgb,vec3(2.2)) * SKYBOX_BRIGHTNESS * albedo.a;
 
-	#if CLOUDS == 1
+	#if defined PLANAR_CLOUDS
 	if (albedo.a > 0.0) {
 		float cloudAlpha = texture2D(gaux1, gl_FragCoord.xy / vec2(viewWidth, viewHeight)).r;
 		float alphaMult = 1.0 - 0.6 * rainStrength;

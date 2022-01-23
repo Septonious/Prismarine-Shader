@@ -163,7 +163,7 @@ vec3 ToWorld(vec3 pos) {
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/materialDeferred.glsl"
 #include "/lib/reflections/roughReflections.glsl"
-#if (defined OVERWORLD && CLOUDS == 1) || defined END_NEBULA || defined OVERWORLD_NEBULA
+#if (defined OVERWORLD && defined PLANAR_CLOUDS) || defined END_NEBULA || defined OVERWORLD_NEBULA
 #include "/lib/atmospherics/clouds.glsl"
 #endif
 #endif
@@ -218,7 +218,7 @@ void main() {
 				skyReflection.rgb += DrawNebula(skyRefPos.xyz * 100.0);
 				#endif
 
-				#if CLOUDS == 1
+				#if defined PLANAR_CLOUDS
 				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a * cloudMixRate);
 				#endif
