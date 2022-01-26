@@ -297,8 +297,10 @@ void main() {
 		#endif
 		
 		if (water > 0.5) {
+			waterColor.g *= 0.85;
+
 			#if WATER_MODE == 0
-			albedo.rgb = waterColor.rgb * waterColor.a;
+			albedo.rgb = waterColor.rgb * clamp(waterColor.a, 0.0, 0.75); //high values overbrighten it
 			#elif WATER_MODE == 1
 			albedo.rgb *= albedo.a;
 			#elif WATER_MODE == 2
@@ -569,9 +571,9 @@ void main() {
 			float absorbDist = 0.0;
 
 			if (isEyeInWater == 0 && water > 0.5){
-				waterColor.g *= 1.35;
-				absorbColor = normalize(waterColor.rgb * WATER_I) * rainFactor * terrainColor * (1.0 + timeBrightness * 1.35);
-				absorbDist = 1.0 - clamp(difT / 14.0, 0.0, 1.0);
+				albedo.a *= 0.75;
+				absorbColor = normalize(waterColor.rgb * WATER_I) * rainFactor * terrainColor * (1.0 + timeBrightness);
+				absorbDist = 1.0 - clamp(difT / 8.0, 0.0, 1.0);
 			}
 
 			if (glass > 0.5){
@@ -584,10 +586,9 @@ void main() {
 			vec3 newAlbedo = mix(absorbColor * absorbColor, terrainColor * terrainColor, absorbDist * absorbDist);
 			newAlbedo *= newAlbedo;
 
-			float absorb = (1.0 - albedo.a);
-			absorb = sqrt(absorb * clamp(lightmap.y + glass, 0, 1));
+			float absorb = sqrt(clamp(lightmap.y + glass, 0.0, 1.0) * (1.0 - WATER_A));
 
-			albedo.rgb = mix(albedo.rgb, newAlbedo * (1.0 + (float(glass > 0.5) * BLENDING_STRENGTH * 0.25)), absorb);
+			albedo.rgb = mix(albedo.rgb, newAlbedo, absorb);
 		}
 		#endif
 

@@ -20,9 +20,9 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     
     float scattering = 0.0;
     if (subsurface > 0.0){
-        float VoL = clamp(dot(normalize(viewPos.xyz), lightVec) * 0.5 + 0.5, 0.0, 1.0);
-        scattering = pow(VoL, 16.0) * (1.0 - rainStrength) * subsurface;
-        NoL = mix(NoL, 1.0, sqrt(subsurface) * 0.7);
+        float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
+        scattering = pow16(VoL) * (1.0 - rainStrength) * subsurface;
+        NoL = mix(NoL, 1.0, sqrt(subsurface) * 0.75);
         NoL = mix(NoL, 1.0, scattering);
     }
     

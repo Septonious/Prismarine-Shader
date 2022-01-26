@@ -357,7 +357,7 @@ void main() {
 			float depth = clamp(length(viewPos.xyz), 0.0, 7.0);
 			depth = 8.0 - depth;
 
-			albedo.rgb *= mix(waterColor.rgb * depth, vec3(1.0), lightmap.y);
+			albedo.rgb *= mix(waterColor.rgb * depth * 4.0, vec3(1.0), lightmap.y);
 		}
 		#endif
 

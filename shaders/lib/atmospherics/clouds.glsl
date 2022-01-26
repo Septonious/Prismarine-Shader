@@ -149,6 +149,8 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	dither = fract(16.0 * frameTimeCounter + dither);
 	#endif
 	
+	float VoU = dot(normalize(viewPos.xyz), upVec);
+
 	float sampleStep = 1.0 / samples;
 	float currentStep = dither * sampleStep;
 
@@ -165,7 +167,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 
 	vec3 aurora = vec3(0.0);
 
-	if (visibility > 0.0) {
+	if (visibility > 0.0 && VoU > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
 			vec3 planeCoord = wpos * ((6.0 + currentStep * 16.0) / wpos.y) * 0.003;

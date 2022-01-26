@@ -164,9 +164,10 @@ void main() {
 
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 
+	float emission       = float(entityColor.a > 0.05) * 0.125;
+
 	if (albedo.a > 0.001 && lightningBolt < 0.5) {
 		float metalness      = 0.0;
-		float emission       = float(entityColor.a > 0.05) * 0.125;
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
 		
@@ -178,8 +179,10 @@ void main() {
 		emission = 0.75;
 		albedo.rgb *= albedo.rgb;
 		#endif
-
+		emission += float(length(albedo.rgb) > 0.5 && albedo.b > 0.7) * 0.1;
+		emission += float(length(albedo.rgb) > 0.6 && albedo.g > 0.6 && albedo.r > 0.65) * 0.1;
 		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
+
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
@@ -305,10 +308,19 @@ void main() {
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
 
-	#ifdef SSGI
-	/* RENDERTARGETS:0,6,10*/
-	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[2] = albedo * pow16(1.0 - lightmap.y);
+	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
+	/* RENDERTARGETS:0,3,6,10 */
+	gl_FragData[1] = vec4(0.0, 0.0, 0.0, emission * pow16(1.0 - lightmap.y));
+	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
+	gl_FragData[3] = albedo * pow16(1.0 - lightmap.y);
+	#endif
+
+	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
+	/* RENDERTARGETS:0,3,6,7,10 */
+	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, emission * pow16(1.0 - lightmap.y));
+	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
+	gl_FragData[3] = vec4(fresnel3, 0.0);
+	gl_FragData[3] = albedo * pow16(1.0 - lightmap.y);
 	#endif
 }
 

@@ -1,13 +1,39 @@
+float GetNoise(vec2 pos) {
+	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+float getPerlinNoise(vec3 pos){
+	vec3 u = floor(pos);
+	vec3 v = fract(pos);
+
+	v = v * v * (3.0 - 2.0 * v);
+	u.y *= 32.0;
+
+	float noisebdl = GetNoise(u.xz + u.y);
+	float noisebdr = GetNoise(u.xz + u.y + vec2(1.0, 0.0));
+	float noisebul = GetNoise(u.xz + u.y + vec2(0.0, 1.0));
+	float noisebur = GetNoise(u.xz + u.y + vec2(1.0, 1.0));
+	float noisetdl = GetNoise(u.xz + u.y + 32.0);
+	float noisetdr = GetNoise(u.xz + u.y + 32.0 + vec2(1.0, 0.0));
+	float noisetul = GetNoise(u.xz + u.y + 32.0 + vec2(0.0, 1.0));
+	float noisetur = GetNoise(u.xz + u.y + 32.0 + vec2(1.0, 1.0));
+
+	float noise = mix(mix(mix(noisebdl, noisebdr, v.x), mix(noisebul, noisebur, v.x), v.z), mix(mix(noisetdl, noisetdr, v.x), mix(noisetul, noisetur, v.x), v.z), v.y);
+
+	return noise;
+}
+
 float getCloudSample(vec3 pos){
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
 	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.30);
 	
 	float noiseA = 0.0;
-	float mult = 1.0;
+	float frequency = VCLOUDS_FREQUENCY, speed = 0.5;
 	for (int i = 1; i <= VCLOUDS_OCTAVES; i++){
-		noiseA += getCloudNoise(pos * (mult * mult * VCLOUDS_FREQUENCY) - wind * mult) * i * VCLOUDS_HORIZONTAL_THICKNESS;
-		mult *= 0.5;
+		noiseA += getPerlinNoise(pos * frequency - wind * speed) * i * VCLOUDS_HORIZONTAL_THICKNESS;
+		frequency *= 0.2;
+		speed *= 0.2;
 	}
 
 	float sampleHeight = abs(VCLOUDS_HEIGHT - pos.y) / VCLOUDS_VERTICAL_THICKNESS;

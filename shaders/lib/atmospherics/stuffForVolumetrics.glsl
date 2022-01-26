@@ -34,7 +34,7 @@ float InterleavedGradientNoiseVL() {
 }
 #endif
 
-float getCloudNoise(vec3 pos){
+float getTextureNoise(vec3 pos){
 	pos *= 0.35;
 	pos.xz *= 0.25;
 
@@ -49,8 +49,8 @@ float getCloudNoise(vec3 pos){
 	vec2 uv = u.xz + v.xz + u.y * 16.0;
 
 	vec2 coord = uv / 64.0;
-	float a = texture2D(noisetex, coord).r;
-	float b = texture2D(noisetex, coord + 0.25).r;
+	float a = texture2D(depthtex2, coord).r;
+	float b = texture2D(depthtex2, coord + 0.25).r;
 		
 	return mix(a, b, v.y);
 }
@@ -77,10 +77,10 @@ float getFogSample(vec3 pos, float height, float verticalThickness, float thickn
 	pos *= 4.0;
 	#endif
 
-	float noise = getCloudNoise(pos * 1.000 - wind * 0.2);
-		  noise+= getCloudNoise(pos * 0.500 + wind * 0.3);
-          noise+= getCloudNoise(pos * 0.250 - wind * 0.1);
-          noise+= getCloudNoise(pos * 0.125 + wind * 0.4);
+	float noise = getTextureNoise(pos * 1.000 - wind * 0.2);
+		  noise+= getTextureNoise(pos * 0.500 + wind * 0.3);
+          noise+= getTextureNoise(pos * 0.250 - wind * 0.1);
+          noise+= getTextureNoise(pos * 0.125 + wind * 0.4);
 
 	noise *= thicknessMult;
 

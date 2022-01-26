@@ -24,7 +24,7 @@ uniform sampler2D noisetex;
 //Program//
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
-	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 4.0;
+	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 32.0;
 	
 	#ifdef WHITE_WORLD
 	albedo.rgb = vec3(2.0);

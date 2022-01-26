@@ -19,6 +19,8 @@ varying vec2 texCoord;
 varying vec4 color;
 
 #ifdef WATER_CAUSTICS
+uniform int isEyeInWater;
+
 uniform float frameTimeCounter, timeBrightness;
 
 varying vec4 position;
@@ -67,8 +69,9 @@ void main() {
 		waterColor.r *= 1.1;
 		waterColor.g *= 0.7;
 		waterColor.b *= 1.4;
-		albedo.rgb = waterColor.rgb;
-		albedo.rgb = getCaustics(position.xyz + cameraPosition.xyz) * albedo.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness * 0.75);
+		float caustics = getCaustics(position.xyz + cameraPosition.xyz);
+		if (isEyeInWater == 0) albedo.rgb = mix(albedo.rgb, waterColor.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness * 0.75), caustics);
+		else albedo.rgb *= caustics * waterColor.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness * 0.75);
 	}
 	#endif
 	

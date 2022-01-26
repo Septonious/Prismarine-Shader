@@ -144,10 +144,9 @@ void main() {
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 
 	if(blockEntityId == 10402) albedo.a = 0.0;
-
+	float emission       = float(blockEntityId == 10205);
 	if (albedo.a > 0.001) {
 		float metalness      = 0.0;
-		float emission       = float(blockEntityId == 10205);
 		float subsurface     = float(blockEntityId == 10109) * 0.5;
 		vec3 baseReflectance = vec3(0.04);
 		
@@ -305,10 +304,19 @@ void main() {
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
 
-	#ifdef SSGI
-	/* RENDERTARGETS:0,6,10*/
-	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[2] = albedo * pow16(1.0 - lightmap.y);
+	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
+	/* RENDERTARGETS:0,3,6,10 */
+	gl_FragData[1] = vec4(0.0, 0.0, 0.0, emission * pow16(1.0 - lightmap.y));
+	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
+	gl_FragData[3] = albedo * pow16(1.0 - lightmap.y);
+	#endif
+
+	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
+	/* RENDERTARGETS:0,3,6,7,10 */
+	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, emission * pow16(1.0 - lightmap.y));
+	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
+	gl_FragData[3] = vec4(fresnel3, 0.0);
+	gl_FragData[3] = albedo * pow16(1.0 - lightmap.y);
 	#endif
 }
 
