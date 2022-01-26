@@ -179,10 +179,8 @@ void main() {
 		emission = 0.75;
 		albedo.rgb *= albedo.rgb;
 		#endif
-		emission += float(length(albedo.rgb) > 0.5 && albedo.b > 0.7) * 0.1;
-		emission += float(length(albedo.rgb) > 0.6 && albedo.g > 0.6 && albedo.r > 0.65) * 0.1;
-		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 
+		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA

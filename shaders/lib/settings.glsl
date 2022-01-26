@@ -31,8 +31,8 @@ Please don't edit anything from Undefine section and onwards.
 //#define POWDER_SNOW_HIGHLIGHT
 //#define ENTITY_HIGHLIGHT
 //#define DEBRIS_HIGHLIGHT
+  #define GLOWING_ARDONI_MARKINGS
   #define BLUE_NOISE_DITHERING
-//#define ALTERNATIVE_SKY
 
   #define CUSTOM_BEACON_BEAM
   #define CUSTOM_NETHER_PORTAL
@@ -539,4 +539,7 @@ Please don't edit anything from Undefine section and onwards.
 #endif
 
 #ifdef POWDER_SNOW_HIGHLIGHT
+#endif
+
+#ifdef GLOWING_ARDONI_MARKINGS
 #endif
