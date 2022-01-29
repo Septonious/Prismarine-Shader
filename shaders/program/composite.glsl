@@ -157,7 +157,7 @@ void main() {
 	vec4 cloud = vec4(0.0);
 
 	#ifdef VOLUMETRIC_CLOUDS
-	cloud += getVolumetricCloud(viewPosScaled.xyz, z1Scaled, z0Scaled, dither, translucent);
+	cloud = getVolumetricCloud(viewPosScaled.xyz, z1Scaled, z0Scaled, dither, translucent);
 	#endif
 
 	#if ALPHA_BLEND == 0

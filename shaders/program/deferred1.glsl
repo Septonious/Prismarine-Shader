@@ -265,10 +265,8 @@ void main() {
 		color.rgb = netherCol.rgb * 0.04;
 		#endif
 
-		#if defined END && !defined LIGHT_SHAFT
-		float VoL = dot(normalize(viewPos.xyz), lightVec);
-		VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
-		color.rgb += endCol.rgb * 0.04 * VoL;
+		#ifdef END
+		color.rgb += endCol.rgb * 0.02;
 		#endif
 
 		if (isEyeInWater == 2) {

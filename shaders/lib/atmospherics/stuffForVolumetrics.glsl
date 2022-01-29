@@ -6,8 +6,8 @@ float GetLinearDepth2(float depth) {
     return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 }
 
-vec4 GetWorldSpace(float shadowdepth, vec2 texCoord) {
-	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord, shadowdepth, 1.0) * 2.0 - 1.0);
+vec4 GetWorldSpace(float depth, vec2 texCoord) {
+	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord, depth, 1.0) * 2.0 - 1.0);
 	viewPos /= viewPos.w;
 
 	vec4 wpos = gbufferModelViewInverse * viewPos;

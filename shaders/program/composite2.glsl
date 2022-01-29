@@ -101,14 +101,14 @@ void main() {
 	#endif
 	
 	#ifdef VOLUMETRIC_CLOUDS
-	vec4 cloud = texture2D(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
+	vec4 cloud = texture2DLod(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 2.0);
 
 	#ifdef BILATERAL_UPSCALING
-	cloud = BilateralUpscaling(colortex8, texCoord.xy, VOLUMETRICS_RENDER_RESOLUTION);
+	cloud.rgb = BilateralUpscaling(colortex8, texCoord.xy, VOLUMETRICS_RENDER_RESOLUTION).rgb;
 	#endif
 
-	float rainFactor = (1.0 - rainStrength * 0.7);
-	color = mix(color, cloud.rgb * rainFactor, clamp(cloud.a * cloud.a, 0.0, 0.999));
+	float rainFactor = (1.0 - rainStrength * 0.75);
+	color = mix(color, cloud.rgb * rainFactor, cloud.a);
 	#endif
 
 	/*DRAWBUFFERS:0*/

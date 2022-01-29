@@ -10,11 +10,11 @@ vec4 BilateralUpscaling(sampler2D colortex, vec2 coord, float resolution){
 
     float depth = texture2D(depthtex0, coord).r;
     float linearDepth = GetLinearDepth(depth);
+    float depthMult = 1.0 / (far * near);
 
     ivec2 scaling = ivec2(1 / resolution);
     ivec2 scaledCoord = ivec2(coord * resolution) * scaling;
     ivec2 halfCoord = ivec2(coord * resolution);
-    float depthMult = 1.0 / (far * near);
     ivec2 newCoord = ivec2((gl_FragCoord.xy * resolution + frameCounter % 2));
 
     ivec2 depthCoord = scaledCoord + ivec2(-2, -2) * scaling + newCoord * scaling;

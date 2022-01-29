@@ -31,7 +31,7 @@ Please don't edit anything from Undefine section and onwards.
 //#define POWDER_SNOW_HIGHLIGHT
 //#define ENTITY_HIGHLIGHT
 //#define DEBRIS_HIGHLIGHT
-  #define GLOWING_ARDONI_MARKINGS
+//#define GLOWING_ARDONI_MARKINGS
   #define BLUE_NOISE_DITHERING
 
   #define CUSTOM_BEACON_BEAM
@@ -46,13 +46,13 @@ Please don't edit anything from Undefine section and onwards.
 //#define SSGI
   #define GI_ACCUMULATION
   #define GI_ACCUMULATION_STRENGTH 0.94 //[0.90 0.91 0.92 0.93 0.94 0.95 0.96 0.97 0.98 0.99]
-  #define GI_DEPTH_LENIENCY 0.25 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
+  #define GI_DEPTH_LENIENCY 5.00 //[0.25 0.5 1.00 5.00 10.00 20.00 40.00]
   #define DENOISE
-  #define DENOISE_QUALITY 40 //[8 12 16 20 24 28 32 36 40 44 48 52 56 60 64]
-  #define DENOISE_STRENGTH 2.00 //[1.00 1.50 2.00 2.50 3.00 3.50 4.00 4.50 5.00 5.50 6.00 6.50 7.00 7.50 8.00]
+  #define DENOISE_QUALITY 48 //[8 16 24 32 40 48 56 64 72 80 88 96 104 112 120 128]
+  #define DENOISE_STRENGTH 80 //[8 16 24 32 40 48 56 64 72 80 88 96 104 112 120 128]
   #define BOUNCES 1 //[1 2 3 4]
   #define ILLUMINATION_STRENGTH 6.00 //[1.00 2.00 3.00 4.00 5.00 6.00 7.00 8.00]
-  #define STRIDE 96 //[4 8 16 24 32 48 64 96 128]
+  #define STRIDE 100 //[10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 200]
   #define EMISSIVE_CONCRETE
 
   #define FOG_ALTITUDE 140.0 //[60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0]
@@ -178,7 +178,7 @@ Please don't edit anything from Undefine section and onwards.
   #define ALPHA_BLEND 0 //[0 1]
 
 //Atmospherics//
-  #define CLOUDS 3 //[0 1 2 3]
+  #define CLOUDS 3 //[0 1 2 3 4]
   #define STARS
 //#define SKY_DESATURATION
   #define AURORA
@@ -204,12 +204,14 @@ Please don't edit anything from Undefine section and onwards.
   #define SKY_GROUND 2 //[0 1 2]
   #define SKYBOX_BRIGHTNESS 2.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
-  #define CLOUD_THICKNESS 8 //[1 2 4 8 16]
+  #define CLOUD_THICKNESS 6 //[1 2 4 6 8 12 16]
   #define CLOUD_AMOUNT 11.0 //[12.0 11.0 10.0 9.0 8.0]
-  #define CLOUD_HEIGHT 5.0 //[5.0 7.5 10.0 12.5 15.0]
+  #define CLOUD_HEIGHT 2.5 //[2.5 5.0 7.5 10.0]
   #define CLOUD_SPEED 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.50 3.00 3.50 4.00]
   #define CLOUD_OPACITY 1.0 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
-  #define CLOUD_BRIGHTNESS 2.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+  #define CLOUD_BRIGHTNESS 2.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+  #define CLOUD_OCTAVES 6 //[1 2 3 4 5 6 7 8]
+  #define CLOUD_FREQUENCY 0.2 //[0.1 0.2 0.3 0.4 0.5]
 
 //Water//
   #define WATER_MODE 0 //[0 1 2 3]

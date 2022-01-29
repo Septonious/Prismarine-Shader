@@ -165,20 +165,22 @@ void main() {
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 	float emission = 0.0;
 
+	float lava = float(mat > 3.98 && mat < 4.02);
+
 	if (albedo.a > 0.001) {
 		float foliage  = float(mat > 0.98 && mat < 1.02);
 		float leaves   = float(mat > 1.98 && mat < 2.02);
 		float emissive = float(mat > 2.98 && mat < 3.02);
-		float lava     = float(mat > 3.98 && mat < 4.02);
 		float candle   = float(mat > 4.98 && mat < 5.02);
 
 		float metalness      = 0.0;
-			  emission       = (emissive + candle + lava) * 0.4;
+			  emission       = emissive + candle + lava;
 		float subsurface     = (foliage + candle) * 0.5 + leaves;
 		vec3 baseReflectance = vec3(0.04);
 
 		#if defined SSGI && defined EMISSIVE_CONCRETE
-		emission += isConcrete * 2.0;
+		emission += isConcrete * 1.5;
+		albedo.rgb *= 1.0 + isConcrete * 0.25;
 		#endif
 
 		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
@@ -354,10 +356,11 @@ void main() {
 
 		#ifdef OVERWORLD
 		if (isEyeInWater == 1){
+			float lightmapFactor = 1.0 + lightmap.y;
 			float depth = clamp(length(viewPos.xyz), 0.0, 7.0);
 			depth = 8.0 - depth;
 
-			albedo.rgb *= mix(waterColor.rgb * depth * 4.0, vec3(1.0), lightmap.y);
+			albedo.rgb *= mix(waterColor.rgb * depth * pow2(lightmapFactor), vec3(1.0), lightmap.y);
 		}
 		#endif
 
@@ -377,18 +380,20 @@ void main() {
 	#endif
 
 	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
+	emission += lava * 4.0;
 	/* RENDERTARGETS:0,3,6,10 */
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, emission * pow16(1.0 - lightmap.y));
+	gl_FragData[1] = vec4(0.0, 0.0, 0.0, emission * pow4(1.0 - lightmap.y * 0.5));
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
-	gl_FragData[3] = albedo * pow16(1.0 - lightmap.y);
+	gl_FragData[3] = albedo * pow4(1.0 - lightmap.y * 0.5);
 	#endif
 
 	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
+	emission += lava * 4.0;
 	/* RENDERTARGETS:0,3,6,7,10 */
-	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, emission * pow16(1.0 - lightmap.y));
+	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, emission * pow4(1.0 - lightmap.y * 0.5));
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
 	gl_FragData[3] = vec4(fresnel3, 0.0);
-	gl_FragData[3] = albedo * pow16(1.0 - lightmap.y);
+	gl_FragData[3] = albedo * pow4(1.0 - lightmap.y * 0.5);
 	#endif
 }
 

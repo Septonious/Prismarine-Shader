@@ -27,12 +27,12 @@ float getCloudSample(vec3 pos){
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
 	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.30);
-	
+
 	float noiseA = 0.0;
-	float frequency = VCLOUDS_FREQUENCY, speed = 0.5;
+	float frequency = 0.1, speed = 0.5;
 	for (int i = 1; i <= VCLOUDS_OCTAVES; i++){
 		noiseA += getPerlinNoise(pos * frequency - wind * speed) * i * VCLOUDS_HORIZONTAL_THICKNESS;
-		frequency *= 0.2;
+		frequency *= VCLOUDS_FREQUENCY;
 		speed *= 0.2;
 	}
 
@@ -56,9 +56,12 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	dither = fract(dither + frameCounter / 32.0);
 	#endif
 
-	float VoL = dot(normalize(viewPos.xyz), lightVec);
-	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-	float scattering = pow6(halfVoL) * (1.0 - rainStrength) * clamp((1.0 - cameraPosition.y * 0.004), 0.0, 1.0);
+	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
+	float scattering = pow16(VoL) * (1.0 - rainStrength);
+          VoL = mix(VoL, 1.0, 0.75);
+          VoL = mix(VoL, 1.0, scattering);
+
+	float cloudScattering = pow(VoL * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
 
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
@@ -67,7 +70,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 		for (int i = 0; i < VCLOUDS_SAMPLES; i++) {
 			float minDist = (i + dither) * VCLOUDS_RANGE;
 
-			if (depth1 < minDist || minDist > 1024.0 || finalColor.a > 0.99 || isEyeInWater > 1.0){
+			if (depth1 < minDist || minDist > 1024.0 || finalColor.a > 0.999 || isEyeInWater > 1.0){
 				break;
 			}
 			
@@ -81,32 +84,34 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 
 				wpos.xyz += cameraPosition.xyz + vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
+				//Cloud noise
 				float noise = getCloudSample(wpos.xyz);
 
 				//Find the lower and upper parts of the cloud
-				float density = pow(smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y), 0.4);
+				float density = pow(smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y), cloudScattering);
 
 				//Color calculation and lighting
-				vec4 cloudsColor = vec4(mix(lightCol, ambientCol, noise * density) * (1.0 + scattering), noise);
+				vec4 cloudsColor = vec4(mix(lightCol, ambientCol, noise * density) * (1.0 + cloudScattering), noise);
 
 				//Translucency blending, works half correct
 				if (depth0 < minDist){
 					cloudsColor *= translucent;
 				}
 
+				//Final color calculations
 				cloudsColor.a *= VCLOUDS_OPACITY;
-				cloudsColor.rgb *= cloudsColor.a;
-
-				#if MC_VERSION >= 11800
-				cloudsColor.rgb *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
-				#else
-				cloudsColor.rgb *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
-				#endif
+				cloudsColor.rgb *= cloudsColor.a * 0.75;
 
 				finalColor += cloudsColor * (1.0 - finalColor.a) * (1.0 - isEyeInWater * (1.0 - eBS));
 			}
 		}
 	}
 
-	return max(finalColor, vec4(0.0));
+	#if MC_VERSION >= 11800
+	finalColor.rgb *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
+	#else
+	finalColor.rgb *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
+	#endif
+
+	return finalColor;
 }

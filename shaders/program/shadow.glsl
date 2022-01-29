@@ -10,13 +10,14 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-uniform int worldTime;
-
 varying float mat;
-
 varying vec2 texCoord;
-
 varying vec4 color;
+
+//Uniforms//
+uniform int blockEntityId, worldTime;
+
+uniform sampler2D tex;
 
 #ifdef WATER_CAUSTICS
 uniform int isEyeInWater;
@@ -39,11 +40,6 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #include "/lib/lighting/caustics.glsl"
 #endif
 
-//Uniforms//
-uniform int blockEntityId;
-
-uniform sampler2D tex;
-
 //Program//
 void main() {
     #if MC_VERSION >= 11300
@@ -58,8 +54,8 @@ void main() {
 	if (disable > 0.5 || albedo.a < 0.01) discard;
 
     #ifdef SHADOW_COLOR
-	albedo.rgb = mix(vec3(1.0), albedo.rgb, 1.0 - pow(1.0 - albedo.a, 8.0));
-	albedo.rgb *= 1.0 - pow(albedo.a, 128.0);
+	albedo.rgb = mix(vec3(1.0), albedo.rgb, pow(albedo.a, (1.0 - albedo.a) * 0.5));
+	albedo.rgb *= 1.0 - pow(albedo.a, 64.0);
 	#else
 	if ((premult > 0.5 && albedo.a < 0.98)) albedo.a = 0.0;
 	#endif

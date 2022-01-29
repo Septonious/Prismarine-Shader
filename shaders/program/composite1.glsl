@@ -95,10 +95,10 @@ void main() {
 
 	#ifdef VOLUMETRIC_CLOUDS
 
+	vec4 cloud = texture2DLod(colortex8, texCoord.xy, 2.0);
+
 	#ifdef BLUR_FILTERING
-	vec4 cloud = GaussianBlur(colortex8, texCoord.xy);
-	#else
-	vec4 cloud = texture2D(colortex8, texCoord.xy);
+	cloud.rgb = GaussianBlur(colortex8, texCoord.xy).rgb;
 	#endif
 
 	gl_FragData[1] = cloud;

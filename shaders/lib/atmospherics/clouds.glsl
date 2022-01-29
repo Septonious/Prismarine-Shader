@@ -2,38 +2,44 @@ void erodeCoord(inout vec2 coord, in float currentStep, in float erosionStrength
 	coord += cos(mix(vec2(cos(currentStep * 1.00), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.0), sin(currentStep * 4.00)), currentStep) * erosionStrength);
 }
 
-#if CLOUDS == 1 && defined OVERWORLD
+#if defined PLANAR_CLOUDS && defined OVERWORLD
 float CloudNoise(vec2 coord, vec2 wind){
-	float noise = texture2D(noisetex, coord * 0.5      + wind * 0.55).x;
-		  noise+= texture2D(noisetex, coord * 0.25     + wind * 0.45).x * 2.0;
-		  noise+= texture2D(noisetex, coord * 0.125    + wind * 0.35).x * 3.0;
-		  noise+= texture2D(noisetex, coord * 0.0625   + wind * 0.25).x * 4.0;
-		  noise+= texture2D(noisetex, coord * 0.03125  + wind * 0.15).x * 5.0;
-		  noise+= texture2D(noisetex, coord * 0.016125 + wind * 0.05).x * 6.0;
+	float windMult = 0.5;
+	float frequencyMult = 0.25;
+	float noiseMult = 1.0;
+	float noise = 0.0;
+
+	for (int i = 0; i < CLOUD_OCTAVES; i++){
+		noise += texture2D(noisetex, coord * frequencyMult + wind * windMult).x * noiseMult;
+		windMult *= 0.75;
+		frequencyMult *= CLOUD_FREQUENCY;
+		noiseMult += 1.0;
+	}
+
 	return noise;
 }
 
 float CloudCoverage(float noise, float VoU, float coverage){
 	float noiseMix = mix(noise, 21.0, 0.33 * rainStrength);
 	float noiseFade = clamp(sqrt(VoU * 10.0), 0.0, 1.0);
-	float noiseCoverage = ((coverage * coverage) + CLOUD_AMOUNT);
+	float noiseCoverage = (coverage * coverage) + CLOUD_AMOUNT;
 	float multiplier = 1.0 - 0.5 * rainStrength;
 
 	return max(noiseMix * noiseFade - noiseCoverage, 0.0) * multiplier;
 }
 
 vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
-	float VoU = dot(normalize(viewPos), upVec);
 	float VoS = dot(normalize(viewPos), sunVec);
-
+	float VoU = dot(normalize(viewPos), upVec);
+	
 	#ifdef TAA
 	dither = fract(16.0 * frameTimeCounter + dither);
 	#endif
-	
+
 	float cloud = 0.0;
 	float cloudGradient = 0.0;
-	float gradientMix = dither * 0.1667;
 	float colorMultiplier = CLOUD_BRIGHTNESS * (0.5 - 0.25 * (1.0 - sunVisibility) * (1.0 - rainStrength));
+	float gradientMix = dither * 0.1667;
 	float noiseMultiplier = CLOUD_THICKNESS * 0.2;
 	float scattering = pow(VoS * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
 
@@ -46,11 +52,10 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 
 	if (VoU > 0.1){
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
-		for(int i = 0; i < 4; i++) {
-			if (cloud > 0.99) break;
-			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * 0.75) / wpos.y) * 0.0075;
+		for(int i = 0; i < 6; i++) {
+			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * 0.75) / wpos.y) * 0.02;
 			vec2 coord = cameraPosition.xz * 0.00015 + planeCoord.xz;
-				 erodeCoord(coord, i + dither, 0.025);
+				 erodeCoord(coord, i + dither, 0.015);
 			float coverage = float(i - 3.0 + dither) * 0.667;
 
 			float noise = CloudNoise(coord, wind);
@@ -62,6 +67,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 				mix(gradientMix * gradientMix, 1.0 - noise, 0.25),
 				noise * (1.0 - cloud * cloud)
 			);
+
 			cloud = mix(cloud, 1.0, noise);
 			gradientMix += 0.1667;
 		}
@@ -161,8 +167,8 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	#endif
 
 	vec2 wind = vec2(
-		frametime * CLOUD_SPEED * 0.000125,
-		sin(frametime * CLOUD_SPEED * 0.05) * 0.00025
+		frametime * CLOUD_SPEED * 0.00025,
+		sin(frametime * CLOUD_SPEED * 0.05) * 0.0005
 	);
 
 	vec3 aurora = vec3(0.0);

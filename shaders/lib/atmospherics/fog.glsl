@@ -13,9 +13,9 @@ vec3 GetFogColor(vec3 viewPos) {
 
 	float baseGradient = exp(-(VoU * 0.5 + 0.5) * 0.5 / density);
 
-    vec3 fog = GetSkyColor(viewPos, false) * vec3(0.5, 0.6, 1.5) * 8.0 * baseGradient / (SKY_I * SKY_I);
+    vec3 fog = GetSkyColor(viewPos, false) * vec3(0.5, 0.6, 1.5) * 8.0 * baseGradient / SKY_I;
 
-    fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * (SKY_I * SKY_I);
+    fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * SKY_I;
 
 	float nightGradient = exp(-(VoU * 0.5 + 0.5) * 0.35 / nightDensity);
     vec3 nightFog = lightNight * lightNight * 6.0 * nightGradient * nightExposure;
@@ -35,7 +35,6 @@ vec3 GetFogColor(vec3 viewPos) {
 	float altitudeFactor2 = pow2(clamp(cameraPosition.y * 0.075, 0.0, 1.0));
 
 	fog = mix(minLightCol * 0.5, fog, altitudeFactor2 * clamp(eBS + 0.25, 0.0, 1.0));
-
 	fog *= altitudeFactor;
 
 	return fog;

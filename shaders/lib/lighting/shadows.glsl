@@ -119,7 +119,7 @@ vec3 GetShadow(vec3 worldPos, float NoL, float subsurface, float skylight) {
     float distanceBias = sqrt(dot(worldPos.xyz, worldPos.xyz)) * 0.005;
     
     float bias = (distortBias * biasFactor + distanceBias + 0.05) / shadowMapResolution;
-    float offset = 4.0 / shadowMapResolution;
+    float offset = 2.0 / shadowMapResolution;
     
     if (subsurface > 0.0) {
         bias = 0.0002;

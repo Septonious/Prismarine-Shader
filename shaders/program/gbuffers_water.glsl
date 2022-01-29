@@ -245,7 +245,7 @@ void main() {
 		float emission       = 0.0;
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
-		
+
 		#ifndef REFLECTION_TRANSLUCENT
 		glass = 0.0;
 		translucent = 0.0;
@@ -577,20 +577,22 @@ void main() {
 			}
 
 			if (glass > 0.5){
-				albedo.a += albedo.a;
+				albedo.a += albedo.a * 0.75;
 				albedo.a = clamp(albedo.a, 0.5, 0.95);
 				absorbColor = normalize(albedo.rgb * albedo.rgb) * terrainColor * 1.25;
-				absorbDist = 1.0 - clamp(difT, 0.0, 1.0);
+				absorbDist = 1.0 - clamp(difT * 32.0, 0.0, 1.0);
 			}
 			
 			vec3 newAlbedo = mix(absorbColor * absorbColor, terrainColor * terrainColor, absorbDist * absorbDist);
-			newAlbedo *= newAlbedo;
 
-			float absorb = sqrt(clamp(lightmap.y + glass, 0.0, 1.0) * (1.0 - WATER_A));
-
-			albedo.rgb = mix(albedo.rgb, newAlbedo, absorb);
+			float lightmapFactor = 0.0 + lightmap.y;
+			float absorb = sqrt(clamp(lightmap.y + glass, 0.0, 1.0) * (1.0 - WATER_A) * lightmap.y);
+ 
+			albedo.rgb = mix(albedo.rgb, newAlbedo, absorb * (1.0 - moonVisibility * 0.85));
 		}
 		#endif
+
+		albedo.a *= 0.75 + lightmap.y * 0.25;
 
 		Fog(albedo.rgb, viewPos);
 
