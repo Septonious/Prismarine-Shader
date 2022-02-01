@@ -485,7 +485,7 @@ void main() {
 
 				#ifdef OVERWORLD
 				#ifdef AURORA
-				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 6);
+				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8);
 				#endif
 
 				#ifdef OVERWORLD_NEBULA
