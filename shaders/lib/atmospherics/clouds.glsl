@@ -55,7 +55,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < 6; i++) {
 			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * 0.75) / wpos.y) * 0.02;
-			vec2 coord = cameraPosition.xz * 0.00015 + planeCoord.xz;
+			vec2 coord = cameraPosition.xz * 0.001 + planeCoord.xz;
 				 erodeCoord(coord, i + dither, 0.015);
 				#ifdef BLOCKY_CLOUDS
 				coord = floor(coord * 8.0);

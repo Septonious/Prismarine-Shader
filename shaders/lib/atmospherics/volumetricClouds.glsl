@@ -26,7 +26,7 @@ float getPerlinNoise(vec3 pos){
 float getCloudSample(vec3 pos){
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
-	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.30);
+	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.50);
 
 	float noiseA = 0.0;
 	float frequency = 0.1, speed = 0.5;
