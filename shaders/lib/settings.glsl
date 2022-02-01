@@ -31,8 +31,9 @@ Please don't edit anything from Undefine section and onwards.
 //#define POWDER_SNOW_HIGHLIGHT
 //#define ENTITY_HIGHLIGHT
 //#define DEBRIS_HIGHLIGHT
-//#define GLOWING_ARDONI_MARKINGS
+//#define ENTITY_BRIGHT_PARTS_HIGHLIGHT
 #define BLUE_NOISE_DITHERING
+//#define BLOCKY_CLOUDS
 //#define RAINBOW
 
 #define CUSTOM_BEACON_BEAM
@@ -63,7 +64,7 @@ Please don't edit anything from Undefine section and onwards.
 #define REFRACTION_STRENGTH 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0]
 #define WATER_CAUSTICS
 #define WATER_CAUSTICS_STRENGTH 4 //[1 2 3 4 5 6 7 8]  
-#define REFLECTION_STRENGTH 2.0 //[1.0 2.0 3.0 4.0]
+#define REFLECTION_STRENGTH 2.0 //[1.0 1.5 2.0 2.5 3.0 3.5 4.0]
 
 #define INTEGRATED_EMISSION
 #define EMISSIVE_ORES
@@ -554,5 +555,5 @@ Please don't edit anything from Undefine section and onwards.
 #ifdef POWDER_SNOW_HIGHLIGHT
 #endif
 
-#ifdef GLOWING_ARDONI_MARKINGS
+#ifdef ENTITY_BRIGHT_PARTS_HIGHLIGHT
 #endif

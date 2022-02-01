@@ -33,10 +33,8 @@ void getIntegratedEmission(inout float emission, inout vec2 lightmap, in vec4 al
         lightmap.x *= newEmissive;
     }
 
-    #ifdef GLOWING_ARDONI_MARKINGS
-    // Players
-		newEmissive += float(length(albedo.rgb) > 0.5 && albedo.b > 0.7) * 0.15;
-		newEmissive += float(length(albedo.rgb) > 0.6 && albedo.g > 0.6 && albedo.r > 0.65) * 0.15;
+    #ifdef ENTITY_BRIGHT_PARTS_HIGHLIGHT
+    newEmissive += float(length(albedo.rgb) > 0.85);
     #endif
 
 	emission += newEmissive;

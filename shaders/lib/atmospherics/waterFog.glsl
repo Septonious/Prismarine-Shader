@@ -21,9 +21,10 @@ vec4 GetWaterFog(vec3 viewPos) {
     #endif
 
     vec3 waterFogColor  = waterColor.rgb * waterColor.rgb * 0.75;
+         waterFogColor  = mix(waterFogColor, weatherCol.rgb * 0.25, rainStrength);
          waterFogColor *= clampEyeBrightness;
          #ifdef OVERWORLD
-         waterFogColor *= (1.0 + scattering) * (1.00 - rainStrength * 0.75);
+         waterFogColor *= (1.0 + scattering);
          #endif
          waterFogColor *= 1.0 - blindFactor;
 

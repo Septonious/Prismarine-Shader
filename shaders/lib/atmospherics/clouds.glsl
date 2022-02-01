@@ -4,6 +4,7 @@ void erodeCoord(inout vec2 coord, in float currentStep, in float erosionStrength
 
 #if defined PLANAR_CLOUDS && defined OVERWORLD
 float CloudNoise(vec2 coord, vec2 wind){
+
 	float windMult = 0.5;
 	float frequencyMult = 0.25;
 	float noiseMult = 1.0;
@@ -56,6 +57,9 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * 0.75) / wpos.y) * 0.02;
 			vec2 coord = cameraPosition.xz * 0.00015 + planeCoord.xz;
 				 erodeCoord(coord, i + dither, 0.015);
+				#ifdef BLOCKY_CLOUDS
+				coord = floor(coord * 8.0);
+				#endif
 			float coverage = float(i - 3.0 + dither) * 0.667;
 
 			float noise = CloudNoise(coord, wind);
@@ -73,7 +77,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 		}
 		cloudColor = mix(
 			ambientCol * (0.5 * sunVisibility + 0.5),
-			lightCol * (1.0 + scattering),
+			lightCol * (1.0 + scattering + rainStrength),
 			cloudGradient * cloud
 		);
 
