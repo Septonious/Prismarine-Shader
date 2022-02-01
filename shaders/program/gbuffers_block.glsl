@@ -307,14 +307,14 @@ void main() {
 
 	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,3,6,10 */
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, emission * pow4(1.0 - lightmap.y * 0.5));
+	gl_FragData[1] = vec4(0.0, 0.0, 0.0, emission);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
 	gl_FragData[3] = albedo * pow4(1.0 - lightmap.y * 0.5);
 	#endif
 
 	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,3,6,7,10 */
-	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, emission * pow4(1.0 - lightmap.y * 0.5));
+	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, emission);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
 	gl_FragData[3] = vec4(fresnel3, 0.0);
 	gl_FragData[3] = albedo * pow4(1.0 - lightmap.y * 0.5);

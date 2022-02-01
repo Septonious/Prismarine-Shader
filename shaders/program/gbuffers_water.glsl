@@ -577,9 +577,9 @@ void main() {
 			}
 
 			if (glass > 0.5){
-				albedo.a += albedo.a * 0.75;
+				albedo.a += albedo.a * 0.25;
 				albedo.a = clamp(albedo.a, 0.5, 0.95);
-				absorbColor = normalize(albedo.rgb * albedo.rgb) * terrainColor * 1.25;
+				absorbColor = normalize(albedo.rgb * albedo.rgb) * terrainColor;
 				absorbDist = 1.0 - clamp(difT * 32.0, 0.0, 1.0);
 			}
 			

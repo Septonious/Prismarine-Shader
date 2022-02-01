@@ -35,7 +35,7 @@ float AnamorphicLens(vec2 lightPos, float size, float dist) {
 }
 
 vec3 RainbowLens(vec2 lightPos, float size, float dist, float rad) {
-	vec2 lensCoord = (texCoord + (lightPos * dist - 0.5)) * vec2(aspectRatio,1.0);
+	vec2 lensCoord = (texCoord + (lightPos * dist - 0.5)) * vec2(aspectRatio, 1.0);
 	float lens = clamp(1.0 - length(lensCoord) / (size * fovmult), 0.0, 1.0);
 	
 	vec3 rainbowLens = 

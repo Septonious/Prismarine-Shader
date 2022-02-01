@@ -7,7 +7,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     float groundDensity = 0.1 * (4.0 - 3.0 * sunVisibility) *
                           (10.0 * rainStrength * rainStrength + 1.0);
-    
+
     float exposure = exp2(timeBrightness * 0.75 - 0.75 + SKY_EXPOSURE_D);
     float nightExposure = exp2(-3.5 + SKY_EXPOSURE_N);
     float weatherExposure = exp2(SKY_EXPOSURE_W);
@@ -68,5 +68,4 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     return sky;
 }
-
 #endif

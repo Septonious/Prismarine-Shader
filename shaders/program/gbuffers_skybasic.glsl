@@ -18,6 +18,10 @@ varying vec3 upVec, sunVec;
 uniform int isEyeInWater;
 uniform int worldTime;
 
+#ifdef RAINBOW
+uniform float wetness;
+#endif
+
 uniform float blindFactor;
 uniform float frameCounter;
 uniform float frameTimeCounter;
@@ -25,14 +29,14 @@ uniform float nightVision;
 uniform float rainStrength;
 uniform float shadowFade, voidFade;
 uniform float timeAngle, timeBrightness;
-uniform float viewWidth, viewHeight;
+uniform float viewWidth, viewHeight, aspectRatio;
 
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferModelViewInverse;
-uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferProjectionInverse, gbufferProjection;
 
 uniform sampler2D noisetex;
 
@@ -100,22 +104,41 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #include "/lib/atmospherics/sky.glsl"
 
 #if defined OVERWORLD && defined MOON_SMOKE
-vec3 GetGalaxy(vec3 viewPos) {
+vec3 Getsmoke(vec3 viewPos) {
 	float VoL = dot(normalize(viewPos.xyz), -sunVec);
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
 	float visibility = pow16(halfVoL) * (1.0 - rainStrength) * (1.0 - timeBrightness);
 
 	vec3 wpos = mat3(gbufferModelViewInverse) * viewPos;
-
 	vec2 planeCoord = wpos.xz / (wpos.y + length(wpos.xz) * 0.5);
 
-	float galaxyNoise = texture2D(noisetex, planeCoord * 0.075).r * 0.1;
-		  galaxyNoise+= texture2D(noisetex, planeCoord * 0.050).r * 0.2;
-		  galaxyNoise+= texture2D(noisetex, planeCoord * 0.025).r * 0.3;
+	float smokeNoise = texture2D(noisetex, planeCoord * 0.075).r * 0.1;
+		  smokeNoise+= texture2D(noisetex, planeCoord * 0.050).r * 0.2;
+		  smokeNoise+= texture2D(noisetex, planeCoord * 0.025).r * 0.3;
 
-	vec3 galaxy = galaxyNoise * lightNight * visibility;
+	vec3 smoke = smokeNoise * lightNight * visibility;
 
-	return galaxy * MOON_SMOKE_BRIGHTNESS * MOON_SMOKE_BRIGHTNESS;
+	return smoke * MOON_SMOKE_BRIGHTNESS * MOON_SMOKE_BRIGHTNESS;
+}
+#endif
+
+#ifdef RAINBOW
+vec3 RainbowLens(vec3 viewPos, vec2 lightPos, float size, float dist, float rad) {
+	vec3 wpos = mat3(gbufferModelViewInverse) * viewPos;
+
+	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
+	vec2 lensCoord = planeCoord.xz + vec2(2.5, 0.0);
+
+	float VoU = dot(normalize(viewPos), upVec);
+	float lens = clamp(1.0 - length(lensCoord) / size, 0.0, 1.0);
+	
+	vec3 rainbowLens = 
+		(smoothstep(0.0, rad, lens) - smoothstep(rad, rad * 2.0, lens)) * vec3(1.0, 0.0, 0.0) +
+		(smoothstep(rad * 0.5, rad * 1.5, lens) - smoothstep(rad * 1.5, rad * 2.5, lens)) * vec3(0.0, 1.0, 0.0) +
+		(smoothstep(rad, rad * 2.0, lens) - smoothstep(rad * 2.0, rad * 3.0, lens)) * vec3(0.0, 0.0, 1.0)
+	;
+
+	return rainbowLens * float(VoU > 0.0) * wetness * (1.0 - rainStrength);
 }
 #endif
 
@@ -126,9 +149,12 @@ void main() {
 	viewPos /= viewPos.w;
 	
 	vec3 albedo = GetSkyColor(viewPos.xyz, false);
+	#ifdef RAINBOW
+	albedo += RainbowLens(viewPos.xyz, viewPos.xy, 1.5, -0.5, 0.05) * 0.1;
+	#endif
 
 	#if defined OVERWORLD && defined MOON_SMOKE
-	albedo += GetGalaxy(viewPos.xyz);
+	albedo += GetSmoke(viewPos.xyz);
 	#endif
 
 	#ifdef ROUND_SUN_MOON
@@ -158,8 +184,6 @@ void main() {
 	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
 	#endif
-
-	SunGlare(albedo, viewPos.xyz, lightCol);
 
 	albedo.rgb *= (4.0 - 3.0 * eBS) * (1.0 + nightVision);
 

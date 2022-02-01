@@ -127,7 +127,7 @@ vec3 generateCosineVector(vec3 vector, vec2 xy) {
 uniform sampler2D depthtex2;
 
 float blueNoise() {
-    float noise = texelFetch2D(depthtex2, ivec2(gl_FragCoord.xy) & 255, 0).r;
+    float noise = texelFetch(depthtex2, ivec2(gl_FragCoord.xy) & 255, 0).r;
     noise = fract(noise);
 
     return noise;

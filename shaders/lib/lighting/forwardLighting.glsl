@@ -13,6 +13,10 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     subsurface = 0.0;
     #endif
 
+    #ifdef SSGI
+    lightmap.x *= 0.1 + lightmap.y * 0.9;
+    #endif
+
     #if defined OVERWORLD || defined END
     if (NoL > 0.0 || subsurface > 0.0) shadow = GetShadow(worldPos, NoL, subsurface, lightmap.y);
     shadow *= parallaxShadow;
@@ -44,10 +48,6 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     
     float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.7;
     vec3 blockLighting = blocklightCol * newLightmap * newLightmap;
-
-    #ifdef SSGI
-    blockLighting *= 0.1 + lightmap.y * 0.9;
-    #endif
 
     vec3 minLighting = minLightCol * (1.0 - eBS);
 

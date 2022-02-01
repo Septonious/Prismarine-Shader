@@ -44,23 +44,23 @@ void getIntegratedEmission(inout float emission, in vec2 lightmap, in vec4 albed
 	} else if (mat > 109.9 && mat < 110.1) { // Glow Lichen
 		newEmissive = (1.0 - lightmap.y) * float(albedo.r > albedo.g || albedo.r > albedo.b) * 3.0;
 	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
-		newEmissive = float(albedo.r > albedo.g && albedo.r > albedo.b) * 0.1 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > 0.8 || length(albedo.rgb) > 0.95) * 0.1 * GLOW_STRENGTH;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
-		newEmissive = float(length(albedo.rgb) > 0.75) * 0.025 * GLOW_STRENGTH;
+		newEmissive = float(length(albedo.rgb) > 0.9) * 0.05 * GLOW_STRENGTH;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
 		newEmissive = float(albedo.r > 0.65) * 0.25 * GLOW_STRENGTH;
 	} else if (mat > 113.9 && mat < 114.1) { // Glow berries
 		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b) * GLOW_STRENGTH;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
-		newEmissive = float(albedo.r > 0.65) * 0.1 * GLOW_STRENGTH;
+		newEmissive = float(length(albedo.rgb) > 0.99) * 0.1 * GLOW_STRENGTH;
 	} else if (mat > 115.9 && mat < 116.1) { // Furnaces
 		newEmissive = float(albedo.r > 0.8) * 0.5 * GLOW_STRENGTH;
 	} else if (mat > 116.9 && mat < 117.1) { // Chorus
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25 * GLOW_STRENGTH;
 	} else if (mat > 117.9 && mat < 118.1) { // Enchanting Table
-		newEmissive = float(albedo.b > albedo.r) * 0.25 * GLOW_STRENGTH;
+		newEmissive = float(length(albedo.rgb) > 0.75) * 0.25 * GLOW_STRENGTH;
 	} else if (mat > 118.9 && mat < 119.1) { // Soul Campfire
-		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.025 * GLOW_STRENGTH;
+		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.03 * GLOW_STRENGTH;
 	} else if (mat > 119.9 && mat < 120.1) { // Normal Campfire
 		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1 * GLOW_STRENGTH;
 	}

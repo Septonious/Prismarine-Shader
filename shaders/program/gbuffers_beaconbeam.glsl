@@ -36,9 +36,9 @@ void main() {
 	#endif
 
 	#ifdef CUSTOM_BEACON_BEAM
-	float noise = texture2D(noisetex, texCoord * 0.0500).r * 0.1;
-		  noise+= texture2D(noisetex, texCoord * 0.0250).r * 0.2;
-		  noise+= texture2D(noisetex, texCoord * 0.0125).r * 0.3;
+	float noise = texture2D(noisetex, texCoord * 0.03).r * 0.1;
+		  noise+= texture2D(noisetex, texCoord * 0.02).r * 0.2;
+		  noise+= texture2D(noisetex, texCoord * 0.01).r * 0.3;
 		
 	albedo.rgb *= noise * noise;
 	#endif
@@ -56,7 +56,7 @@ void main() {
 	#if defined SSGI && !defined ADVANCED_MATERIALS
 	/* RENDERTARGETS:0,9,10*/
 	gl_FragData[1] = vec4(1.0);
-	gl_FragData[2] = albedo * 0.25;
+	gl_FragData[2] = albedo;
 	#endif
 }
 

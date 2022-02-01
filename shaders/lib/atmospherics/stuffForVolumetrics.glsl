@@ -21,7 +21,7 @@ vec4 GetWorldSpace(float depth, vec2 texCoord) {
 uniform sampler2D depthtex2;
 
 float InterleavedGradientNoiseVL() {
-    float noise = texelFetch2D(depthtex2, ivec2(gl_FragCoord.xy) & 255, 0).r;
+    float noise = texelFetch(depthtex2, ivec2(gl_FragCoord.xy) & 255, 0).r;
     noise = fract(noise);
 
     return noise;

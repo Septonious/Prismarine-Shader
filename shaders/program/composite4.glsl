@@ -38,7 +38,11 @@ vec3 BloomTile(float lod, vec2 coord, vec2 offset) {
 		for(int i = 0; i < 5; i++) {
 			for(int j = 0; j < 5; j++) {
 				float wg = weight[i] * weight[j];
+				#ifdef ANAMORPHIC_BLOOM
+				vec2 pixelOffset = vec2((float(i) - 2.0) * pw, 0.0);
+				#else
 				vec2 pixelOffset = vec2((float(i) - 2.0) * pw, (float(j) - 2.0) * ph);
+				#endif
 				vec2 sampleCoord = coord + pixelOffset * scale;
 				bloom += texture2D(colortex0, sampleCoord).rgb * wg;
 			}
