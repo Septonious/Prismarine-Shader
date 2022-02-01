@@ -104,7 +104,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #include "/lib/atmospherics/sky.glsl"
 
 #if defined OVERWORLD && defined MOON_SMOKE
-vec3 Getsmoke(vec3 viewPos) {
+vec3 GetSmoke(vec3 viewPos) {
 	float VoL = dot(normalize(viewPos.xyz), -sunVec);
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
 	float visibility = pow16(halfVoL) * (1.0 - rainStrength) * (1.0 - timeBrightness);
