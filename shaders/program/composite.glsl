@@ -118,8 +118,8 @@ void main() {
 
 	if (isEyeInWater == 1.0) {
 		vec4 waterFog = GetWaterFog(viewPos.xyz);
-		waterFog.a = mix(waterAlpha * 0.5, 1.0, waterFog.a);
-		color.rgb = mix(sqrt(color.rgb), sqrt(waterFog.rgb), waterFog.a);
+		waterColor.g = mix(waterColor.g * 2.0, waterColor.g * 4.0, waterFog.a * 0.5);
+		color.rgb = mix(sqrt(color.rgb) * 1.25, sqrt(waterFog.rgb), waterFog.a);
 		color.rgb *= color.rgb;
 	}
 

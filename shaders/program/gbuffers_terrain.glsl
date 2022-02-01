@@ -60,6 +60,8 @@ uniform mat4 shadowModelView;
 
 uniform sampler2D texture;
 
+uniform sampler2D depthtex1;
+
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;
 
@@ -110,10 +112,6 @@ float GetLuminance(vec3 color) {
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
-
-#ifdef OVERWORLD
-#include "/lib/color/waterColor.glsl"
-#endif
 
 #ifdef INTEGRATED_EMISSION
 #include "/lib/surface/integratedEmissionTerrain.glsl"
@@ -355,13 +353,7 @@ void main() {
 		#endif
 
 		#ifdef OVERWORLD
-		if (isEyeInWater == 1){
-			float lightmapFactor = 1.0 + lightmap.y;
-			float depth = clamp(length(viewPos.xyz), 0.0, 7.0);
-			depth = 8.0 - depth;
 
-			albedo.rgb *= mix(waterColor.rgb * depth * pow2(lightmapFactor), vec3(1.0), lightmap.y);
-		}
 		#endif
 
 		#if ALPHA_BLEND == 0

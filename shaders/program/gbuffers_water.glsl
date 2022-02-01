@@ -242,7 +242,7 @@ void main() {
 		float translucent = float(mat > 2.98 && mat < 3.02) + float(mat > 3.98 && mat < 4.02);
 		
 		float metalness      = 0.0;
-		float emission       = 0.0;
+		float emission       = translucent;
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
 
@@ -297,12 +297,8 @@ void main() {
 		#endif
 		
 		if (water > 0.5) {
-			waterColor.g *= 0.85;
-
 			#if WATER_MODE == 0
-			albedo.rgb = waterColor.rgb * clamp(waterColor.a, 0.0, 0.75); //high values overbrighten it
-			#elif WATER_MODE == 1
-			albedo.rgb *= albedo.a;
+			albedo.rgb = waterColor.rgb * (1.0 - WATER_A);
 			#elif WATER_MODE == 2
 			float waterLuma = length(albedo.rgb / pow(color.rgb, vec3(2.2))) * 2.0;
 			albedo.rgb = waterLuma * waterColor.rgb * waterColor.a * albedo.a;
@@ -312,11 +308,53 @@ void main() {
 			#if WATER_ALPHA_MODE == 0
 			albedo.a = waterAlpha;
 			#endif
+
 			baseReflectance = vec3(0.02);
 		}
 
 		vlAlbedo = mix(vec3(1.0), albedo.rgb, sqrt(albedo.a)) * (1.0 - pow(albedo.a, 64.0));
-		
+
+		#if defined OVERWORLD && defined TRANSLUCENCY_BLENDING
+		glass = float(mat > 1.98 && mat < 2.02);
+		if ((isEyeInWater == 0 && water > 0.5) || glass > 0.5) {
+			vec3 terrainColor = texture2D(gaux2, gl_FragCoord.xy / vec2(viewWidth, viewHeight)).rgb;
+		 	float oDepth = texture2D(depthtex1, screenPos.xy).r;
+		 	vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
+			
+		 	#ifdef TAA
+		 	vec3 oViewPos = ToNDC(vec3(TAAJitter(oScreenPos.xy, -0.5), oScreenPos.z));
+		 	#else
+		 	vec3 oViewPos = ToNDC(oScreenPos);
+		 	#endif
+
+			float rainFactor = 1.0 - rainStrength * 0.75;
+			float moonFactor = 1.0 - moonVisibility * 0.85;
+			float difT = length(oViewPos - viewPos.xyz);
+					
+			vec3 absorbColor = vec3(0.0);
+			float absorbDist = 0.0;
+
+			if (isEyeInWater == 0 && water > 0.5){
+				absorbColor = normalize(waterColor.rgb * WATER_I) * rainFactor * moonFactor * terrainColor;
+				absorbDist = 1.0 - clamp(difT / 8.0, 0.0, 1.0);
+			}
+
+			if (glass > 0.5){
+				albedo.a += albedo.a * 0.25;
+				albedo.a = clamp(albedo.a, 0.5, 0.95);
+				absorbColor = normalize(albedo.rgb * albedo.rgb) * terrainColor;
+				absorbDist = 1.0 - clamp(difT * 32.0, 0.0, 1.0);
+			}
+			
+			vec3 newAlbedo = mix(absorbColor * absorbColor * (1.0 - WATER_A) * (5.0 - REFLECTION_STRENGTH), terrainColor * terrainColor, absorbDist * absorbDist);
+
+			float lightmapFactor = 0.0 + lightmap.y;
+			float absorb = sqrt(clamp(lightmap.y + glass, 0.0, 1.0) * lightmap.y);
+ 
+			albedo.rgb = mix(albedo.rgb, newAlbedo, absorb * moonFactor * rainFactor);
+		}
+		#endif
+
 		float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
 
 		float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
@@ -386,7 +424,7 @@ void main() {
 		#endif
 		#endif
 		
-		float fresnel = pow(clamp(1.0 + dot(newNormal, normalize(viewPos)), 0.0, 1.0), 5.0);
+		float fresnel = pow(clamp(1.0 + dot(newNormal, normalize(viewPos)), 0.0, 1.0), REFLECTION_STRENGTH);
 
 		#ifdef CUSTOM_NETHER_PORTAL
 		if (mat > 3.98 && mat < 4.02) {
@@ -439,7 +477,7 @@ void main() {
 				#if ALPHA_BLEND == 0
 				float specularAlpha = pow(mix(albedo.a, 1.0, fresnel), 2.2) * fresnel;
 				#else
-				float specularAlpha = mix(albedo.a , 1.0, fresnel) * fresnel;
+				float specularAlpha = mix(albedo.a, 1.0, fresnel) * fresnel;
 				#endif
 
 				skyReflection += specular / ((4.0 - 3.0 * eBS) * specularAlpha);
@@ -550,49 +588,6 @@ void main() {
 										   	   specularColor, shadow * vanillaDiffuse, color.a);
 			#endif
 		}
-
-		#if defined OVERWORLD && defined TRANSLUCENCY_BLENDING
-		glass = float(mat > 1.98 && mat < 2.02);
-		if ((isEyeInWater == 0 && water > 0.5) || glass > 0.5) {
-			vec3 terrainColor = texture2D(gaux2, gl_FragCoord.xy / vec2(viewWidth, viewHeight)).rgb;
-		 	float oDepth = texture2D(depthtex1, screenPos.xy).r;
-		 	vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
-			
-		 	#ifdef TAA
-		 	vec3 oViewPos = ToNDC(vec3(TAAJitter(oScreenPos.xy, -0.5), oScreenPos.z));
-		 	#else
-		 	vec3 oViewPos = ToNDC(oScreenPos);
-		 	#endif
-
-			float rainFactor = 1.00 - rainStrength * 0.5;
-			float difT = length(oViewPos - viewPos.xyz);
-					
-			vec3 absorbColor = vec3(0.0);
-			float absorbDist = 0.0;
-
-			if (isEyeInWater == 0 && water > 0.5){
-				albedo.a *= 0.75;
-				absorbColor = normalize(waterColor.rgb * WATER_I) * rainFactor * terrainColor * (1.0 + timeBrightness);
-				absorbDist = 1.0 - clamp(difT / 8.0, 0.0, 1.0);
-			}
-
-			if (glass > 0.5){
-				albedo.a += albedo.a * 0.25;
-				albedo.a = clamp(albedo.a, 0.5, 0.95);
-				absorbColor = normalize(albedo.rgb * albedo.rgb) * terrainColor;
-				absorbDist = 1.0 - clamp(difT * 32.0, 0.0, 1.0);
-			}
-			
-			vec3 newAlbedo = mix(absorbColor * absorbColor, terrainColor * terrainColor, absorbDist * absorbDist);
-
-			float lightmapFactor = 0.0 + lightmap.y;
-			float absorb = sqrt(clamp(lightmap.y + glass, 0.0, 1.0) * (1.0 - WATER_A) * lightmap.y);
- 
-			albedo.rgb = mix(albedo.rgb, newAlbedo, absorb * (1.0 - moonVisibility * 0.85));
-		}
-		#endif
-
-		albedo.a *= 0.75 + lightmap.y * 0.25;
 
 		Fog(albedo.rgb, viewPos);
 

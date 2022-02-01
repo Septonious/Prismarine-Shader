@@ -36,7 +36,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	float caveFactor = pow4(clamp(cameraPosition.y * 0.01 + eBS, 0.0, 1.0));
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility) * (1.0 - timeBrightness * caveFactor);
+	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility) * pow2(1.0 - timeBrightness * caveFactor);
 	visibility = clamp(visibility + isEyeInWater * 0.05, 0.0, 1.0);
 	#endif
 

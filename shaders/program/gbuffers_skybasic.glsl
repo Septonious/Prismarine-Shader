@@ -149,6 +149,7 @@ void main() {
 	viewPos /= viewPos.w;
 	
 	vec3 albedo = GetSkyColor(viewPos.xyz, false);
+
 	#ifdef RAINBOW
 	albedo += RainbowLens(viewPos.xyz, viewPos.xy, 1.5, -0.5, 0.05) * 0.1;
 	#endif
@@ -173,7 +174,7 @@ void main() {
 	float dither = Bayer64(gl_FragCoord.xy);
 
 	#ifdef AURORA
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 10);
+	albedo.rgb += DrawAurora(viewPos.xyz, dither, 12);
 	#endif
 	
 	#ifdef OVERWORLD_NEBULA

@@ -345,6 +345,8 @@ option.WEATHER_PERBIOME.comment=Use varied weather color for different biomes.
 option.UNDERGROUND_SKY=Underground Sky Fix
 option.UNDERGROUND_SKY.comment=Hides the sky when the player is in dark area and under sea level (Y: 62). §c[-]§rNot suitable for low superflat worlds.
 
+option.LIGHTSHAFT_CLOUDY_NOISE=Cloudy Noise
+option.LIGHTSHAFT_CLOUDY_NOISE.comment=Turns light shafts into cloudy volumetric fog.
 option.LIGHT_SHAFT=Light Shafts
 option.LIGHT_SHAFT.comment=Adds volumetric rays from sun / moon. §a[+]§rThis effect benefits from TAA. §e[*]§rPerformance depends on Shadowmap Resolution.
 option.LIGHTSHAFT_SAMPLES=Samples
@@ -353,6 +355,7 @@ option.LIGHTSHAFT_MIN_DISTANCE=Range
 option.LIGHTSHAFT_MIN_DISTANCE.comment=Adjusts light shafts render distance. Big performance impact! §cDo not adjust it together with sample count if you want to keep the shader playable.
 option.LIGHTSHAFT_MAX_DISTANCE=Max Distance
 option.LIGHTSHAFT_MAX_DISTANCE.comment=Controls how far can the light shafts go (limits their render distance).
+option.LIGHTSHAFT_HEIGHT=Height (Blocks)
 
 option.LIGHT_SHAFT_STRENGTH=Light Shaft Strength
 option.LIGHT_SHAFT_STRENGTH.comment=Adjusts light shaft strength.
@@ -459,6 +462,9 @@ option.WATER_ALPHA_MODE.comment=Determine whether the water uses shader based or
 value.WATER_ALPHA_MODE.0=Flat
 value.WATER_ALPHA_MODE.1=Vanilla
 
+option.REFLECTION_STRENGTH=Reflection Strength
+option.REFLECTION_STRENGTH.comment=Controls the sharpness and visibility of water reflections.
+
 option.WATER_NORMALS=Normals
 option.WATER_NORMALS.comment=Enables realtime-generated normal mapping for water.
 value.WATER_NORMALS.0=§cOFF
@@ -499,9 +505,6 @@ option.WATER_CAUSTICS_STRENGTH=Caustics Strength
 option.WATER_REFRACTION=Refraction
 option.WATER_REFRACTION.comment=Distorts things behind water.
 option.REFRACTION_STRENGTH=Refraction Strength
-
-option.BLENDING_STRENGTH=Blending Strength
-option.BLENDING_STRENGTH.comment=Adjusts translucency blending strength. Higher values give brighter and more defined color.
 
 option.TRANSLUCENCY_BLENDING=Translucency Blending
 option.TRANSLUCENCY_BLENDING.comment=Makes colored glass and water blend with things behind it. Also adds water absorption.
