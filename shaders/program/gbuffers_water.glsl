@@ -242,7 +242,7 @@ void main() {
 		float translucent = float(mat > 2.98 && mat < 3.02) + float(mat > 3.98 && mat < 4.02);
 		
 		float metalness      = 0.0;
-		float emission       = translucent;
+		float emission       = 0.0;
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
 
