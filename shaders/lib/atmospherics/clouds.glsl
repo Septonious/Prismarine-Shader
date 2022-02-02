@@ -139,7 +139,7 @@ void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float b
 	
 	#endif
 
-	color += star * vec3(0.5, 0.75, 1.00) * brightness * (1.0 - timeBrightness * 0.5);
+	color += star * vec3(0.5, 0.75, 1.00) * brightness * (1.0 - timeBrightness * 0.75);
 }
 
 #ifdef AURORA

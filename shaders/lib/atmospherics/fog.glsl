@@ -4,7 +4,7 @@ vec3 GetFogColor(vec3 viewPos) {
 
     float VoU = clamp(dot(nViewPos,  upVec), -1.0, 1.0);
 
-	float density = 0.4;
+	float density = 0.5;
     float nightDensity = 0.75;
     float weatherDensity = 1.0;
     
@@ -21,7 +21,7 @@ vec3 GetFogColor(vec3 viewPos) {
     vec3 nightFog = lightNight * lightNight * 6.0 * nightGradient * nightExposure;
     fog = mix(nightFog, fog, sunVisibility * sunVisibility);
 
-    float rainGradient = exp(-(VoU * 0.5 + 0.5) * 0.125 / weatherDensity);
+    float rainGradient = exp(-(VoU * 0.5 + 0.5) * 0.25 / weatherDensity);
     vec3 weatherFog = weatherCol.rgb * weatherCol.rgb;
     weatherFog *= GetLuminance(ambientCol / (weatherFog)) * (0.4 * sunVisibility + 0.2);
     fog = mix(fog, weatherFog * rainGradient, rainStrength);

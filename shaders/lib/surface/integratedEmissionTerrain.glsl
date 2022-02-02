@@ -63,6 +63,8 @@ void getIntegratedEmission(inout float emission, in vec2 lightmap, in vec4 albed
 		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.03 * GLOW_STRENGTH;
 	} else if (mat > 119.9 && mat < 120.1) { // Normal Campfire
 		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1 * GLOW_STRENGTH;
+	} else if (mat > 121.9 && mat < 122.1) {
+		newEmissive = 0.0;
 	}
 
 	#ifdef DEBRIS_HIGHLIGHT

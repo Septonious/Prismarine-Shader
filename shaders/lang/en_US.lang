@@ -418,11 +418,19 @@ option.VCLOUDS_VERTICAL_THICKNESS.comment=Adjusts clouds stretching factor. High
 
 option.CLOUD_THICKNESS=Thickness
 option.CLOUD_THICKNESS.comment=Adjusts cloud thickness, higher thickness makes artifacts more visible.
-value.CLOUD_THICKNESS.1=Very Low
-value.CLOUD_THICKNESS.2=Low
-value.CLOUD_THICKNESS.4=Medium
+value.CLOUD_THICKNESS.1=tiny cloods
+value.CLOUD_THICKNESS.2=Very Low
+value.CLOUD_THICKNESS.4=Low
+value.CLOUD_THICKNESS.6=Medium
 value.CLOUD_THICKNESS.8=High
-value.CLOUD_THICKNESS.16=Very High
+value.CLOUD_THICKNESS.12=Very High
+value.CLOUD_THICKNESS.16=huuge cloods
+
+option.CLOUD_FREQUENCY=Frequency
+option.CLOUD_FREQUENCY.comment=Increases clouds noise frequency. Higher values can turn clouds into a foggy mess.
+
+option.CLOUD_OCTAVES=Octaves
+option.CLOUD_OCTAVES.comment=Increases the amount of noise octaves used in cloud shaping. Higher values make clouds more detailed at cost of performance.
 
 option.CLOUD_AMOUNT=Amount
 option.CLOUD_AMOUNT.comment=Adjusts cloud amount.
