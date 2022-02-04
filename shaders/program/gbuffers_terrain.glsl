@@ -527,6 +527,7 @@ void main() {
 	#endif
 
 	#ifdef INTEGRATED_EMISSION
+	isPlant = 0.0;
 	getIntegratedEmissionMaterials(mat, isPlant);
 	#endif
 

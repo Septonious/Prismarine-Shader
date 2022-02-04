@@ -31,13 +31,6 @@ uniform sampler2D depthtex0;
 uniform mat4 gbufferProjectionInverse;
 #endif
 
-#if defined WATER_REFRACTION || defined WATER_ABSORPTION
-uniform sampler2D colortex12;
-#ifdef WATER_ABSORPTION
-uniform sampler2D colortex1;
-#endif
-#endif
-
 #ifdef WATER_REFRACTION
 uniform int worldTime;
 
@@ -45,7 +38,7 @@ uniform float frameTimeCounter;
 
 uniform vec3 cameraPosition;
 
-uniform sampler2D noisetex;
+uniform sampler2D colortex12, noisetex;
 
 uniform mat4 gbufferModelViewInverse;
 #endif
@@ -184,14 +177,9 @@ void main() {
     viewPos /= viewPos.w;
 	#endif
 
-	#if defined WATER_REFRACTION || defined WATER_ABSORPTION
-	vec4 waterData = texture2D(colortex12, texCoord);
-	vec4 translucent = texture2D(colortex1, texCoord);
-
-	color.rgb = mix(color.rgb, translucent.rgb, waterData.a);
-	#endif
-
 	#ifdef WATER_REFRACTION
+    vec4 waterData = texture2D(colortex12, texCoord);
+
     if (waterData.a > 0.5){
         vec3 worldPos = ToWorld(viewPos.xyz);
         vec3 waterPos = worldPos + cameraPosition;
