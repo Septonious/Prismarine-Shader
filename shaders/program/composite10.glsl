@@ -26,7 +26,7 @@ void main() {
     gi *= ILLUMINATION_STRENGTH * 4.0;
 
     #ifdef NETHER
-    gi *= 0.25;
+    gi *= 0.15;
     #endif
 
     color.rgb *= vec3(1.0) + gi;
