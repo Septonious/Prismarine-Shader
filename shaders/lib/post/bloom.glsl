@@ -38,18 +38,12 @@ void Bloom(inout vec3 color, vec2 coord) {
 	float strength = BLOOM_STRENGTH;
 
 	#if defined BLOOM_BALANCING && defined OVERWORLD
-	strength *= (1.0 - eBS * 0.75) * (2.0 - sunVisibility);
-	#endif
-
-	#ifdef NETHER
-	strength *= 2.0;
+	strength *= (1.0 - eBS * 0.5) * (2.0 - sunVisibility);
 	#endif
 
 	#ifdef SSGI
 	strength = 0.0;
 	#endif
-
-	strength = clamp(strength, 0.0, 2.0);
 
 	#if BLOOM_CONTRAST == 0
 	color = mix(color, blur, 0.2 * strength);

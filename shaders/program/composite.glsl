@@ -161,7 +161,7 @@ void main() {
 	#endif
 
 	#if ALPHA_BLEND == 0
-	color.rgb *= color.rgb;
+	color.rgb = pow(color.rgb, vec3(2.2));
 	#endif
 
     /* DRAWBUFFERS:018 */

@@ -39,14 +39,14 @@ uniform sampler2D colortex8;
 uniform float viewWidth, viewHeight;
 #endif
 
-#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+#ifdef LIGHT_SHAFT
 uniform ivec2 eyeBrightnessSmooth;
-
-uniform sampler2D colortex1;
 #endif
 
-//Optifine Constants//
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+uniform sampler2D colortex1;
+
+//Optifine Constants//
 const bool colortex1MipmapEnabled = true;
 #endif
 
@@ -61,11 +61,9 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 #include "/lib/filters/blur.glsl"
 #endif
 
-#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 #ifdef LIGHT_SHAFT
 #include "/lib/color/waterColor.glsl"
 #include "/lib/color/lightColor.glsl"
-#endif
 #endif
 
 //Program//
@@ -79,22 +77,19 @@ void main() {
 	vec3 vl = texture2D(colortex1, texCoord * VOLUMETRICS_RENDER_RESOLUTION).rgb;
 	#endif
 
-	#if defined LIGHT_SHAFT && defined OVERWORLD
+	#ifdef LIGHT_SHAFT
 	if (isEyeInWater != 1.0) vl.rgb *= lightCol * 0.25;
 	else vl.rgb *= waterColor.rgb * 0.15 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75);
     vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
 	#endif
 
-	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	color += vl;
-	#endif
 	#endif
 
 	/* DRAWBUFFERS:08 */
 	gl_FragData[0] = vec4(color, 1.0);
 
 	#ifdef VOLUMETRIC_CLOUDS
-
 	vec4 cloud = texture2DLod(colortex8, texCoord.xy, 2.0);
 
 	#ifdef BLUR_FILTERING

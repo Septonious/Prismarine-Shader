@@ -23,11 +23,13 @@ void main() {
     vec3 color = texture2D(colortex1, texCoord).rgb;
     vec3 gi = texture2D(colortex11, texCoord).rgb;
 
+    gi *= ILLUMINATION_STRENGTH * 4.0;
+
     #ifdef NETHER
     gi *= 0.25;
     #endif
 
-    color.rgb *= vec3(1.0) + gi * 4.0 * ILLUMINATION_STRENGTH;
+    color.rgb *= vec3(1.0) + gi;
 
     /* DRAWBUFFERS:1 */
     gl_FragData[0] = vec4(color, 1.0);

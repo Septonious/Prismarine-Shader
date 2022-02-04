@@ -59,11 +59,9 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0) * eBS, eBS);
 	fog = 1.0 - exp(-2.0 * pow(fog, 0.15 * clearDay * eBS + 1.25));
 
-	vec3 pos = ToWorld(viewPos.xyz) + cameraPosition.xyz + 1100.0;
-	float height = (pos.y - (FOG_ALTITUDE * (1.0 + rainStrength * 0.5))) * 0.0009;
-		height = pow16(height);
-		height = clamp(height, 0.0, 1.0);
-	fog *= 1.0 - height;
+	vec3 pos = ToWorld(viewPos.xyz) + cameraPosition.xyz;
+	float worldHeightFactor = clamp(pos.y * 0.0075, 0.0, 1.0);
+	fog *= (1.0 - worldHeightFactor) * 1.25;
 
 	vec3 fogColor = GetFogColor(viewPos);
 

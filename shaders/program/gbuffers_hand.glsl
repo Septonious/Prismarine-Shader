@@ -269,7 +269,7 @@ void main() {
 	#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
 	/* DRAWBUFFERS:0367 */
 	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
-	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
 }

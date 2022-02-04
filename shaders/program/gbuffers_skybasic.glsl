@@ -174,7 +174,7 @@ void main() {
 	float dither = Bayer64(gl_FragCoord.xy);
 
 	#ifdef AURORA
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 16);
+	albedo.rgb += DrawAurora(viewPos.xyz, dither, 12);
 	#endif
 	
 	#ifdef OVERWORLD_NEBULA

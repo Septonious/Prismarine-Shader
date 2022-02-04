@@ -1,5 +1,5 @@
 #ifdef FSH
-void getIntegratedEmission(inout float emission, in vec2 lightmap, in vec4 albedo, in vec3 worldPos){
+void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albedo, in vec3 worldPos){
 	float newEmissive = 0.0;
 
 	#ifdef EMISSIVE_ORES
@@ -27,13 +27,10 @@ void getIntegratedEmission(inout float emission, in vec2 lightmap, in vec4 albed
         }
 
 	} else if (mat > 102.9 && mat < 103.1) { // Warped Stem & Hyphae
-        float core = float(albedo.r < 0.1);
-        float edge = float(albedo.b > 0.35 && albedo.b < 0.401 && core == 0.0);
-        newEmissive = (core * 0.195 + 0.035 * edge);
+		newEmissive = float(length(albedo.rgb) > 0.49) * 0.4 + float(length(albedo.rgb) > 0.59);
 		newEmissive *= GLOW_STRENGTH;
 	} else if (mat > 103.9 && mat < 104.1) { // Crimson Stem & Hyphae
-        newEmissive = float(albedo.b < 0.16);
-        newEmissive = min(pow(length(albedo.rgb) * length(albedo.rgb), 2.0) * newEmissive * GLOW_STRENGTH, 0.3);
+		newEmissive = (float(length(albedo.rgb) > 0.47) * 0.5 + float(length(albedo.rgb) > 0.50)) * float(albedo.b < 0.25);
 		newEmissive *= GLOW_STRENGTH;
 	} else if (mat > 104.9 && mat < 105.1) { // Warped Nether Warts
 		newEmissive = pow2(float(albedo.g - albedo.b)) * GLOW_STRENGTH;
@@ -44,7 +41,7 @@ void getIntegratedEmission(inout float emission, in vec2 lightmap, in vec4 albed
 	} else if (mat > 109.9 && mat < 110.1) { // Glow Lichen
 		newEmissive = (1.0 - lightmap.y) * float(albedo.r > albedo.g || albedo.r > albedo.b) * 3.0;
 	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
-		newEmissive = float(albedo.r > 0.8 || length(albedo.rgb) > 0.95) * 0.1 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > 0.9) * 0.1 * GLOW_STRENGTH;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
 		newEmissive = float(length(albedo.rgb) > 0.9) * 0.05 * GLOW_STRENGTH;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
@@ -60,11 +57,11 @@ void getIntegratedEmission(inout float emission, in vec2 lightmap, in vec4 albed
 	} else if (mat > 117.9 && mat < 118.1) { // Enchanting Table
 		newEmissive = float(length(albedo.rgb) > 0.75) * 0.25 * GLOW_STRENGTH;
 	} else if (mat > 118.9 && mat < 119.1) { // Soul Campfire
-		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.03 * GLOW_STRENGTH;
+		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.05 * GLOW_STRENGTH;
 	} else if (mat > 119.9 && mat < 120.1) { // Normal Campfire
 		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1 * GLOW_STRENGTH;
 	} else if (mat > 121.9 && mat < 122.1) {
-		newEmissive = 0.0;
+		newEmissive = 0.25;
 	}
 
 	#ifdef DEBRIS_HIGHLIGHT
@@ -83,7 +80,7 @@ void getIntegratedEmission(inout float emission, in vec2 lightmap, in vec4 albed
 	} 
 	#endif
 
-	emission += newEmissive;
+	emissive += newEmissive;
 }
 #endif
 
@@ -112,6 +109,7 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	if (mc_Entity.x == 20018) mat = 118.0;
 	if (mc_Entity.x == 20019) mat = 119.0;
 	if (mc_Entity.x == 20020) mat = 120.0;
+	if (mc_Entity.x == 20022) mat = 122.0;
 
 	#ifdef DEBRIS_HIGHLIGHT
 	if (mc_Entity.x == 20021) mat = 121.0;

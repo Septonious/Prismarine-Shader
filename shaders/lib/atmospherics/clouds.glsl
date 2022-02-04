@@ -7,14 +7,30 @@ float CloudNoise(vec2 coord, vec2 wind){
 
 	float windMult = 0.5;
 	float frequencyMult = 0.25;
-	float noiseMult = 1.0;
+	float noiseMult = 1.0, noiseFactor = 0.0;
 	float noise = 0.0;
+
+	#if CLOUD_OCTAVES == 2
+	noiseFactor = 12.4;
+	#elif CLOUD_OCTAVES == 3
+	noiseFactor = 5.2;
+	#elif CLOUD_OCTAVES == 4
+	noiseFactor = 2.6;
+	#elif CLOUD_OCTAVES == 5
+	noiseFactor = 1.4;
+	#elif CLOUD_OCTAVES == 6
+	noiseFactor = 0.8;
+	#elif CLOUD_OCTAVES == 7
+	noiseFactor = 0.5;
+	#elif CLOUD_OCTAVES == 8
+	noiseFactor = 0.36;
+	#endif
 
 	for (int i = 0; i < CLOUD_OCTAVES; i++){
 		noise += texture2D(noisetex, coord * frequencyMult + wind * windMult).x * noiseMult;
 		windMult *= 0.75;
 		frequencyMult *= CLOUD_FREQUENCY;
-		noiseMult += 1.0;
+		noiseMult += noiseFactor;
 	}
 
 	return noise;
@@ -56,7 +72,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 		for(int i = 0; i < 6; i++) {
 			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * 0.75) / wpos.y) * 0.02;
 			vec2 coord = cameraPosition.xz * 0.001 + planeCoord.xz;
-				 erodeCoord(coord, i + dither, 0.015);
+				 erodeCoord(coord, i + dither, 0.0025 * CLOUD_OCTAVES);
 				#ifdef BLOCKY_CLOUDS
 				coord = floor(coord * 8.0);
 				#endif

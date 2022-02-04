@@ -586,7 +586,7 @@ option.BLOOM_BALANCING=Bloom Balancing
 option.BLOOM_BALANCING.comment=Reduces bloom strength when you're outdoors in order to prevent leaves from literally being lit up.
 option.BLOOM_STRENGTH=Strength
 option.BLOOM_STRENGTH.comment=Adjusts bloom intensity.
-value.BLOOM_STRENGTH.8.00=https://youtu.be/76bREM5NK70
+value.BLOOM_STRENGTH.16.00=https://youtu.be/76bREM5NK70
 
 option.BLOOM_CONTRAST=Contrast
 value.BLOOM_CONTRAST.-4=-1.00

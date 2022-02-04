@@ -85,7 +85,7 @@ bool IntersectSSRay(inout vec3 position, vec3 startVS, vec3 rayDirection, float 
 
 	vec3 rayOrigin = position;
 
-	float ascribeAmount = GI_DEPTH_LENIENCY * float(stride) * viewPixelSize.y * gbufferProjectionInverse[1].y;
+	float ascribeAmount = GI_DEPTH_LENIENCY * (1.0 - eBS * 0.75) * float(stride) * viewPixelSize.y * gbufferProjectionInverse[1].y;
 
 	bool hit = false;
 	float t = ditherp;
@@ -158,14 +158,14 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
         bool hit = IntersectSSRay(hitPos, currentPosition, sampleDir, dither, STRIDE);
         currentPosition = hitPos;
 
-        if (hit && hand < 0.5 && length(albedo) < 0.75) {
-            vec3 hitAlbedo = texture2D(colortex10, currentPosition.xy).rgb;
-            float isEmissive = texture2D(colortex3, currentPosition.xy).a;
+        if (hit && hand < 0.5 && length(albedo) < 0.5) {
+            vec3 hitAlbedo = texture2D(colortex10, currentPosition.xy).rgb * clamp(ILLUMINATION_STRENGTH, 1.0, 6.0);
+            float isEmissive = texture2D(colortex10, currentPosition.xy).a;
 
-            weight *= hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo;
-            illumination += weight * isEmissive;
+            weight *= hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo;
+            illumination += hitAlbedo * isEmissive;
         }
     }
 
-    return illumination;
+    return illumination * illumination;
 }

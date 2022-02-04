@@ -47,7 +47,7 @@ vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
                 #endif
 
                 #if defined NETHER_SMOKE
-                vec4 fogColor = vec4(netherCol.rgb * netherCol.rgb * 0.25, noise);
+                vec4 fogColor = vec4(netherCol.rgb * netherCol.rgb * 0.75, noise);
                 #elif defined END_SMOKE
                 vec4 fogColor = vec4(endCol.rgb * visibility, noise);
                 #endif

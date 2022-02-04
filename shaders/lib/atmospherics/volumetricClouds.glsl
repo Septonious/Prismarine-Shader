@@ -29,7 +29,7 @@ float getCloudSample(vec3 pos){
 	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.50);
 
 	float noiseA = 0.0;
-	float frequency = 0.1, speed = 0.5;
+	float frequency = 0.15, speed = 0.5;
 	for (int i = 1; i <= VCLOUDS_OCTAVES; i++){
 		noiseA += getPerlinNoise(pos * frequency - wind * speed) * i * VCLOUDS_HORIZONTAL_THICKNESS;
 		frequency *= VCLOUDS_FREQUENCY;
@@ -41,14 +41,14 @@ float getCloudSample(vec3 pos){
 	//Shaping
 	float noiseB = clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 	float density = pow(smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noiseB, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noiseB, pos.y), 0.25);
-	sampleHeight = pow(sampleHeight, 8.0 * (1.5 - density) * (1.5 - density));
+	sampleHeight = pow(sampleHeight, 8.0 * pow2(1.0 - density * 0.85));
 
 	return clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 }
 
 vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 translucent){
 	vec4 wpos = vec4(0.0);
-	vec4 finalColor = vec4(0.0);
+	vec4 finalColor = vec4(0.0), cloudsColor = vec4(0.0);
 
 	vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
 
@@ -90,19 +90,21 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 				//Find the lower and upper parts of the cloud
 				float density = pow(smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y), cloudScattering);
 
-				//Color calculation and lighting
-				vec4 cloudsColor = vec4(mix(lightCol, ambientCol, noise * density) * (1.0 + cloudScattering), noise);
+				if(noise > 0.01){
+					float dif = clamp((noise - getCloudSample(wpos.xyz + 0.25 * sunVec)) / 0.25, 0.0, 1.0);
+					vec3 lin = (lightCol + ambientCol * dif) * 1.5;
+					cloudsColor = vec4(mix(lightCol, ambientCol, noise + dif), noise);
+					cloudsColor.xyz *= lin;
+					
+					cloudsColor.rgb *= cloudsColor.a;
+					finalColor += cloudsColor * (1.0 - finalColor.a) * (1.0 - isEyeInWater * (1.0 - eBS));
+				}
 
 				//Translucency blending, works half correct
 				if (depth0 < minDist){
 					cloudsColor *= translucent;
+					finalColor *= translucent;
 				}
-
-				//Final color calculations
-				cloudsColor.a *= VCLOUDS_OPACITY;
-				cloudsColor.rgb *= cloudsColor.a * 0.75;
-
-				finalColor += cloudsColor * (1.0 - finalColor.a) * (1.0 - isEyeInWater * (1.0 - eBS));
 			}
 		}
 	}

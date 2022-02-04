@@ -600,7 +600,7 @@ void main() {
     gl_FragData[0] = albedo;
 	gl_FragData[1] = vec4(vlAlbedo, 1.0);
 
-	#if defined WATER_REFRACTION || defined WATER_LIGHTSHAFTS
+	#if defined WATER_REFRACTION || defined WATER_LIGHTSHAFTS || defined WATER_ABSORPTION
 	/* RENDERTARGETS:0,1,12 */
 	gl_FragData[2] = vec4(0.0, lightmap.y, dist, water);
 	#endif
@@ -608,7 +608,7 @@ void main() {
 	#ifdef SSGI
 	/* RENDERTARGETS:0,1,12,3,6,10 */
 	gl_FragData[3] = vec4(0.0, 0.0, 0.0, float(mat > 3.98 && mat < 4.02) * 0.25);
-	gl_FragData[4] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+	gl_FragData[4] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
 	gl_FragData[5] = albedo * 0.25 * pow16(1.0 - lightmap.y);
 	#endif
 }

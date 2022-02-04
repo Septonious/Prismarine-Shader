@@ -14,7 +14,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     #ifdef SSGI
-    lightmap.x *= 0.1 + lightmap.y * 0.9;
+    lightmap.x *= 0.15;
     #endif
 
     #if defined OVERWORLD || defined END
@@ -33,9 +33,10 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     vec3 fullShadow = shadow * NoL;
     
     #ifdef OVERWORLD
+    lightmap.y = clamp(lightmap.y + clamp(isEyeInWater, 0.0, 1.0) * 0.1, 0.0, 1.0);
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
     vec3 sceneLighting = mix(ambientCol, lightCol, fullShadow * shadowMult);
-    sceneLighting *= (4.0 - 3.0 * eBS) * pow6(lightmap.y) * (1.0 + scattering * shadow);
+    sceneLighting *= pow6(lightmap.y) * (1.0 + scattering * shadow);
     #endif
 
     #ifdef END

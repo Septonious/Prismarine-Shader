@@ -163,26 +163,7 @@ void main() {
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 	float emission = 0.0;
 
-	float lava = float(mat > 3.98 && mat < 4.02);
-
 	if (albedo.a > 0.001) {
-		float foliage  = float(mat > 0.98 && mat < 1.02);
-		float leaves   = float(mat > 1.98 && mat < 2.02);
-		float emissive = float(mat > 2.98 && mat < 3.02);
-		float candle   = float(mat > 4.98 && mat < 5.02);
-
-		float metalness      = 0.0;
-			  emission       = emissive + candle + lava;
-		float subsurface     = (foliage + candle) * 0.5 + leaves;
-		vec3 baseReflectance = vec3(0.04);
-
-		#if defined SSGI && defined EMISSIVE_CONCRETE
-		emission += isConcrete * 1.5;
-		albedo.rgb *= 1.0 + isConcrete * 0.25;
-		#endif
-
-		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
-		
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
 		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
@@ -191,9 +172,27 @@ void main() {
 		#endif
 		vec3 worldPos = ToWorld(viewPos);
 
-		#ifdef INTEGRATED_EMISSION
-		getIntegratedEmission(emission, lightmap, albedo, worldPos);
+		float emissive = float(mat > 2.98 && mat < 3.02);
+		float foliage  = float(mat > 0.98 && mat < 1.02);
+		float leaves   = float(mat > 1.98 && mat < 2.02);
+		float candle   = float(mat > 4.98 && mat < 5.02);
+		float lava     = float(mat > 3.98 && mat < 4.02);
+
+		#if defined SSGI && defined EMISSIVE_CONCRETE
+		emissive += isConcrete * 1.5;
+		albedo.rgb *= 1.0 + isConcrete * 0.25;
 		#endif
+
+		#ifdef INTEGRATED_EMISSION
+		getIntegratedEmission(emissive, lightmap, albedo, worldPos);
+		#endif
+
+		float metalness      = 0.0;
+			  emission       = emissive + candle + lava;
+		float subsurface     = (foliage + candle) * 0.5 + leaves;
+		vec3 baseReflectance = vec3(0.04);
+
+		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 
 		#ifdef ADVANCED_MATERIALS
 		float f0 = 0.0, porosity = 0.5, ao = 1.0;
@@ -282,9 +281,10 @@ void main() {
 					
 		#ifdef ADVANCED_MATERIALS
 		float puddles = 0.0;
+
 		#ifdef REFLECTION_RAIN
 		float pNoU = dot(outNormal, upVec);
-		if(wetness > 0.001) {
+		if (wetness > 0.001) {
 			puddles = GetPuddles(worldPos, newCoord, wetness) * clamp(pNoU, 0.0, 1.0);
 		}
 		
@@ -352,10 +352,6 @@ void main() {
 		}
 		#endif
 
-		#ifdef OVERWORLD
-
-		#endif
-
 		#if ALPHA_BLEND == 0
 		albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
 		#endif
@@ -367,25 +363,21 @@ void main() {
 	#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
 	/* DRAWBUFFERS:0367 */
 	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
-	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
 
 	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
-	emission += lava * 4.0;
-	/* RENDERTARGETS:0,3,6,10 */
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, emission);
-	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
-	gl_FragData[3] = albedo * pow4(1.0 - lightmap.y * 0.5);
+	/* RENDERTARGETS:0,6,10 */
+	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
+	gl_FragData[2] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * 0.75));
 	#endif
 
 	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
-	emission += lava * 4.0;
-	/* RENDERTARGETS:0,3,6,7,10 */
-	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, emission);
-	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
-	gl_FragData[3] = vec4(fresnel3, 0.0);
-	gl_FragData[3] = albedo * pow4(1.0 - lightmap.y * 0.5);
+	/* RENDERTARGETS:0,6,7,10 */
+	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
+	gl_FragData[2] = vec4(fresnel3, 0.0);
+	gl_FragData[3] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * 0.75));
 	#endif
 }
 

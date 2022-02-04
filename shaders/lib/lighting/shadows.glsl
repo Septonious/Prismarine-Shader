@@ -111,7 +111,7 @@ vec3 GetShadow(vec3 worldPos, float NoL, float subsurface, float skylight) {
     doShadow = doShadow && skylight > 0.001;
     #endif
 
-    if (!doShadow) return vec3(skylight);
+    if (!doShadow) return vec3(0.0);
 
     float biasFactor = sqrt(1.0 - NoL * NoL) / NoL;
     float distortBias = distortFactor * shadowDistance / 256.0;

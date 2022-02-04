@@ -24,7 +24,7 @@ uniform sampler2D noisetex;
 //Program//
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
-	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 32.0;
+	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 2.0;
 	
 	#ifdef WHITE_WORLD
 	albedo.rgb = vec3(2.0);
@@ -55,7 +55,7 @@ void main() {
 
 	#if defined SSGI && !defined ADVANCED_MATERIALS
 	/* RENDERTARGETS:0,9,10*/
-	gl_FragData[1] = vec4(1.0);
+	gl_FragData[1] = vec4(0.25);
 	gl_FragData[2] = albedo;
 	#endif
 }
