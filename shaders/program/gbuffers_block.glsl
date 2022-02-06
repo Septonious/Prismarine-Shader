@@ -3,6 +3,8 @@ BSL Shaders v8 Series by Capt Tatsu
 https://bitslablab.com 
 */ 
 
+#define GB_BLOCK
+
 //Settings//
 #include "/lib/settings.glsl"
 

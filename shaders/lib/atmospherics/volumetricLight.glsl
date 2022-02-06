@@ -29,15 +29,26 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	#endif
 
 	#ifdef OVERWORLD
-	float visfactor = 0.05 * (-0.8 * timeBrightness + 1.0);
-	float invvisfactor = 1.0 - visfactor;
+	#ifndef LIGHTSHAFT_CLOUDY_NOISE
+	float VoL = dot(normalize(viewPos.xyz), lightVec);
+	float VoU = clamp(dot(normalize(viewPos.xyz), upVec), -1.0, 1.0);
+	#endif
 
 	float visibility = 1.0;
 	float caveFactor = pow4(clamp(cameraPosition.y * 0.01 + eBS, 0.0, 1.0));
-	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
-	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility) * pow2(1.0 - timeBrightness * caveFactor);
+
+	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility);
+
+	#ifdef LIGHTSHAFT_CLOUDY_NOISE
+	visibility *= pow2(1.0 - timeBrightness * caveFactor);
+	#endif
+
 	visibility = clamp(visibility + isEyeInWater, 0.0, 1.0);
+
+	#ifndef LIGHTSHAFT_CLOUDY_NOISE
+	visibility = pow2(clamp(VoL * 0.5 + 0.5, 0.0, 1.0));
+	visibility *= 0.14285 * float(pixeldepth0 > 0.56);
+	#endif
 	#endif
 
 	if (visibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {

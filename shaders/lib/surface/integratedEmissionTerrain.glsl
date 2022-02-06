@@ -11,7 +11,7 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 	#endif
 	if (mat > 100.9 && mat < 101.1) { // Crying Obsidian and Respawn Anchor
 		newEmissive = (albedo.b - albedo.r) * albedo.r * GLOW_STRENGTH;
-        newEmissive *= newEmissive * newEmissive * GLOW_STRENGTH;
+        newEmissive *= newEmissive * 0.25 * GLOW_STRENGTH;
 	} else if (mat > 101.9 && mat < 102.1) { // Command Block
         vec3 comPos = fract(worldPos.xyz + cameraPosition.xyz);
              comPos = abs(comPos - vec3(0.5));
@@ -62,6 +62,8 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1 * GLOW_STRENGTH;
 	} else if (mat > 121.9 && mat < 122.1) {
 		newEmissive = 0.25;
+	} else if (mat > 122.9 && mat < 123.1) {
+		newEmissive = 0.0;
 	}
 
 	#ifdef DEBRIS_HIGHLIGHT
@@ -110,6 +112,7 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	if (mc_Entity.x == 20019) mat = 119.0;
 	if (mc_Entity.x == 20020) mat = 120.0;
 	if (mc_Entity.x == 20022) mat = 122.0;
+	if (mc_Entity.x == 20023) mat = 123.0;
 
 	#ifdef DEBRIS_HIGHLIGHT
 	if (mc_Entity.x == 20021) mat = 121.0;

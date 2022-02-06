@@ -2,6 +2,10 @@
 #include "/lib/lighting/shadows.glsl"
 #endif
 
+#if !defined GB_BLOCK && !defined GB_WATER
+uniform sampler2D noisetex;
+#endif
+
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
                  float parallaxShadow, float emission, float subsurface) {
@@ -33,6 +37,28 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     vec3 fullShadow = shadow * NoL;
     
     #ifdef OVERWORLD
+    #ifdef AURORA
+	float auroraVisibility = moonVisibility * (1.0 - rainStrength) * (1.0 - rainStrength);
+
+	#ifdef WEATHER_PERBIOME
+	auroraVisibility *= isCold * isCold;
+	#endif
+
+    float noise1 = texture2D(noisetex, (worldPos.xz + cameraPosition.xz) * 0.00005).r;
+
+    auroraVisibility *= noise1;
+
+    vec3 auroraLowColSqrt1 = vec3(AURORA_LR, AURORA_LG, AURORA_LB) * AURORA_LI / 255.0;
+    vec3 auroraLowCol1 = auroraLowColSqrt1 * auroraLowColSqrt1 * 0.1;
+    vec3 auroraHighColSqrt1 = vec3(AURORA_HR, AURORA_HG, AURORA_HB) * AURORA_HI / 255.0;
+    vec3 auroraHighCol1 = auroraHighColSqrt1 * auroraHighColSqrt1;
+    vec3 auroraColor = (auroraLowColSqrt1 + auroraHighColSqrt1 * 0.25) * 0.5;
+    auroraColor *= auroraColor * auroraColor;
+
+    lightCol += mix(vec3(0.0), auroraColor, auroraVisibility);
+    ambientCol += mix(vec3(0.0), auroraColor, auroraVisibility);
+    #endif
+
     lightmap.y = clamp(lightmap.y + clamp(float(isEyeInWater), 0.0, 1.0) * 0.1, 0.0, 1.0);
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
     vec3 sceneLighting = mix(ambientCol, lightCol, fullShadow * shadowMult);

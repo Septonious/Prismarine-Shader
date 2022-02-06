@@ -3,6 +3,8 @@ BSL Shaders v8 Series by Capt Tatsu
 https://bitslablab.com 
 */ 
 
+#define GB_WATER
+
 //Settings//
 #include "/lib/settings.glsl"
 
@@ -364,29 +366,28 @@ void main() {
 
 			float rainFactor = 1.0 - rainStrength * 0.75;
 			float moonFactor = 1.0 - moonVisibility * 0.95;
+			float timeFactor = 0.15 + timeBrightness * 0.85;
+
 			float difT = length(oViewPos - viewPos.xyz);
-			float absorb = sqrt(clamp(lightmap.y + glass, 0.0, 1.0) * lightmap.y) * moonFactor * rainFactor;
+			float absorb = sqrt(clamp(lightmap.y + glass, 0.0, 1.0) * moonFactor * timeFactor * rainFactor);
 			float glass = float(mat > 1.98 && mat < 2.02);
 			float absorbDist = 0.0;
 
 			vec3 absorbColor = vec3(0.0);
 
 			if (isEyeInWater == 0 && water > 0.5){
-				absorbColor = waterColor.rgb * WATER_I * rainFactor * moonFactor * 1.25;
-				absorbDist = 1.0 - clamp(difT * 0.05, 0.0, 1.0);
-				albedo.rgb *= pow8(absorbDist) * 0.25;
+				absorbColor = waterColor.rgb * WATER_I * rainFactor * moonFactor * 2.2;
+				absorbDist = 1.0 - clamp(difT / 10.0, 0.0, 1.0);
 			}
 
 			if (glass > 0.5){
-				albedo.a += albedo.a * 0.25;
-				albedo.a = clamp(albedo.a, 0.5, 0.95);
 				absorbColor = normalize(albedo.rgb) * 0.5;
 				absorbDist = 1.0 - clamp(difT * 32.0, 0.0, 1.0);
 			}
 			
-			vec3 newAlbedo = mix(absorbColor * absorbColor * terrainColor * (5.0 - REFLECTION_STRENGTH), terrainColor * terrainColor, absorbDist * absorbDist);
+			vec3 newAlbedo = mix(absorbColor * absorbColor * terrainColor, terrainColor * terrainColor, absorbDist * absorbDist);
  
-			albedo.rgb = mix(albedo.rgb * 0.25, newAlbedo, absorb);
+			albedo.rgb = mix(albedo.rgb, newAlbedo, absorb);
 		}
 		#endif
 

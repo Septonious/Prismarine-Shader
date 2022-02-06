@@ -16,9 +16,9 @@ vec4 GetWorldSpace(float depth, vec2 texCoord) {
 	return wpos;
 }
 
-#if defined LIGHTSHAFT_CLOUDY_NOISE || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
 uniform sampler2D depthtex2;
 
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
 #ifdef BLUE_NOISE_DITHERING
 float InterleavedGradientNoiseVL() {
     float noise = texelFetch(depthtex2, ivec2(gl_FragCoord.xy) & 255, 0).r;
@@ -33,7 +33,9 @@ float InterleavedGradientNoiseVL() {
 	return fract(n);
 }
 #endif
+#endif
 
+#if defined LIGHTSHAFT_CLOUDY_NOISE || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
 float getTextureNoise(vec3 pos){
 	pos *= 0.30;
 	pos.xz *= 0.20;

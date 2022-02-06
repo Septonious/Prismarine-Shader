@@ -37,7 +37,10 @@ uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
-uniform sampler2D colortex0;
+uniform sampler2D colortex0, depthtex1;
+#ifdef OVERWORLD
+uniform sampler2D colortex12;
+#endif
 uniform sampler2D depthtex0;
 
 uniform mat4 gbufferProjectionInverse;
@@ -46,7 +49,6 @@ uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
 
 uniform sampler2D colortex1;
-uniform sampler2D depthtex1;
 #endif
 
 #if defined LIGHTSHAFT_CLOUDY_NOISE || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
@@ -60,10 +62,6 @@ uniform mat4 shadowProjection;
 uniform sampler2DShadow shadowtex0;
 uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
-
-#ifdef WATER_LIGHTSHAFTS
-uniform sampler2D colortex12;
-#endif
 #endif
 
 //Optifine Constants//
@@ -107,6 +105,21 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #include "/lib/atmospherics/volumetricSmoke.glsl"
 #endif
 
+#ifdef OVERWORLD
+vec3 getWaterAbsorption(vec3 color, vec3 viewPos, vec3 viewPosZ1, float skylight) {
+	float visfactor = pow4((1.0 - rainStrength * 0.95) * (0.1 + timeBrightness * 0.9) * (0.0 + skylight));
+	vec3 absorbColor = (lightCol + ambientCol) * visfactor;
+
+	float density = abs(distance(viewPos.xyz, viewPosZ1.xyz)) * visfactor;
+    	  density = clamp(density * 0.5, 0.0, 2.0);
+
+    vec3 scattering = 1.0 - exp(-(density * 0.75) * scatteringCoeff);
+    vec3 transmittance = exp(-density * transmittanceCoeff);
+
+    return color * transmittance + absorbColor * scattering * 0.05;
+}
+#endif
+
 //Program//
 void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
@@ -116,12 +129,26 @@ void main() {
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
 
-	if (isEyeInWater == 1.0) {
+	if (isEyeInWater == 1) {
 		vec4 waterFog = GetWaterFog(viewPos.xyz);
 		waterColor.g = mix(waterColor.g * 2.0, waterColor.g * 4.0, waterFog.a * 0.5);
 		color.rgb = mix(sqrt(color.rgb) * 1.25, sqrt(waterFog.rgb), waterFog.a);
 		color.rgb *= color.rgb;
 	}
+
+	#ifdef OVERWORLD
+	vec4 waterData = texture2D(colortex12, texCoord);
+
+	if (waterData.a > 1.75){
+		float z1 = texture2D(depthtex1, texCoord).r;
+		vec4 screenPosZ1 = vec4(texCoord, z1, 1.0);
+		vec4 viewPosZ1 = gbufferProjectionInverse * (screenPosZ1 * 2.0 - 1.0);
+		viewPosZ1 /= viewPosZ1.w;
+
+        color.rgb = getWaterAbsorption(color.rgb, viewPos.xyz, viewPosZ1.xyz, waterData.g);
+    
+	}
+	#endif
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
     vec4 translucent = texture2D(colortex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION));
@@ -139,13 +166,7 @@ void main() {
 
 	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	float waterData = 0.0;
-
-	#ifdef WATER_LIGHTSHAFTS
-	waterData = texture2D(colortex12, texCoord).a;
-	#endif
-
-	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither, waterData);
+	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither, waterData.a);
 	#endif
 	
 	//Nether & End Smoke

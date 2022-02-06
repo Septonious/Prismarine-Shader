@@ -23,7 +23,7 @@ float CloudNoise(vec2 coord, vec2 wind){
 	#elif CLOUD_OCTAVES == 7
 	noiseFactor = 0.5;
 	#elif CLOUD_OCTAVES == 8
-	noiseFactor = 0.36;
+	noiseFactor = 0.32;
 	#endif
 
 	for (int i = 0; i < CLOUD_OCTAVES; i++){
@@ -334,7 +334,7 @@ vec3 DrawNebula(vec3 viewPos) {
 			nebulaColor = mix(nebulaLowCol, nebulaHighCol, currentStep);
 			#endif
 
-			nebula += noise * nebulaColor * exp2(-4.0 * i * sampleStep);
+			nebula += noise * nebulaColor * exp2(-8.0 * i * sampleStep);
 			currentStep += sampleStep;
 		}
 	}
