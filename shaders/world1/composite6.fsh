@@ -7,7 +7,7 @@ https://bitslablab.com
 
 #extension GL_ARB_shader_texture_lod : enable
 
-#define OVERWORLD
+#define END
 #define FSH
 
-#include "/program/composite5.glsl"
+#include "/program/composite6.glsl"

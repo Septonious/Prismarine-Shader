@@ -38,8 +38,8 @@ uniform ivec2 eyeBrightnessSmooth;
 uniform vec3 cameraPosition;
 
 uniform sampler2D colortex0, depthtex1;
-#ifdef OVERWORLD
-uniform sampler2D colortex12;
+#if defined OVERWORLD || defined END
+uniform sampler2D colortex9, colortex12;
 #endif
 uniform sampler2D depthtex0;
 
@@ -105,16 +105,20 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #include "/lib/atmospherics/volumetricSmoke.glsl"
 #endif
 
-#ifdef OVERWORLD
-vec3 getWaterAbsorption(vec3 color, vec3 viewPos, vec3 viewPosZ1, float skylight) {
-	float visfactor = pow4((1.0 - rainStrength * 0.95) * (0.1 + timeBrightness * 0.9) * (0.0 + skylight));
-	vec3 absorbColor = (lightCol + ambientCol) * visfactor;
+#if defined WATER_ABSORPTION && defined OVERWORLD
+//Common Functions//
+const vec3 scatteringCoeff = vec3(0.025, 0.25, 1.0);
+const vec3 transmittanceCoeff = vec3(1.0, 0.25, 0.025);
 
-	float density = abs(distance(viewPos.xyz, viewPosZ1.xyz)) * visfactor;
-    	  density = clamp(density * 0.5, 0.0, 2.0);
+vec3 getWaterAbsorption(vec3 color, vec3 waterColor, vec3 viewPos, vec3 viewPosZ1, float skylight) {
+	float visfactor = pow4((1.0 - rainStrength * 0.95) * (0.3 + timeBrightness * 0.7) * skylight);
+	vec3 absorbColor = waterColor * visfactor;
 
-    vec3 scattering = 1.0 - exp(-(density * 0.75) * scatteringCoeff);
-    vec3 transmittance = exp(-density * transmittanceCoeff);
+	float density = abs(length(viewPos - viewPosZ1)) * visfactor;
+    	  density = clamp(density * ABSORPTION_DENSITY, 0.0, 4.0);
+
+    vec3 scattering = 1.0 - exp(-density * scatteringCoeff);
+    vec3 transmittance = exp(-density * 0.75 * transmittanceCoeff);
 
     return color * transmittance + absorbColor * scattering * 0.05;
 }
@@ -122,12 +126,31 @@ vec3 getWaterAbsorption(vec3 color, vec3 viewPos, vec3 viewPosZ1, float skylight
 
 //Program//
 void main() {
-    vec3 color = texture2D(colortex0, texCoord).rgb;
+    vec4 color = texture2D(colortex0, texCoord);
 	float z0 = texture2D(depthtex0, texCoord).r;
 
 	vec4 screenPos = vec4(texCoord, z0, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
+
+	#if defined OVERWORLD || defined END
+	vec4 waterData = texture2D(colortex12, texCoord);
+	vec4 reflection = texture2D(colortex9, texCoord);
+
+	if (waterData.a > 0.5 && isEyeInWater == 0){
+		#if defined WATER_ABSORPTION && defined OVERWORLD
+		float z1 = texture2D(depthtex1, texCoord).r;
+		vec4 screenPosZ1 = vec4(texCoord, z1, 1.0);
+		vec4 viewPosZ1 = gbufferProjectionInverse * (screenPosZ1 * 2.0 - 1.0);
+		viewPosZ1 /= viewPosZ1.w;
+
+        color.rgb = getWaterAbsorption(color.rgb, waterColor.rgb, viewPos.xyz, viewPosZ1.xyz, waterData.g);
+		#endif
+
+		color.rgb = mix(color.rgb, reflection.rgb, reflection.a);
+		color.a = mix(color.a, 1.0, reflection.a);
+	}
+	#endif
 
 	if (isEyeInWater == 1) {
 		vec4 waterFog = GetWaterFog(viewPos.xyz);
@@ -135,20 +158,6 @@ void main() {
 		color.rgb = mix(sqrt(color.rgb) * 1.25, sqrt(waterFog.rgb), waterFog.a);
 		color.rgb *= color.rgb;
 	}
-
-	#ifdef OVERWORLD
-	vec4 waterData = texture2D(colortex12, texCoord);
-
-	if (waterData.a > 1.75){
-		float z1 = texture2D(depthtex1, texCoord).r;
-		vec4 screenPosZ1 = vec4(texCoord, z1, 1.0);
-		vec4 viewPosZ1 = gbufferProjectionInverse * (screenPosZ1 * 2.0 - 1.0);
-		viewPosZ1 /= viewPosZ1.w;
-
-        color.rgb = getWaterAbsorption(color.rgb, viewPos.xyz, viewPosZ1.xyz, waterData.g);
-    
-	}
-	#endif
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
     vec4 translucent = texture2D(colortex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION));
@@ -166,7 +175,7 @@ void main() {
 
 	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither, waterData.a);
+	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither);
 	#endif
 	
 	//Nether & End Smoke
@@ -186,7 +195,7 @@ void main() {
 	#endif
 
     /* DRAWBUFFERS:018 */
-	gl_FragData[0] = vec4(color.rgb, 1.0);
+	gl_FragData[0] = color;
 	gl_FragData[1] = vec4(vl, 1.0);
 	gl_FragData[2] = cloud;
 	

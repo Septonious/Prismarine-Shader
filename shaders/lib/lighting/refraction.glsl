@@ -4,6 +4,7 @@ float GetWaterHeightMap(vec3 waterPos, vec2 offset) {
     vec2 wind = vec2(frametime) * 0.5 * WATER_SPEED;
 
 	waterPos.xz -= waterPos.y * 0.2;
+	waterPos.xz *= 0.75;
 
 	#if WATER_NORMALS == 1
 	offset /= 256.0;

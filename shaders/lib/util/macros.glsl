@@ -19,20 +19,11 @@
 #define sum12(x) sum6(x) + sum6(x)
 #define sum16(x) sum8(x) + sum8(x)
 
-/*
-void mainImage( out vec4 fragColor, in vec2 fragCoord ){
-    vec2 imageSize = iResolution.xy;
-    
-    fragCoord -= 0.5f;
-    
-    vec2 uv_fullres = clamp(fragCoord / imageSize, 0.0, 1.0);
-    vec2 uv_halfres = floor(fragCoord / 2.0) * 2.0;
-    uv_halfres += 1.0f;
-    uv_halfres = clamp(uv_halfres / imageSize, 0.0, 1.0);
-    
-    vec4 test0 = texture(iChannel0, uv_halfres);
-    
+#define _cube_smooth(x) ((x * x) * (3.0 - 2.0 * x))
 
-    fragColor = test0;
+float cube_smooth(float x) {
+    return _cube_smooth(x);
 }
-*/
+vec3 cube_smooth(vec3 x) {
+    return _cube_smooth(x);
+}

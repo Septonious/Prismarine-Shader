@@ -172,7 +172,7 @@ void main() {
 		#endif
 		vec3 worldPos = ToWorld(viewPos);
 
-		float emissive = float(mat > 2.98 && mat < 3.02);
+		float emissive = float(mat > 2.98 && mat < 3.02) * 0.5;
 		float foliage  = float(mat > 0.98 && mat < 1.02);
 		float leaves   = float(mat > 1.98 && mat < 2.02);
 		float candle   = float(mat > 4.98 && mat < 5.02);
@@ -370,14 +370,14 @@ void main() {
 	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,6,10 */
 	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
-	gl_FragData[2] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * 0.75));
+	gl_FragData[2] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.25 + timeBrightness * 0.50)));
 	#endif
 
 	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,6,7,10 */
 	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
 	gl_FragData[2] = vec4(fresnel3, 0.0);
-	gl_FragData[3] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * 0.75));
+	gl_FragData[3] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.25 + timeBrightness * 0.50)));
 	#endif
 }
 

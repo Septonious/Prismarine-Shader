@@ -5,7 +5,7 @@ https://bitslablab.com
 
 #version 120 
 
-#define NETHER
+#define END
 #define VSH
 
-#include "/program/composite5.glsl"
+#include "/program/composite6.glsl"

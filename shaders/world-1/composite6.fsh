@@ -7,7 +7,7 @@ https://bitslablab.com
 
 #extension GL_ARB_shader_texture_lod : enable
 
-#define END
+#define NETHER
 #define FSH
 
-#include "/program/composite5.glsl"
+#include "/program/composite6.glsl"

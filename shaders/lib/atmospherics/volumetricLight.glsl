@@ -19,7 +19,7 @@ vec4 GetShadowSpace(vec4 wpos) {
 }
 
 //Light shafts from Robobo1221 (modified)
-vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 color, float dither, float waterData) {
+vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
 	vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
@@ -30,25 +30,19 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 
 	#ifdef OVERWORLD
 	#ifndef LIGHTSHAFT_CLOUDY_NOISE
-	float VoL = dot(normalize(viewPos.xyz), lightVec);
-	float VoU = clamp(dot(normalize(viewPos.xyz), upVec), -1.0, 1.0);
+	float VoU = clamp(dot(normalize(viewPos.xyz), upVec), 0.0, 1.0);
 	#endif
 
 	float visibility = 1.0;
-	float caveFactor = pow4(clamp(cameraPosition.y * 0.01 + eBS, 0.0, 1.0));
 
 	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility);
 
 	#ifdef LIGHTSHAFT_CLOUDY_NOISE
-	visibility *= pow2(1.0 - timeBrightness * caveFactor);
+	visibility *= pow2(1.0 - timeBrightness * 0.5);
+	visibility *= 0.14285 * float(pixeldepth0 > 0.56);
 	#endif
 
 	visibility = clamp(visibility + isEyeInWater, 0.0, 1.0);
-
-	#ifndef LIGHTSHAFT_CLOUDY_NOISE
-	visibility = pow2(clamp(VoL * 0.5 + 0.5, 0.0, 1.0));
-	visibility *= 0.14285 * float(pixeldepth0 > 0.56);
-	#endif
 	#endif
 
 	if (visibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {
@@ -78,7 +72,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 
 			if (length(shadowposition.xy * 2.0 - 1.0) < 1.0) {
 				float shadow0 = shadow2D(shadowtex0, shadowposition.xyz).z;
-				
+
 				vec3 shadowCol = vec3(0.0);
 				#ifdef SHADOW_COLOR
 				if (shadow0 < 1.0) {
@@ -93,15 +87,19 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if ((depth0 < minDist && waterData > 0.5) || isEyeInWater == 1.0) shadow *= watercol * 256.0 * (0.5 + eBS) * (0.05 + timeBrightness * 0.95);
-				
+				else if (isEyeInWater == 1.0) shadow *= watercol * 256.0 * (0.5 + eBS) * (0.05 + timeBrightness * 0.95);
+
 				#ifdef LIGHTSHAFT_CLOUDY_NOISE
 				if (isEyeInWater == 0){
 					vec3 fogPosition = worldposition.xyz + cameraPosition.xyz;
-					float theLowerTheDenser = 1.2 + (0.2 - clamp(fogPosition.y, 0.0, 1.0) * 0.002);
-					float noise = getFogSample(fogPosition, LIGHTSHAFT_HEIGHT * (1.0 - timeBrightness * 0.25), 64.0, theLowerTheDenser);
-					shadow *= noise;
+					float worldHeightFactor = clamp(fogPosition.y * 0.0075, 0.0, 1.0);
+					shadow *= (1.0 - worldHeightFactor) * 1.25;
 				}
+				#endif
+
+				#ifndef LIGHTSHAFT_CLOUDY_NOISE
+				VoU = 1.0 - VoU;
+				shadow *= pow4(VoU);
 				#endif
 
 				vl += shadow;

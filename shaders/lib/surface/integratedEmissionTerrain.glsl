@@ -6,12 +6,12 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
     if (mat > 99.9 && mat < 100.1) { // Emissive Ores
         float stoneDif = max(abs(albedo.r - albedo.g), max(abs(albedo.r - albedo.b), abs(albedo.g - albedo.b)));
         float ore = max(max(stoneDif - 0.175, 0.0), 0.0);
-        newEmissive = sqrt(ore) * GLOW_STRENGTH * 0.25;
+        newEmissive = sqrt(ore) * GLOW_STRENGTH;
     } 
 	#endif
 	if (mat > 100.9 && mat < 101.1) { // Crying Obsidian and Respawn Anchor
 		newEmissive = (albedo.b - albedo.r) * albedo.r * GLOW_STRENGTH;
-        newEmissive *= newEmissive * 0.25 * GLOW_STRENGTH;
+        newEmissive *= newEmissive * 0.5 * GLOW_STRENGTH;
 	} else if (mat > 101.9 && mat < 102.1) { // Command Block
         vec3 comPos = fract(worldPos.xyz + cameraPosition.xyz);
              comPos = abs(comPos - vec3(0.5));

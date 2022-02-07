@@ -85,7 +85,7 @@ bool IntersectSSRay(inout vec3 position, vec3 startVS, vec3 rayDirection, float 
 
 	vec3 rayOrigin = position;
 
-	float ascribeAmount = GI_DEPTH_LENIENCY * (1.0 - eBS * 0.75) * float(stride) * viewPixelSize.y * gbufferProjectionInverse[1].y;
+	float ascribeAmount = GI_DEPTH_LENIENCY * (1.0 - eBS * 0.95) * float(stride) * viewPixelSize.y * gbufferProjectionInverse[1].y;
 
 	bool hit = false;
 	float t = ditherp;

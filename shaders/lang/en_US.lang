@@ -290,6 +290,12 @@ value.CLOUDS.2=Vanilla
 value.CLOUDS.3=Volumetric
 value.CLOUDS.4=Volumetric + Planar
 
+option.CLOUD_SHADOWS=Cloud Shadows
+option.CLOUD_SHADOWS.comment=Enables large shadows from clouds
+
+option.STARS=Stars
+option.END_STARS=End Stars
+
 option.END_NEBULA=Ender Nebula
 option.OVERWORLD_NEBULA=Overworld Nebula
 option.OVERWORLD_NEBULA.comment=Visible only at night.
@@ -514,8 +520,8 @@ option.WATER_REFRACTION=Refraction
 option.WATER_REFRACTION.comment=Distorts things behind water.
 option.REFRACTION_STRENGTH=Refraction Strength
 
-option.TRANSLUCENCY_BLENDING=Translucency Blending
-option.TRANSLUCENCY_BLENDING.comment=Makes colored glass and water blend with things behind it. Also adds water absorption.
+option.WATER_ABSORPTION=Water absorption
+option.WATER_ABSORPTION.comment=Makes light scatter realistically as the water density increases.
 
 option.WATER_BUMP=Bumpiness
 option.WATER_BUMP.comment=Adjusts the intensity of custom water normals.
