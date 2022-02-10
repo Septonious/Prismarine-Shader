@@ -1,5 +1,5 @@
 void erodeCoord(inout vec2 coord, in float currentStep, in float erosionStrength){
-	coord += cos(mix(vec2(cos(currentStep * 1.00), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.0), sin(currentStep * 4.00)), currentStep) * erosionStrength);
+	coord += cos(mix(vec2(cos(currentStep), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.0), sin(currentStep * 4.00)), currentStep) * erosionStrength);
 }
 
 #if defined PLANAR_CLOUDS && defined OVERWORLD

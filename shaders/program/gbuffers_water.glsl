@@ -360,7 +360,6 @@ void main() {
 		#endif
 
 		Fog(albedo.rgb, viewPos);
-		Fog(reflection.rgb, viewPos);
 
 		#if ALPHA_BLEND == 0
 		albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));

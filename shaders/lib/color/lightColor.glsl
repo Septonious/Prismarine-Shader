@@ -1,3 +1,10 @@
+#ifdef WEATHER_PERBIOME
+uniform float isDesert, isMesa, isCold, isSwamp, isMushroom, isSavanna;
+#ifdef FOG_PERBIOME
+uniform float isForest, isJungle, isTaiga;
+#endif
+#endif
+
 vec3 lightMorning    = vec3(LIGHT_MR,   LIGHT_MG,   LIGHT_MB)   * LIGHT_MI / 255.0;
 vec3 lightDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB)   * LIGHT_DI / 255.0;
 vec3 lightEvening    = vec3(LIGHT_ER,   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI / 255.0;
@@ -9,8 +16,6 @@ vec3 ambientEvening  = vec3(AMBIENT_ER, AMBIENT_EG, AMBIENT_EB) * AMBIENT_EI / 2
 vec3 ambientNight    = vec3(AMBIENT_NR, AMBIENT_NG, AMBIENT_NB) * AMBIENT_NI * 0.3 / 255.0;
 
 #ifdef WEATHER_PERBIOME
-uniform float isDesert, isMesa, isCold, isSwamp, isMushroom, isSavanna;
-
 vec3 weatherRain     = vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0 * WEATHER_RI;
 vec3 weatherCold     = vec3(WEATHER_CR, WEATHER_CG, WEATHER_CB) / 255.0 * WEATHER_CI;
 vec3 weatherDesert   = vec3(WEATHER_DR, WEATHER_DG, WEATHER_DB) / 255.0 * WEATHER_DI;
@@ -19,7 +24,30 @@ vec3 weatherSwamp    = vec3(WEATHER_SR, WEATHER_SG, WEATHER_SB) / 255.0 * WEATHE
 vec3 weatherMushroom = vec3(WEATHER_MR, WEATHER_MG, WEATHER_MB) / 255.0 * WEATHER_MI;
 vec3 weatherSavanna  = vec3(WEATHER_VR, WEATHER_VG, WEATHER_VB) / 255.0 * WEATHER_VI;
 
+#ifdef FOG_PERBIOME
+vec3 weatherForest = vec3(WEATHER_FR, WEATHER_FG, WEATHER_FB) / 255.0 * WEATHER_FI;
+vec3 weatherTaiga  = vec3(WEATHER_TR, WEATHER_TG, WEATHER_TB) / 255.0 * WEATHER_TI;
+vec3 weatherJungle = vec3(WEATHER_JR, WEATHER_JG, WEATHER_JB) / 255.0 * WEATHER_JI;
+#endif
+
 float weatherWeight = isCold + isDesert + isMesa + isSwamp + isMushroom + isSavanna;
+
+#ifdef FOG_PERBIOME
+float fogWeight = isCold + isDesert + isMesa + isSwamp + isMushroom + isSavanna + isForest + isJungle + isTaiga;
+
+vec3 skyColSqrt0 = vec3(SKY_R, SKY_G, SKY_B) * SKY_I / 255.0;
+vec3 fogCol0 = skyColSqrt0 * skyColSqrt0;
+
+vec3 fogColBiome = mix(
+	fogCol0.rgb,
+	(
+		weatherCold  * isCold  + weatherDesert   * isDesert   + weatherBadlands * isMesa    +
+		weatherSwamp * isSwamp + weatherMushroom * isMushroom + weatherSavanna  * isSavanna +
+		weatherForest * isForest + weatherJungle * isJungle + weatherTaiga * isTaiga
+	) / max(fogWeight, 0.0001),
+	fogWeight
+);
+#endif
 
 vec3 weatherCol = mix(
 	weatherRain,

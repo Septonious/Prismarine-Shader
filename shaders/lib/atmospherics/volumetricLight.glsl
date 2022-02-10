@@ -38,12 +38,14 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	visibility *= (1.0 - rainStrength) * (1.0 - moonVisibility);
 
 	#ifdef LIGHTSHAFT_CLOUDY_NOISE
-	visibility *= pow2(1.0 - timeBrightness * 0.5);
 	visibility *= 0.14285 * float(pixeldepth0 > 0.56);
 	#endif
 
 	visibility = clamp(visibility + isEyeInWater, 0.0, 1.0);
 	#endif
+
+	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+	visibility = mix(visibility, 0.0, ug);
 
 	if (visibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {
 		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE;
@@ -87,13 +89,13 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol * 256.0 * (0.5 + eBS) * (0.05 + timeBrightness * 0.95);
+				else if (isEyeInWater == 1.0) shadow *= watercol * 32.0 * (0.5 + eBS) * (0.05 + timeBrightness * 0.95);
 
 				#ifdef LIGHTSHAFT_CLOUDY_NOISE
 				if (isEyeInWater == 0){
 					vec3 fogPosition = worldposition.xyz + cameraPosition.xyz;
 					float worldHeightFactor = clamp(fogPosition.y * 0.0075, 0.0, 1.0);
-					shadow *= (1.0 - worldHeightFactor) * 1.25;
+					shadow *= getFogSample(fogPosition, LIGHTSHAFT_HEIGHT * (1.0 - timeBrightness * 0.25), 48.0, 1.0 + worldHeightFactor);
 				}
 				#endif
 
@@ -105,16 +107,6 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				vl += shadow;
 			}
 		}
-		
-		#if MC_VERSION >= 11800
-		vl *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
-		#else
-		vl *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
-		#endif
-		
-		#ifdef UNDERGROUND_SKY
-		vl *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
-		#endif
 
 		vl = sqrt(vl * visibility);
 	}

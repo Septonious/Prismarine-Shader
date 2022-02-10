@@ -17,13 +17,10 @@ varying vec3 sunVec, upVec;
 #endif
 
 //Uniforms//
-#if defined VOLUMETRIC_CLOUDS || defined LIGHT_SHAFT
-uniform float rainStrength;
-#endif
-
 #ifdef LIGHT_SHAFT
 uniform int isEyeInWater;
 
+uniform float rainStrength;
 uniform float blindFactor;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
@@ -72,33 +69,33 @@ void main() {
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	#ifdef BLUR_FILTERING
-	vec3 vl = GaussianBlur(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION).rgb;
+	vec3 vl = GaussianBlur(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
 	#else
 	vec3 vl = texture2D(colortex1, texCoord * VOLUMETRICS_RENDER_RESOLUTION).rgb;
 	#endif
 
 	#ifdef LIGHT_SHAFT
 	if (isEyeInWater != 1.0) vl.rgb *= lightCol * 0.25;
-	else vl.rgb *= waterColor.rgb * 0.15 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75);
+	else vl.rgb *= waterColor.rgb * 0.15 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75) * (1.0 - isEyeInWater * 0.75);
     vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
 	#endif
 
 	color += vl;
 	#endif
 
-	/* DRAWBUFFERS:08 */
-	gl_FragData[0] = vec4(color, 1.0);
-
 	#ifdef VOLUMETRIC_CLOUDS
-	vec4 cloud = texture2DLod(colortex8, texCoord.xy, 2.0);
+	vec4 cloud = texture2D(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
 
 	#ifdef BLUR_FILTERING
-	cloud.rgb = GaussianBlur(colortex8, texCoord.xy).rgb;
+	cloud.rgb = GaussianBlur(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
 	#endif
 
-	gl_FragData[1] = cloud;
+	float rainFactor = 1.0 - rainStrength * 0.75;
+	color.rgb = mix(color.rgb, cloud.rgb * rainFactor, cloud.a * cloud.a);
 	#endif
 
+	/* DRAWBUFFERS:0 */
+	gl_FragData[0] = vec4(color, 1.0);
 }
 
 #endif

@@ -55,7 +55,6 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     ambientCol += mix(vec3(0.0), auroraColor, auroraVisibility);
     #endif
 
-    lightmap.y = clamp(lightmap.y + clamp(float(isEyeInWater), 0.0, 0.1), 0.0, 1.0);
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
     vec3 sceneLighting = mix(ambientCol, lightCol, fullShadow * shadowMult);
     sceneLighting *= lightmap.y * (1.0 + scattering * shadow);

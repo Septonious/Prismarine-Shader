@@ -408,8 +408,6 @@ option.VCLOUDS_NOISE_OCTAVES.comment=Increases the amount of noise octaves used 
 option.VCLOUDS_FREQUENCY=Frequency
 option.VCLOUDS_FREQUENCY.comment=Increases clouds noise frequency. Higher values can turn clouds into a foggy mess.
 
-option.VCLOUDS_OPACITY=Opacity
-
 option.VCLOUDS_SPEED=Wind Speed
 option.VCLOUDS_SPEED.comment=Adjusts clouds speed.
 

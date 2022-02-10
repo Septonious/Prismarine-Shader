@@ -1,7 +1,8 @@
 #define pow2(x) x*x
 #define pow3(x) x*x*x
-#define pow6(x) x*x*x*x*x*x
 #define pow4(x) pow2(pow2(x))
+#define pow5(x) x*x*x*x*x
+#define pow6(x) x*x*x*x*x*x
 #define pow8(x) pow2(pow4(x))
 #define pow12(x) pow2(pow6(x))
 #define pow16(x) pow2(pow8(x))
@@ -18,6 +19,7 @@
 #define sum8(x) sum4(x) + sum4(x)
 #define sum12(x) sum6(x) + sum6(x)
 #define sum16(x) sum8(x) + sum8(x)
+#define sum32(x) sum16(x) + sum16(x)
 
 #define _cube_smooth(x) ((x * x) * (3.0 - 2.0 * x))
 

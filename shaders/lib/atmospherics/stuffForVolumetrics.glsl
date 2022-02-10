@@ -70,7 +70,7 @@ float getFogSample(vec3 pos, float height, float verticalThickness, float thickn
 	vec3 wind = vec3(frametime * SMOKE_SPEED, 0.0, 0.0);
 
 	#ifdef OVERWORLD
-	wind *= 0.5;
+	wind *= 0.25;
 	#endif
 
 	#ifdef NETHER

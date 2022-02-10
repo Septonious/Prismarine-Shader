@@ -24,20 +24,6 @@ uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
 uniform sampler2D depthtex1;
 #endif
 
-#ifdef VOLUMETRIC_CLOUDS
-uniform float rainStrength;
-
-#ifdef BILATERAL_UPSCALING
-uniform int frameCounter;
-
-uniform float far, near;
-
-uniform sampler2D depthtex0;
-#endif
-
-uniform sampler2D colortex8;
-#endif
-
 uniform sampler2D colortex0;
 
 #ifdef MOTION_BLUR
@@ -85,10 +71,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 #include "/lib/util/dither.glsl"
 #endif
 
-#if defined VOLUMETRIC_CLOUDS && defined BILATERAL_UPSCALING
-#include "/lib/filters/bilateralUpscaling.glsl"
-#endif
-
 //Program//
 void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
@@ -98,17 +80,6 @@ void main() {
 	float dither = Bayer64(gl_FragCoord.xy);
 
 	color = MotionBlur(color, z, dither);
-	#endif
-	
-	#ifdef VOLUMETRIC_CLOUDS
-	vec4 cloud = texture2DLod(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 2.0);
-
-	#ifdef BILATERAL_UPSCALING
-	cloud.rgb = BilateralUpscaling(colortex8, texCoord.xy, VOLUMETRICS_RENDER_RESOLUTION).rgb;
-	#endif
-
-	float rainFactor = (1.0 - rainStrength * 0.75);
-	color = mix(color, cloud.rgb * rainFactor, cloud.a);
 	#endif
 
 	/*DRAWBUFFERS:0*/
