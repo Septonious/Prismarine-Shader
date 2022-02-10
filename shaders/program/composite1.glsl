@@ -12,90 +12,158 @@ https://bitslablab.com
 //Varyings//
 varying vec2 texCoord;
 
-#ifdef LIGHT_SHAFT
+#if defined OVERWORLD || defined END
 varying vec3 sunVec, upVec;
 #endif
 
 //Uniforms//
-#ifdef LIGHT_SHAFT
+uniform int frameCounter;
 uniform int isEyeInWater;
+uniform int worldTime;
 
+uniform float blindFactor, nightVision;
+uniform float far, near;
+uniform float frameTimeCounter;
+
+#if defined OVERWORLD || defined END
 uniform float rainStrength;
-uniform float blindFactor;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 #endif
 
-uniform sampler2D colortex0;
+uniform float viewWidth, viewHeight;
 
-#ifdef VOLUMETRIC_CLOUDS
-uniform sampler2D colortex8;
+uniform ivec2 eyeBrightnessSmooth;
+
+uniform vec3 cameraPosition;
+
+uniform sampler2D colortex0;
+uniform sampler2D depthtex0, depthtex1;
+
+uniform mat4 gbufferProjectionInverse;
+
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
+uniform mat4 gbufferModelViewInverse;
+
+uniform sampler2D colortex1;
 #endif
 
-#ifdef BLUR_FILTERING
-uniform float viewWidth, viewHeight;
+#if defined LIGHTSHAFT_CLOUDY_NOISE || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
+uniform sampler2D noisetex;
 #endif
 
 #ifdef LIGHT_SHAFT
-uniform ivec2 eyeBrightnessSmooth;
-#endif
+uniform mat4 shadowModelView;
+uniform mat4 shadowProjection;
 
-#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
-uniform sampler2D colortex1;
+uniform sampler2DShadow shadowtex0;
+uniform sampler2DShadow shadowtex1;
+uniform sampler2D shadowcolor0;
+#endif
 
 //Optifine Constants//
-const bool colortex1MipmapEnabled = true;
-#endif
+const bool colortex5Clear = false;
 
 //Common Variables//
-#ifdef LIGHT_SHAFT
 float eBS = eyeBrightnessSmooth.y / 240.0;
+
+#if defined OVERWORLD || defined END
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
+float moonVisibility = clamp(dot(-sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
+
+vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
+#endif
+
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
 //Includes//
-#ifdef BLUR_FILTERING
-#include "/lib/filters/blur.glsl"
+#include "/lib/color/dimensionColor.glsl"
+#include "/lib/color/waterColor.glsl"
+#include "/lib/atmospherics/waterFog.glsl"
+
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
+#include "/lib/atmospherics/stuffForVolumetrics.glsl"
+#include "/lib/util/dither.glsl"
+#endif
+
+#ifdef VOLUMETRIC_CLOUDS
+#include "/lib/atmospherics/volumetricClouds.glsl"
 #endif
 
 #ifdef LIGHT_SHAFT
-#include "/lib/color/waterColor.glsl"
-#include "/lib/color/lightColor.glsl"
+#include "/lib/atmospherics/volumetricLight.glsl"
+#endif
+
+#if defined END_SMOKE || defined NETHER_SMOKE
+#include "/lib/atmospherics/volumetricSmoke.glsl"
 #endif
 
 //Program//
 void main() {
-    vec3 color = texture2D(colortex0, texCoord.xy).rgb;
+    vec4 color = texture2D(colortex0, texCoord);
+	float z0 = texture2D(depthtex0, texCoord).r;
 
-	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
-	#ifdef BLUR_FILTERING
-	vec3 vl = GaussianBlur(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
-	#else
-	vec3 vl = texture2D(colortex1, texCoord * VOLUMETRICS_RENDER_RESOLUTION).rgb;
+	vec4 screenPos = vec4(texCoord, z0, 1.0);
+	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+	viewPos /= viewPos.w;
+
+	if (isEyeInWater == 1) {
+		vec4 waterFog = GetWaterFog(viewPos.xyz);
+		waterColor.g = mix(waterColor.g * 2.0, waterColor.g * 4.0, waterFog.a * 0.5);
+		color.rgb = mix(sqrt(color.rgb) * 1.25, sqrt(waterFog.rgb), waterFog.a);
+		color.rgb *= color.rgb;
+	}
+
+	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
+    vec4 translucent = texture2D(colortex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION));
+
+	float dither = InterleavedGradientNoiseVL();
+	float z0Scaled = texture2D(depthtex0, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION)).r;
+	float z1Scaled = texture2D(depthtex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION)).r;
+
+	vec4 screenPosScaled = vec4(texCoord, z0Scaled, 1.0);
+	vec4 viewPosScaled = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+	viewPosScaled /= viewPosScaled.w;
 	#endif
 
+	vec3 vl = vec3(0.0);
+
+	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	if (isEyeInWater != 1.0) vl.rgb *= lightCol * 0.25;
-	else vl.rgb *= waterColor.rgb * 0.15 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75) * (1.0 - isEyeInWater * 0.75);
-    vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
+	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither);
+	#endif
+	
+	//Nether & End Smoke
+	#if defined NETHER_SMOKE || defined END_SMOKE
+	vl += GetVolumetricSmoke(z0Scaled, z1Scaled, viewPosScaled.xyz);
 	#endif
 
-	color += vl;
-	#endif
+	//Volumetric Clouds
+	vec4 cloud = vec4(0.0);
 
 	#ifdef VOLUMETRIC_CLOUDS
-	vec4 cloud = texture2D(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
-
-	#ifdef BLUR_FILTERING
-	cloud.rgb = GaussianBlur(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
+	cloud = getVolumetricCloud(viewPosScaled.xyz, z1Scaled, z0Scaled, dither, translucent);
 	#endif
 
-	float rainFactor = 1.0 - rainStrength * 0.75;
-	color.rgb = mix(color.rgb, cloud.rgb * rainFactor, cloud.a * cloud.a);
+	#if ALPHA_BLEND == 0
+	color.rgb = pow(color.rgb, vec3(2.2));
 	#endif
 
-	/* DRAWBUFFERS:0 */
-	gl_FragData[0] = vec4(color, 1.0);
+    /* DRAWBUFFERS:018 */
+	gl_FragData[0] = color;
+	gl_FragData[1] = vec4(vl, 1.0);
+	gl_FragData[2] = cloud;
+
+    #ifdef REFLECTION_PREVIOUS
+	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;
+
+    /*DRAWBUFFERS:0185*/
+	gl_FragData[3] = vec4(reflectionColor, float(z0 < 1.0));
+	#endif
 }
 
 #endif
@@ -106,12 +174,12 @@ void main() {
 //Varyings//
 varying vec2 texCoord;
 
-#ifdef LIGHT_SHAFT
+#if defined OVERWORLD || defined END
 varying vec3 sunVec, upVec;
 #endif
 
 //Uniforms//
-#ifdef LIGHT_SHAFT
+#if defined OVERWORLD || defined END
 uniform float timeAngle;
 
 uniform mat4 gbufferModelView;
@@ -123,7 +191,7 @@ void main() {
 	
 	gl_Position = ftransform();
 
-	#ifdef LIGHT_SHAFT
+	#if defined OVERWORLD || defined END
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);
 	ang = (ang + (cos(ang * 3.14159265358979) * -0.5 + 0.5 - ang) / 3.0) * 6.28318530717959;

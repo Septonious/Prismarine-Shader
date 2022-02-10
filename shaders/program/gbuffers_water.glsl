@@ -161,7 +161,6 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector, vec2 lightmap)
 #include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/atmospherics/fog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/reflections/raytrace.glsl"
 #include "/lib/reflections/simpleReflections.glsl"
@@ -358,8 +357,6 @@ void main() {
 		#ifdef TRANSLUCENCY_BLENDING
 		albedo *= (1.0 - water * 0.975 * timeBrightness);
 		#endif
-
-		Fog(albedo.rgb, viewPos);
 
 		#if ALPHA_BLEND == 0
 		albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));

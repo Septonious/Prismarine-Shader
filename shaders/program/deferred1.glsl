@@ -155,7 +155,6 @@ vec3 ToWorld(vec3 pos) {
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/atmospherics/fog.glsl"
 
 #if defined OVERWORLD && defined SKY_BLUR
 #include "/lib/filters/blur.glsl"
@@ -262,8 +261,6 @@ void main() {
 		#ifdef AO
 		color.rgb *= GetAmbientOcclusion(z);
 		#endif
-
-		Fog(color.rgb, viewPos.xyz);
 	} else {
 		#if defined OVERWORLD && defined SKY_BLUR
 		color = GaussianBlur(colortex0, texCoord, 0.5);

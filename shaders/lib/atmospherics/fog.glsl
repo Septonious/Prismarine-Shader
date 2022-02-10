@@ -36,12 +36,13 @@ vec3 GetFogColor(vec3 viewPos) {
 #endif
 
 void NormalFog(inout vec3 color, vec3 viewPos) {
+	vec4 worldPos = gbufferModelViewInverse * vec4(viewPos, 1.0);
+	worldPos.xyz /= worldPos.w;
+
 	#if DISTANT_FADE > 0
 	#if DISTANT_FADE_STYLE == 0
 	float fogFactor = length(viewPos);
 	#else
-	vec4 worldPos = gbufferModelViewInverse * vec4(viewPos, 1.0);
-	worldPos.xyz /= worldPos.w;
 	float fogFactor = length(worldPos.xz);
 	#endif
 	#endif
@@ -53,7 +54,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0) * eBS, eBS);
 	fog = 1.0 - exp(-2.0 * pow(fog, 0.05 * clearDay * eBS + 1.35));
 
-	vec3 pos = ToWorld(viewPos.xyz) + cameraPosition.xyz;
+	vec3 pos = worldPos.xyz + cameraPosition.xyz;
 	float worldHeightFactor = clamp(pos.y * 0.0075, 0.0, 1.0);
 	fog *= (1.0 - worldHeightFactor) * 1.25;
 

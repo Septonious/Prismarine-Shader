@@ -12,77 +12,89 @@ https://bitslablab.com
 //Varyings//
 varying vec2 texCoord;
 
+#ifdef LIGHT_SHAFT
+varying vec3 sunVec, upVec;
+#endif
+
 //Uniforms//
-#ifdef MOTION_BLUR
-uniform float viewWidth, viewHeight;
+#ifdef LIGHT_SHAFT
+uniform int isEyeInWater;
 
-uniform vec3 cameraPosition, previousCameraPosition;
-
-uniform mat4 gbufferPreviousProjection, gbufferProjectionInverse;
-uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
-
-uniform sampler2D depthtex1;
+uniform float rainStrength;
+uniform float blindFactor;
+uniform float shadowFade;
+uniform float timeAngle, timeBrightness;
 #endif
 
 uniform sampler2D colortex0;
 
-#ifdef MOTION_BLUR
-//Common Functions//
-vec3 MotionBlur(vec3 color, float z, float dither) {
-	
-	float hand = float(z < 0.56);
+#ifdef VOLUMETRIC_CLOUDS
+uniform sampler2D colortex8;
+#endif
 
-	if (hand < 0.5) {
-		float mbwg = 0.0;
-		vec2 doublePixel = 2.0 / vec2(viewWidth, viewHeight);
-		vec3 mblur = vec3(0.0);
-		
-		vec4 currentPosition = vec4(texCoord, z, 1.0) * 2.0 - 1.0;
-		
-		vec4 viewPos = gbufferProjectionInverse * currentPosition;
-		viewPos = gbufferModelViewInverse * viewPos;
-		viewPos /= viewPos.w;
-		
-		vec3 cameraOffset = cameraPosition - previousCameraPosition;
-		
-		vec4 previousPosition = viewPos + vec4(cameraOffset, 0.0);
-		previousPosition = gbufferPreviousModelView * previousPosition;
-		previousPosition = gbufferPreviousProjection * previousPosition;
-		previousPosition /= previousPosition.w;
+#ifdef BLUR_FILTERING
+uniform float viewWidth, viewHeight;
+#endif
 
-		vec2 velocity = (currentPosition - previousPosition).xy;
-		velocity = velocity / (1.0 + length(velocity)) * MOTION_BLUR_STRENGTH * 0.02;
-		
-		vec2 coord = texCoord.st - velocity * (1.5 + dither);
-		for(int i = 0; i < 5; i++, coord += velocity) {
-			vec2 sampleCoord = clamp(coord, doublePixel, 1.0 - doublePixel);
-			float mask = float(texture2D(depthtex1, sampleCoord).r > 0.56);
-			mblur += texture2D(colortex0, sampleCoord).rgb * mask;
-			mbwg += mask;
-		}
-		mblur /= max(mbwg, 1.0);
+#ifdef LIGHT_SHAFT
+uniform ivec2 eyeBrightnessSmooth;
+#endif
 
-		return mblur;
-	}
-	else return color;
-}
+#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+uniform sampler2D colortex1;
+
+//Optifine Constants//
+const bool colortex1MipmapEnabled = true;
+#endif
+
+//Common Variables//
+#ifdef LIGHT_SHAFT
+float eBS = eyeBrightnessSmooth.y / 240.0;
+float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
+#endif
 
 //Includes//
-#include "/lib/util/dither.glsl"
+#ifdef BLUR_FILTERING
+#include "/lib/filters/blur.glsl"
+#endif
+
+#ifdef LIGHT_SHAFT
+#include "/lib/color/waterColor.glsl"
+#include "/lib/color/lightColor.glsl"
 #endif
 
 //Program//
 void main() {
-    vec3 color = texture2D(colortex0, texCoord).rgb;
-	
-	#ifdef MOTION_BLUR
-	float z = texture2D(depthtex1, texCoord.st).x;
-	float dither = Bayer64(gl_FragCoord.xy);
+    vec3 color = texture2D(colortex0, texCoord.xy).rgb;
 
-	color = MotionBlur(color, z, dither);
+	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
+	#ifdef BLUR_FILTERING
+	vec3 vl = GaussianBlur(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
+	#else
+	vec3 vl = texture2D(colortex1, texCoord * VOLUMETRICS_RENDER_RESOLUTION).rgb;
 	#endif
 
-	/*DRAWBUFFERS:0*/
+	#ifdef LIGHT_SHAFT
+	if (isEyeInWater != 1.0) vl.rgb *= lightCol * 0.25;
+	else vl.rgb *= waterColor.rgb * 0.15 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75) * (1.0 - isEyeInWater * 0.75);
+    vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
+	#endif
+
+	color += vl;
+	#endif
+
+	#ifdef VOLUMETRIC_CLOUDS
+	vec4 cloud = texture2D(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
+
+	#ifdef BLUR_FILTERING
+	cloud.rgb = GaussianBlur(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
+	#endif
+
+	float rainFactor = 1.0 - rainStrength * 0.75;
+	color.rgb = mix(color.rgb, cloud.rgb * rainFactor, cloud.a * cloud.a);
+	#endif
+
+	/* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(color, 1.0);
 }
 
@@ -94,11 +106,31 @@ void main() {
 //Varyings//
 varying vec2 texCoord;
 
+#ifdef LIGHT_SHAFT
+varying vec3 sunVec, upVec;
+#endif
+
+//Uniforms//
+#ifdef LIGHT_SHAFT
+uniform float timeAngle;
+
+uniform mat4 gbufferModelView;
+#endif
+
 //Program//
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
 	
 	gl_Position = ftransform();
+
+	#ifdef LIGHT_SHAFT
+	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
+	float ang = fract(timeAngle - 0.25);
+	ang = (ang + (cos(ang * 3.14159265358979) * -0.5 + 0.5 - ang) / 3.0) * 6.28318530717959;
+	sunVec = normalize((gbufferModelView * vec4(vec3(-sin(ang), cos(ang) * sunRotationData) * 2000.0, 1.0)).xyz);
+
+	upVec = normalize(gbufferModelView[1].xyz);
+	#endif
 }
 
 #endif

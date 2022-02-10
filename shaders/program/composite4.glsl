@@ -13,69 +13,190 @@ https://bitslablab.com
 varying vec2 texCoord;
 
 //Uniforms//
-uniform float viewHeight, aspectRatio;
+#ifdef DOF
+uniform float centerDepthSmooth;
+#endif
+
+#if defined DOF || defined DISTANT_BLUR
+uniform float viewWidth, viewHeight, aspectRatio;
+
+uniform mat4 gbufferProjection;
+
+uniform sampler2D depthtex1;
+#endif
+
+#if defined WATER_REFRACTION || defined DISTANT_BLUR
+uniform sampler2D depthtex0;
+
+uniform mat4 gbufferProjectionInverse;
+#endif
+
+#ifdef WATER_REFRACTION
+uniform int worldTime;
+
+uniform float frameTimeCounter;
+
+uniform vec3 cameraPosition;
+
+uniform sampler2D colortex12, noisetex;
+
+uniform mat4 gbufferModelViewInverse;
+#endif
 
 uniform sampler2D colortex0;
 
-#ifdef BLOOM
 //Optifine Constants//
 const bool colortex0MipmapEnabled = true;
 
 //Common Variables//
-float ph = 0.8 / min(360.0, viewHeight);
-float pw = ph / aspectRatio;
+#ifdef WATER_REFRACTION
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter * ANIMATION_SPEED;
+#endif
+#endif
 
-float weight[5] = float[5](1.0, 4.0, 6.0, 4.0, 1.0);
+#if defined DOF || defined DISTANT_BLUR
+vec2 dofOffsets[60] = vec2[60](
+	vec2( 0.0    ,  0.25  ),
+	vec2(-0.2165 ,  0.125 ),
+	vec2(-0.2165 , -0.125 ),
+	vec2( 0      , -0.25  ),
+	vec2( 0.2165 , -0.125 ),
+	vec2( 0.2165 ,  0.125 ),
+	vec2( 0      ,  0.5   ),
+	vec2(-0.25   ,  0.433 ),
+	vec2(-0.433  ,  0.25  ),
+	vec2(-0.5    ,  0     ),
+	vec2(-0.433  , -0.25  ),
+	vec2(-0.25   , -0.433 ),
+	vec2( 0      , -0.5   ),
+	vec2( 0.25   , -0.433 ),
+	vec2( 0.433  , -0.2   ),
+	vec2( 0.5    ,  0     ),
+	vec2( 0.433  ,  0.25  ),
+	vec2( 0.25   ,  0.433 ),
+	vec2( 0      ,  0.75  ),
+	vec2(-0.2565 ,  0.7048),
+	vec2(-0.4821 ,  0.5745),
+	vec2(-0.51295,  0.375 ),
+	vec2(-0.7386 ,  0.1302),
+	vec2(-0.7386 , -0.1302),
+	vec2(-0.51295, -0.375 ),
+	vec2(-0.4821 , -0.5745),
+	vec2(-0.2565 , -0.7048),
+	vec2(-0      , -0.75  ),
+	vec2( 0.2565 , -0.7048),
+	vec2( 0.4821 , -0.5745),
+	vec2( 0.51295, -0.375 ),
+	vec2( 0.7386 , -0.1302),
+	vec2( 0.7386 ,  0.1302),
+	vec2( 0.51295,  0.375 ),
+	vec2( 0.4821 ,  0.5745),
+	vec2( 0.2565 ,  0.7048),
+	vec2( 0      ,  1     ),
+	vec2(-0.2588 ,  0.9659),
+	vec2(-0.5    ,  0.866 ),
+	vec2(-0.7071 ,  0.7071),
+	vec2(-0.866  ,  0.5   ),
+	vec2(-0.9659 ,  0.2588),
+	vec2(-1      ,  0     ),
+	vec2(-0.9659 , -0.2588),
+	vec2(-0.866  , -0.5   ),
+	vec2(-0.7071 , -0.7071),
+	vec2(-0.5    , -0.866 ),
+	vec2(-0.2588 , -0.9659),
+	vec2(-0      , -1     ),
+	vec2( 0.2588 , -0.9659),
+	vec2( 0.5    , -0.866 ),
+	vec2( 0.7071 , -0.7071),
+	vec2( 0.866  , -0.5   ),
+	vec2( 0.9659 , -0.2588),
+	vec2( 1      ,  0     ),
+	vec2( 0.9659 ,  0.2588),
+	vec2( 0.866  ,  0.5   ),
+	vec2( 0.7071 ,  0.7071),
+	vec2( 0.5    ,  0.8660),
+	vec2( 0.2588 ,  0.9659)
+);
+#endif
 
 //Common Functions//
-vec3 BloomTile(float lod, vec2 coord, vec2 offset) {
-	vec3 bloom = vec3(0.0);
-	float scale = exp2(lod);
-	coord = (coord - offset) * scale;
-	float padding = 0.5 + 0.005 * scale;
-
-	if (abs(coord.x - 0.5) < padding && abs(coord.y - 0.5) < padding) {
-		for(int i = 0; i < 5; i++) {
-			for(int j = 0; j < 5; j++) {
-				float wg = weight[i] * weight[j];
-				#ifdef ANAMORPHIC_BLOOM
-				vec2 pixelOffset = vec2((float(i) - 2.0) * pw, 0.0);
-				#else
-				vec2 pixelOffset = vec2((float(i) - 2.0) * pw, (float(j) - 2.0) * ph);
-				#endif
-				vec2 sampleCoord = coord + pixelOffset * scale;
-				bloom += texture2D(colortex0, sampleCoord).rgb * wg;
-			}
-		}
-		bloom /= 256.0;
-	}
-
-	return pow(bloom / 32.0, vec3(0.25));
+#ifdef WATER_REFRACTION
+vec3 ToWorld(vec3 pos) {
+	return mat3(gbufferModelViewInverse) * pos + gbufferModelViewInverse[3].xyz;
 }
+#endif
+
+#if defined DOF || defined DISTANT_BLUR
+vec3 DepthOfField(vec3 color, vec3 viewPos, float z) {
+	vec3 dof = vec3(0.0);
+	float hand = float(z < 0.56);
+	
+	float fovScale = gbufferProjection[1][1] / 1.37;
+	float coc = 0.0;
+
+	#ifdef DOF
+	coc = max(abs(z - centerDepthSmooth) * DOF_STRENGTH - 0.01, 0.0);
+	coc = coc / sqrt(coc * coc + 0.1);
+	#endif
+
+	#ifdef DISTANT_BLUR
+	coc = min(length(viewPos) * DISTANT_BLUR_RANGE * 0.00025, DISTANT_BLUR_STRENGTH * 0.025) * DISTANT_BLUR_STRENGTH;
+	#endif
+	
+	if (coc > 0.0 && hand < 0.5) {
+		for(int i = 0; i < 60; i++) {
+			vec2 offset = dofOffsets[i] * coc * 0.015 * fovScale * vec2(1.0 / aspectRatio, 1.0);
+			float lod = log2(viewHeight * aspectRatio * coc * fovScale / 320.0);
+			dof += texture2DLod(colortex0, texCoord + offset, lod).rgb;
+		}
+		dof /= 60.0;
+	}
+	else dof = color;
+	return dof;
+}
+#endif
 
 //Includes//
-#include "/lib/util/dither.glsl"
+#ifdef WATER_REFRACTION
+#include "/lib/lighting/refraction.glsl"
 #endif
 
 //Program//
 void main() {
-	#ifdef BLOOM
-	vec2 bloomCoord = texCoord * viewHeight * 0.8 / min(360.0, viewHeight);
-	vec3 blur =  BloomTile(1.0, bloomCoord, vec2(0.0      , 0.0   ));
-	     blur += BloomTile(2.0, bloomCoord, vec2(0.51     , 0.0   ));
-	     blur += BloomTile(3.0, bloomCoord, vec2(0.51     , 0.26  ));
-	     blur += BloomTile(4.0, bloomCoord, vec2(0.645    , 0.26  ));
-	     blur += BloomTile(5.0, bloomCoord, vec2(0.7175   , 0.26  ));
-	     blur += BloomTile(6.0, bloomCoord, vec2(0.645    , 0.3325));
-	     blur += BloomTile(7.0, bloomCoord, vec2(0.670625 , 0.3325));
-		
-		 blur = clamp(blur + Bayer64(gl_FragCoord.xy - 0.5) / 256.0, vec3(0.0), vec3(1.0));
-	#else
-	vec3 blur = texture2D(colortex0, texCoord.xy).rgb;
+	vec3 color = texture2D(colortex0, texCoord).rgb;
+
+	vec4 viewPos = vec4(0.0);
+
+	#if defined WATER_REFRACTION || defined DISTANT_BLUR
+	float z0 = texture2D(depthtex0, texCoord).r;
+    vec4 screenPos = vec4(texCoord, z0, 1.0);
+    viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+    viewPos /= viewPos.w;
 	#endif
 
-    /* DRAWBUFFERS:1 */
-	gl_FragData[0] = vec4(blur, 1.0);
+	#ifdef WATER_REFRACTION
+    vec4 waterData = texture2D(colortex12, texCoord);
+
+    if (waterData.a > 0.5){
+        vec3 worldPos = ToWorld(viewPos.xyz);
+        vec3 waterPos = worldPos + cameraPosition;
+
+        vec2 refractCoord = getRefraction(texCoord, waterPos, waterData.b, waterData.g);
+        color = texture2D(colortex0, refractCoord).rgb;
+    }
+	#endif
+
+	#if defined DOF || defined DISTANT_BLUR
+	float z1 = texture2D(depthtex1, texCoord.st).x;
+
+	color = DepthOfField(color, viewPos.xyz, z1);
+	#endif
+	
+    /*DRAWBUFFERS:0*/
+	gl_FragData[0] = vec4(color, 1.0);
 }
 
 #endif
