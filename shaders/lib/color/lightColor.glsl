@@ -35,11 +35,8 @@ float weatherWeight = isCold + isDesert + isMesa + isSwamp + isMushroom + isSava
 #ifdef FOG_PERBIOME
 float fogWeight = isCold + isDesert + isMesa + isSwamp + isMushroom + isSavanna + isForest + isJungle + isTaiga;
 
-vec3 skyColSqrt0 = vec3(SKY_R, SKY_G, SKY_B) * SKY_I / 255.0;
-vec3 fogCol0 = skyColSqrt0 * skyColSqrt0;
-
 vec3 fogColBiome = mix(
-	fogCol0.rgb,
+	vec3(0.25, 0.45, 1.25),
 	(
 		weatherCold  * isCold  + weatherDesert   * isDesert   + weatherBadlands * isMesa    +
 		weatherSwamp * isSwamp + weatherMushroom * isMushroom + weatherSavanna  * isSavanna +

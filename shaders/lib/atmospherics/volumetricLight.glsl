@@ -45,7 +45,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	#endif
 
 	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
-	visibility = mix(visibility, 0.0, ug);
+	visibility = mix(visibility, visibility * 0.25, ug);
 
 	if (visibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {
 		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE;

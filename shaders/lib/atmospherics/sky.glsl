@@ -64,12 +64,12 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     float altitudeFactor = clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
     #endif
 
-    float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+    float ug = mix(clamp((cameraPosition.y - 32.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 
     #ifdef UNDERGROUND_SKY
     sky = mix(minLightCol * 0.125, sky, ug);
     #endif
 
-    return sky;
+    return sky * altitudeFactor;
 }
 #endif

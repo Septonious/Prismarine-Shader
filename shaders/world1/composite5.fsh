@@ -3,7 +3,7 @@ BSL Shaders v8 Series by Capt Tatsu
 https://bitslablab.com 
 */ 
 
-#version 120 
+#version 330 compatibility 
 
 #define END
 #define FSH

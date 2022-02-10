@@ -1,4 +1,10 @@
 #ifdef OVERWORLD
+#if MC_VERSION >= 11800
+float altitudeFactor = clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
+#else
+float altitudeFactor = clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
+#endif
+
 vec3 GetFogColor(vec3 viewPos) {
 	vec3 nViewPos = normalize(viewPos);
 
@@ -13,10 +19,11 @@ vec3 GetFogColor(vec3 viewPos) {
 
 	float baseGradient = exp(-(VoU * 0.5 + 0.5) * 0.5 / density);
 	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+	float ug2 = mix(clamp((cameraPosition.y - 32.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 
-    vec3 fog = mix(GetSkyColor(viewPos, false), skyCol, (1.0 - timeBrightness) * (1.0 - eBS)) * 4.0 * baseGradient / SKY_I;
+    vec3 fog = mix(GetSkyColor(viewPos, false), vec3(0.25, 0.45, 1.25), (1.0 - eBS)) * 4.0 * baseGradient / SKY_I;
 	#ifdef FOG_PERBIOME
-	fog = mix(fog, fogColBiome * baseGradient, 1.0 - ug);
+	fog = mix(fog, fogColBiome * baseGradient, 1.0 - eBS);
 	#endif
     fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * SKY_I;
 
@@ -29,7 +36,7 @@ vec3 GetFogColor(vec3 viewPos) {
     weatherFog *= GetLuminance(ambientCol / (weatherFog)) * (0.4 * sunVisibility + 0.2);
     fog = mix(fog, weatherFog * rainGradient, rainStrength);
 
-	fog = mix(minLightCol * 0.5, fog, ug);
+	fog = mix(minLightCol, fog, ug2);
 
 	return fog;
 }
@@ -48,15 +55,15 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float density = (1.0 - timeBrightness * 0.75) * FOG_DENSITY * (1.0 + rainStrength * 0.25);
+	float density = (0.25 + eBS * 0.75) * altitudeFactor * FOG_DENSITY * (1.0 + rainStrength * 0.25);
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
-	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0) * eBS, eBS);
-	fog = 1.0 - exp(-2.0 * pow(fog, 0.05 * clearDay * eBS + 1.35));
+	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0), eBS);
+	fog = 1.0 - exp(-2.0 * pow(fog, 0.05 * clearDay + 1.35));
 
 	vec3 pos = worldPos.xyz + cameraPosition.xyz;
-	float worldHeightFactor = clamp(pos.y * 0.0075, 0.0, 1.0);
-	fog *= (1.0 - worldHeightFactor) * 1.25;
+	float worldHeightFactor = clamp(pos.y * 0.008, 0.0, 1.0);
+	fog *= 1.0 - worldHeightFactor;
 
 	vec3 fogColor = GetFogColor(viewPos);
 

@@ -82,12 +82,14 @@ void main() {
 
 	if (waterData.a > 0.5 && isEyeInWater == 0){
 		#if defined WATER_ABSORPTION && defined OVERWORLD
-		float z1 = texture2D(depthtex1, texCoord).r;
-		vec4 screenPosZ1 = vec4(texCoord, z1, 1.0);
-		vec4 viewPosZ1 = gbufferProjectionInverse * (screenPosZ1 * 2.0 - 1.0);
-		viewPosZ1 /= viewPosZ1.w;
+		if (z0 > 0.56){
+			float z1 = texture2D(depthtex1, texCoord).r;
+			vec4 screenPosZ1 = vec4(texCoord, z1, 1.0);
+			vec4 viewPosZ1 = gbufferProjectionInverse * (screenPosZ1 * 2.0 - 1.0);
+			viewPosZ1 /= viewPosZ1.w;
 
-        color.rgb = getWaterAbsorption(color.rgb, waterColor.rgb, viewPos.xyz, viewPosZ1.xyz, waterData.g);
+			color.rgb = getWaterAbsorption(color.rgb, waterColor.rgb, viewPos.xyz, viewPosZ1.xyz, waterData.g);
+		}
 		#endif
 
 		#if REFLECTION == 2
@@ -97,7 +99,7 @@ void main() {
 	}
 	#endif
 
-	Fog(color.rgb, viewPos.xyz);
+	if (z0 < 1.0) Fog(color.rgb, viewPos.xyz);
 
     /*DRAWBUFFERS:0*/
 	gl_FragData[0] = color;

@@ -77,11 +77,8 @@ float GetLinearDepth(float depth) {
 //Includes//
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
-#include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
-#include "/lib/atmospherics/sky.glsl"
-#include "/lib/atmospherics/fog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 
 #ifdef TAA
@@ -125,10 +122,6 @@ void main() {
 		vec3 shadow = vec3(0.0);
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, 1.0, NoL, 1.0,
 				    1.0, 0.0, 0.0);
-
-		#if defined FOG && MC_VERSION >= 11500
-		Fog(albedo.rgb, viewPos);
-		#endif
 
 		#if ALPHA_BLEND == 0
 		albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
