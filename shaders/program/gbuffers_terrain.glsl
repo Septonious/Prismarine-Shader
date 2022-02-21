@@ -72,8 +72,6 @@ uniform sampler2D normals;
 uniform float wetness;
 
 uniform mat4 gbufferModelView;
-
-uniform sampler2D noisetex;
 #endif
 #endif
 

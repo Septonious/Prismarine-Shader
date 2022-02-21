@@ -78,28 +78,23 @@ void main() {
 
 	vec4 waterData = texture2D(colortex12, texCoord);
 
-	if (z0 < z1 && waterData.a < 0.5){
-		color *= translucent;
-	}
-
 	#if defined OVERWORLD
 	#if REFLECTION == 2
 	vec4 reflection = texture2D(colortex9, texCoord);
 	#endif
 
+	vec4 screenPos = vec4(texCoord, z0, 1.0);
+	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+	viewPos /= viewPos.w;
+
 	if (waterData.a > 0.5 && isEyeInWater == 0){
 		#ifdef WATER_ABSORPTION
 		if (z0 > 0.56 && z0 < 1.0){
-			vec4 screenPos = vec4(texCoord, z0, 1.0);
-			vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
-			viewPos /= viewPos.w;
-
 			vec4 screenPosZ1 = vec4(texCoord, z1, 1.0);
 			vec4 viewPosZ1 = gbufferProjectionInverse * (screenPosZ1 * 2.0 - 1.0);
 			viewPosZ1 /= viewPosZ1.w;
 
 			color.rgb = getWaterAbsorption(color.rgb, waterColor.rgb, viewPos.xyz, viewPosZ1.xyz, waterData.g);
-			Fog(color.rgb, viewPos.xyz);
 		}
 		#endif
 	}
@@ -110,6 +105,10 @@ void main() {
 		color.a = mix(color.a, 1.0, reflection.a);
 		#endif
 	}
+	#endif
+
+	#ifdef WATER_ABSORPTION
+	if (z0 < z1) Fog(color.rgb, viewPos.xyz);
 	#endif
 
     /*DRAWBUFFERS:0*/

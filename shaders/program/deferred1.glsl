@@ -214,10 +214,6 @@ void main() {
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8) * cloudMixRate;
 				#endif
 
-				#ifdef OVERWORLD_NEBULA
-				skyReflection.rgb += DrawNebula(skyRefPos.xyz * 100.0);
-				#endif
-
 				#if defined PLANAR_CLOUDS
 				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a * cloudMixRate);

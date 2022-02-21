@@ -55,7 +55,7 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 	} else if (mat > 116.9 && mat < 117.1) { // Chorus
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25;
 	} else if (mat > 117.9 && mat < 118.1) { // Enchanting Table
-		newEmissive = float(length(albedo.rgb) > 0.75) * 0.25;
+		newEmissive = float(length(albedo.rgb) > 0.75) * 0.1;
 	} else if (mat > 118.9 && mat < 119.1) { // Soul Campfire
 		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.05;
 	} else if (mat > 119.9 && mat < 120.1) { // Normal Campfire
