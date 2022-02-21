@@ -23,7 +23,7 @@ void main() {
     vec3 color = texture2D(colortex1, texCoord).rgb;
     vec3 gi = texture2D(colortex11, texCoord).rgb;
 
-    gi *= ILLUMINATION_STRENGTH * 4.0;
+    gi *= ILLUMINATION_STRENGTH * 8.0;
 
     #ifdef NETHER
     gi *= 0.15;

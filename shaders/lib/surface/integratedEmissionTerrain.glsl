@@ -6,12 +6,12 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
     if (mat > 99.9 && mat < 100.1) { // Emissive Ores
         float stoneDif = max(abs(albedo.r - albedo.g), max(abs(albedo.r - albedo.b), abs(albedo.g - albedo.b)));
         float ore = max(max(stoneDif - 0.175, 0.0), 0.0);
-        newEmissive = sqrt(ore) * GLOW_STRENGTH;
+        newEmissive = sqrt(ore);
     } 
 	#endif
 	if (mat > 100.9 && mat < 101.1) { // Crying Obsidian and Respawn Anchor
-		newEmissive = (albedo.b - albedo.r) * albedo.r * GLOW_STRENGTH;
-        newEmissive *= newEmissive * 0.5 * GLOW_STRENGTH;
+		newEmissive = (albedo.b - albedo.r) * albedo.r;
+        newEmissive *= newEmissive * 0.5;
 	} else if (mat > 101.9 && mat < 102.1) { // Command Block
         vec3 comPos = fract(worldPos.xyz + cameraPosition.xyz);
              comPos = abs(comPos - vec3(0.5));
@@ -33,33 +33,33 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 		newEmissive = (float(length(albedo.rgb) > 0.47) * 0.5 + float(length(albedo.rgb) > 0.50)) * float(albedo.b < 0.25);
 		newEmissive *= GLOW_STRENGTH;
 	} else if (mat > 104.9 && mat < 105.1) { // Warped Nether Warts
-		newEmissive = pow2(float(albedo.g - albedo.b)) * GLOW_STRENGTH;
+		newEmissive = pow2(float(albedo.g - albedo.b));
 	} else if (mat > 105.9 && mat < 106.1) { // Warped Nylium
-		newEmissive = float(albedo.g > albedo.b && albedo.g > albedo.r) * pow(float(albedo.g - albedo.b), 3.0) * GLOW_STRENGTH;
+		newEmissive = float(albedo.g > albedo.b && albedo.g > albedo.r) * pow(float(albedo.g - albedo.b), 3.0);
 	} else if (mat > 107.9 && mat < 108.1) { // Amethyst
-		newEmissive = float(length(albedo.rgb) > 0.5) * 0.05 * GLOW_STRENGTH;
+		newEmissive = float(length(albedo.rgb) > 0.5) * 0.1;
 	} else if (mat > 109.9 && mat < 110.1) { // Glow Lichen
-		newEmissive = (1.0 - lightmap.y) * float(albedo.r > albedo.g || albedo.r > albedo.b) * 3.0;
+		newEmissive = (1.0 - lightmap.y) * (0.1 + float(albedo.r > albedo.g || albedo.r > albedo.b));
 	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
-		newEmissive = float(albedo.r > 0.9) * 0.1 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > 0.9) * 0.1;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
-		newEmissive = float(length(albedo.rgb) > 0.9) * 0.05 * GLOW_STRENGTH;
+		newEmissive = float(length(albedo.rgb) > 0.9) * 0.25;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
-		newEmissive = float(albedo.r > 0.65) * 0.25 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > 0.65) * 0.25;
 	} else if (mat > 113.9 && mat < 114.1) { // Glow berries
-		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b) * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b);
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
-		newEmissive = float(length(albedo.rgb) > 0.99) * 0.1 * GLOW_STRENGTH;
+		newEmissive = float(length(albedo.rgb) > 0.99) * 0.25;
 	} else if (mat > 115.9 && mat < 116.1) { // Furnaces
-		newEmissive = float(albedo.r > 0.8) * 0.5 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > 0.8) * 0.5;
 	} else if (mat > 116.9 && mat < 117.1) { // Chorus
-		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25;
 	} else if (mat > 117.9 && mat < 118.1) { // Enchanting Table
-		newEmissive = float(length(albedo.rgb) > 0.75) * 0.25 * GLOW_STRENGTH;
+		newEmissive = float(length(albedo.rgb) > 0.75) * 0.25;
 	} else if (mat > 118.9 && mat < 119.1) { // Soul Campfire
-		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.05 * GLOW_STRENGTH;
+		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.05;
 	} else if (mat > 119.9 && mat < 120.1) { // Normal Campfire
-		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1 * GLOW_STRENGTH;
+		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1;
 	} else if (mat > 121.9 && mat < 122.1) {
 		newEmissive = 0.25;
 	} else if (mat > 122.9 && mat < 123.1) {
@@ -78,11 +78,11 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 
 	#ifdef POWDER_SNOW_HIGHLIGHT
 	if (mat > 29999.9 && mat < 30000.1){
-		newEmissive = 1.0;
+		newEmissive = 0.1;
 	} 
 	#endif
 
-	emissive += newEmissive;
+	emissive += newEmissive * GLOW_STRENGTH;
 }
 #endif
 

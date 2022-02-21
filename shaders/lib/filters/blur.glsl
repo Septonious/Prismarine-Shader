@@ -11,7 +11,7 @@ vec4 GaussianBlur(sampler2D colortex, vec2 coord, float strength) {
 			float wg = weight[i] * weight[j];
 			vec2 pixelOffset = vec2(i * pixelWdith, j * pixelHeight) * strength;
 			vec2 sampleCoord = coord + pixelOffset;
-			blur += texture2D(colortex, sampleCoord) * wg;
+			blur += texture2DLod(colortex, sampleCoord, 16.0) * wg;
 		}
 	}
 	blur /= 256.0;

@@ -24,7 +24,7 @@ uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 
 uniform sampler2D colortex6, colortex10;
-uniform sampler2D depthtex0, depthtex1;
+uniform sampler2D depthtex0, depthtex1, depthtex2;
 
 //Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;

@@ -155,10 +155,7 @@ vec3 ToWorld(vec3 pos) {
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/sky.glsl"
-
-#if defined OVERWORLD && defined SKY_BLUR
-#include "/lib/filters/blur.glsl"
-#endif
+#include "/lib/atmospherics/fog.glsl"
 
 #if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
 #include "/lib/util/encode.glsl"
@@ -173,8 +170,8 @@ vec3 ToWorld(vec3 pos) {
 
 //Program//
 void main() {
-    vec4 color = texture2D(colortex0, texCoord);
-	float z = texture2D(depthtex0, texCoord).r;
+    vec4 color      = texture2D(colortex0, texCoord);
+	float z         = texture2D(depthtex0, texCoord).r;
 
 	float dither = Bayer64(gl_FragCoord.xy);
 
@@ -261,11 +258,9 @@ void main() {
 		#ifdef AO
 		color.rgb *= GetAmbientOcclusion(z);
 		#endif
-	} else {
-		#if defined OVERWORLD && defined SKY_BLUR
-		color = GaussianBlur(colortex0, texCoord, 0.5);
-		#endif
 
+		Fog(color.rgb, viewPos.xyz);
+	} else {
 		#ifdef NETHER
 		color.rgb = netherCol.rgb * 0.04;
 		#endif

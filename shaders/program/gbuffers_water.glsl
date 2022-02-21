@@ -183,21 +183,21 @@ void main() {
 
 	float water = float(mat > 0.98 && mat < 1.02);
 	float glass = float(mat > 1.98 && mat < 2.02);
+	float ice = float(mat > 2.98 && mat < 3.02);
+	float translucent = ice + float(mat > 3.98 && mat < 4.02);
 	float fresnel = 0.0;
 
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 	
-	if (albedo.a > 0.001) {
-		float translucent = float(mat > 2.98 && mat < 3.02) + float(mat > 3.98 && mat < 4.02);
+	#ifndef REFLECTION_TRANSLUCENT
+	glass = 0.0;
+	translucent = 0.0;
+	#endif
 
-		float emission       = 0.0;
+	if (albedo.a > 0.001) {
+		float emission       = float(mat > 3.98 && mat < 4.02) * 0.5;
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
-
-		#ifndef REFLECTION_TRANSLUCENT
-		glass = 0.0;
-		translucent = 0.0;
-		#endif
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
@@ -312,10 +312,6 @@ void main() {
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8);
 				#endif
 
-				#ifdef OVERWORLD_NEBULA
-				skyReflection.rgb += DrawNebula(skyRefPos.xyz * 100.0);
-				#endif
-
 				#if defined PLANAR_CLOUDS
 				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
@@ -338,8 +334,8 @@ void main() {
 										  specularColor, shadow * vanillaDiffuse, color.a);
 		#endif
 		
-		#ifdef CUSTOM_NETHER_PORTAL
 		if (mat > 3.98 && mat < 4.02) {
+			#ifdef CUSTOM_NETHER_PORTAL
 			vec2 portalCoord = gl_FragCoord.xy / vec2(viewWidth, viewHeight);
 			portalCoord = (portalCoord - 0.5) * vec2(aspectRatio, 1.0);
 
@@ -350,9 +346,10 @@ void main() {
 				portal+= texture2D(noisetex, portalCoord * 0.05 + wind * 0.01).r * 0.3;
 			
 			albedo.rgb = portal * portal * vec3(0.75, 0.25, 1.5);
-			albedo.a = 0.25;
+			#endif
+
+			albedo.a *= 0.1;			
 		}
-		#endif
 
 		#ifdef TRANSLUCENCY_BLENDING
 		albedo *= (1.0 - water * 0.975 * timeBrightness);
@@ -368,12 +365,12 @@ void main() {
     gl_FragData[0] = albedo;
 	gl_FragData[1] = vec4(vlAlbedo, 1.0);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
-	gl_FragData[3] = vec4(0.0, lightmap.y, dist, water);
+	gl_FragData[3] = vec4(1.0, lightmap.y, dist, water);
 	gl_FragData[4] = vec4(reflection.rgb, fresnel);
 
 	#ifdef SSGI
 	/* RENDERTARGETS:0,1,6,12,9,10 */
-	gl_FragData[5] = vec4(albedo.rgb, float(mat > 3.98 && mat < 4.02) * 2);
+	gl_FragData[5] = vec4(albedo.rgb, float(mat > 3.98 && mat < 4.02) * 2.0);
 	#endif
 }
 

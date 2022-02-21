@@ -26,7 +26,7 @@ float getPerlinNoise(vec3 pos){
 float getCloudSample(vec3 pos){
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
-	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.50);
+	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.40);
 
 	float noiseA = 0.0;
 	float frequency = 0.15, speed = 0.5;
@@ -39,6 +39,7 @@ float getCloudSample(vec3 pos){
 	float sampleHeight = abs(VCLOUDS_HEIGHT - pos.y) / VCLOUDS_VERTICAL_THICKNESS;
 
 	//Shaping
+	noiseA -= getPerlinNoise(pos * 0.5 - wind * speed) * 1.5;
 	float noiseB = clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 	float density = pow(smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noiseB, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noiseB, pos.y), 0.25);
 	sampleHeight = pow(sampleHeight, 8.0 * pow2(1.0 - density * 0.85));
@@ -57,11 +58,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	#endif
 
 	float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), 0.0, 1.0);
-	float scattering = pow16(VoL) * (1.0 - rainStrength);
-          VoL = mix(VoL, 1.0, 0.75);
-          VoL = mix(VoL, 1.0, scattering);
-
-	float cloudScattering = pow4(VoL * 0.5 + 0.5) * 0.5;
+	float scattering = moonVisibility + 1.5 + pow8(VoL);
 
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
@@ -75,7 +72,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	float altitudeFactor2 = pow2(clamp(cameraPosition.y * 0.1, 0.0, 1.0));
 	altitudeFactor2 *= clamp(eBS + 0.25, 0.0, 1.0);
 
-	if (clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord){
+	if (clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord && eBS > 0.2){
 		for (int i = 0; i < VCLOUDS_SAMPLES; i++) {
 			float minDist = (i + dither) * VCLOUDS_RANGE;
 
@@ -99,9 +96,9 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 				//Find the lower and upper parts of the cloud
 				float sampleHeightFactor = smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y);
 
-				vec3 densityLighting = mix(lightCol, ambientCol * (1.0 + cloudScattering), noise);
-				vec3 heightLighting = mix(lightCol, ambientCol, sampleHeightFactor);
-				vec3 cloudLighting = sqrt(densityLighting * heightLighting);
+				vec3 densityLighting = mix(lightCol * lightCol, ambientCol * max(1.0 - moonVisibility + rainStrength * 0.25, 0.25), noise);
+				vec3 heightLighting = mix(lightCol * lightCol, ambientCol * max(1.0 - moonVisibility + rainStrength * 0.25, 0.25), sampleHeightFactor);
+				vec3 cloudLighting = sqrt(densityLighting * heightLighting) * scattering;
 
 				vec4 cloudsColor = vec4(cloudLighting, noise);
 					 cloudsColor.rgb *= cloudsColor.a;

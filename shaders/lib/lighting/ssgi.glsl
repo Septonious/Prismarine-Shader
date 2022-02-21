@@ -124,13 +124,10 @@ vec3 generateCosineVector(vec3 vector, vec2 xy) {
     return normalize(vector + dir);
 }
 
-uniform sampler2D depthtex2;
-
 float blueNoise() {
     float noise = texelFetch(depthtex2, ivec2(gl_FragCoord.xy) & 255, 0).r;
-    noise = fract(noise);
 
-    return noise;
+    return fract(noise);
 }
 
 vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
@@ -160,9 +157,9 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
 
         if (hit && hand < 0.5 && length(albedo) < 0.5) {
             vec3 hitAlbedo = texture2D(colortex10, currentPosition.xy).rgb * clamp(ILLUMINATION_STRENGTH, 1.0, 6.0);
-            float isEmissive = texture2D(colortex10, currentPosition.xy).a;
+            float isEmissive = float(texture2D(colortex10, currentPosition.xy).a > 0.25);
 
-            weight *= hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo;
+            weight *= hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo;
             illumination += hitAlbedo * isEmissive;
         }
     }

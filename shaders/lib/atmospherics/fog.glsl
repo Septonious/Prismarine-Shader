@@ -9,7 +9,8 @@ vec3 GetFogColor(vec3 viewPos) {
 	vec3 nViewPos = normalize(viewPos);
 
     float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
-
+	float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), 0.0, 1.0);
+	
 	float density = 0.25;
     float nightDensity = 0.75;
     float weatherDensity = exp2(1.0);
@@ -23,9 +24,9 @@ vec3 GetFogColor(vec3 viewPos) {
 
     vec3 fog = mix(GetSkyColor(viewPos, false), vec3(0.25, 0.45, 1.25), (1.0 - eBS)) * 4.0 * baseGradient / SKY_I;
 	#ifdef FOG_PERBIOME
-	fog = mix(fog, fogColBiome * baseGradient, 1.0 - eBS);
+	fog = getBiomeFog(vec3(0.25, 0.45, 1.25)) * baseGradient;
 	#endif
-    fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * SKY_I;
+    fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * SKY_I * (1.0 + (VoL * 0.5 + 0.5));
 
 	float nightGradient = exp(-(VoU * 0.5 + 0.5) * 0.35 / nightDensity);
     vec3 nightFog = lightNight * lightNight * 6.0 * nightGradient * nightExposure;
@@ -77,7 +78,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 
 		fogOffset *= 1.0 - rainStrength * 0.75;
 
-		float vanillaFog = 1.0 - (far - (fogFactor + fogOffset)) * 5.0 / (FOG_DENSITY * 0.5 * far);
+		float vanillaFog = 1.0 - (far - (fogFactor + fogOffset)) * 4.0 / (FOG_DENSITY * 0.5 * far);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 	
 		if (vanillaFog > 0.0){
@@ -103,10 +104,6 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	vec3 fogColor = netherCol.rgb * 0.04;
 	#endif
 
-	#ifdef END
-	discard;
-	#endif
-
 	color = mix(color, fogColor, fog * (1.0 - float(isEyeInWater > 0.9 && isEyeInWater < 1.1)));
 }
 
@@ -118,13 +115,20 @@ void BlindFog(inout vec3 color, vec3 viewPos) {
 
 vec3 denseFogColor[2] = vec3[2](
 	vec3(1.0, 0.3, 0.01),
-	vec3(0.1, 0.14, 0.24) * clamp(timeBrightness, 0.1, 1.0)
+	vec3(0.1, 0.14, 0.24)
 );
 
 void DenseFog(inout vec3 color, vec3 viewPos) {
 	float fog = length(viewPos) * 0.5;
 	fog = (1.0 - exp(-4.0 * fog * fog * fog));
-	color = mix(color, denseFogColor[isEyeInWater - 2], fog);
+
+	vec3 denseFogColor0 = denseFogColor[isEyeInWater - 2];
+
+	#ifdef OVERWORLD
+	denseFogColor0 *- clamp(timeBrightness, 0.1, 1.0);
+	#endif
+
+	color = mix(color, denseFogColor0, fog);
 }
 
 void Fog(inout vec3 color, vec3 viewPos) {

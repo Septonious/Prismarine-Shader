@@ -16,10 +16,12 @@ varying vec3 upVec, sunVec;
 //Uniforms//
 uniform int isEyeInWater;
 
+#ifdef WATER_ABSORPTION
 uniform float nightVision, blindFactor;
 uniform float far;
+#endif
 
-#if defined OVERWORLD || defined END
+#if defined OVERWORLD
 uniform float rainStrength, timeAngle, timeBrightness;
 #endif
 
@@ -27,26 +29,25 @@ uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
-uniform sampler2D colortex0;
-uniform sampler2D depthtex0;
+uniform sampler2D colortex12;
+uniform sampler2D colortex0, colortex1;
+uniform sampler2D depthtex0, depthtex1;
 
-uniform mat4 gbufferModelViewInverse, gbufferProjectionInverse;
+uniform mat4 gbufferModelViewInverse;
 
-#if defined OVERWORLD || defined END
+#ifdef WATER_ABSORPTION
+uniform mat4 gbufferProjectionInverse;
+#endif
+
+#if defined OVERWORLD
 #if REFLECTION == 2
 uniform sampler2D colortex9;
 #endif
-
-#ifdef WATER_ABSORPTION
-uniform sampler2D depthtex1;
-#endif
-
-uniform sampler2D colortex12;
 #endif
 
 //Common Variables//
+#ifdef WATER_ABSORPTION
 float eBS = eyeBrightnessSmooth.y / 240.0;
-#if defined OVERWORLD || defined END
 float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 #endif
@@ -57,6 +58,7 @@ float GetLuminance(vec3 color) {
 }
 
 //Includes//
+#ifdef WATER_ABSORPTION
 #include "/lib/util/dither.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/waterColor.glsl"
@@ -64,42 +66,51 @@ float GetLuminance(vec3 color) {
 #include "/lib/atmospherics/waterAbsorption.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/atmospherics/fog.glsl"
+#endif
 
 //Program//
 void main() {
 	vec4 color = texture2D(colortex0, texCoord);
+	vec4 translucent = texture2D(colortex1, texCoord);
 
 	float z0 = texture2D(depthtex0, texCoord).r;
-	vec4 screenPos = vec4(texCoord, z0, 1.0);
-	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
-	viewPos /= viewPos.w;
+	float z1 = texture2D(depthtex1, texCoord).r;
 
-	#if defined OVERWORLD || defined END
 	vec4 waterData = texture2D(colortex12, texCoord);
+
+	if (z0 < z1 && waterData.a < 0.5){
+		color *= translucent;
+	}
+
+	#if defined OVERWORLD
 	#if REFLECTION == 2
 	vec4 reflection = texture2D(colortex9, texCoord);
 	#endif
 
 	if (waterData.a > 0.5 && isEyeInWater == 0){
-		#if defined WATER_ABSORPTION && defined OVERWORLD
-		if (z0 > 0.56){
-			float z1 = texture2D(depthtex1, texCoord).r;
+		#ifdef WATER_ABSORPTION
+		if (z0 > 0.56 && z0 < 1.0){
+			vec4 screenPos = vec4(texCoord, z0, 1.0);
+			vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+			viewPos /= viewPos.w;
+
 			vec4 screenPosZ1 = vec4(texCoord, z1, 1.0);
 			vec4 viewPosZ1 = gbufferProjectionInverse * (screenPosZ1 * 2.0 - 1.0);
 			viewPosZ1 /= viewPosZ1.w;
 
 			color.rgb = getWaterAbsorption(color.rgb, waterColor.rgb, viewPos.xyz, viewPosZ1.xyz, waterData.g);
+			Fog(color.rgb, viewPos.xyz);
 		}
 		#endif
+	}
 
+	if (waterData.r > 0.5 || waterData.a > 0.5){
 		#if REFLECTION == 2
 		color.rgb = mix(color.rgb, reflection.rgb, reflection.a);
 		color.a = mix(color.a, 1.0, reflection.a);
 		#endif
 	}
 	#endif
-
-	if (z0 < 1.0) Fog(color.rgb, viewPos.xyz);
 
     /*DRAWBUFFERS:0*/
 	gl_FragData[0] = color;

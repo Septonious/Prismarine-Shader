@@ -58,10 +58,13 @@ float getTextureNoise(vec3 pos){
 }
 
 float getFBM(vec3 pos, vec3 wind){
+	pos *= SMOKE_FREQUENCY;
+
 	float noise = getTextureNoise(pos * 1.000 - wind * 0.2);
 	      noise+= getTextureNoise(pos * 0.500 + wind * 0.3);
           noise+= getTextureNoise(pos * 0.250 - wind * 0.1);
           noise+= getTextureNoise(pos * 0.125 + wind * 0.4);
+
 	return noise;
 }
 
@@ -88,7 +91,6 @@ float getFogSample(vec3 pos, float height, float verticalThickness, float thickn
 	#endif
 
 	float noise = getFBM(pos, wind);
-
 	noise *= thicknessMult;
 
 	noise = clamp(noise * 0.6 - (1.0 + sampleHeight), 0.0, 1.0);

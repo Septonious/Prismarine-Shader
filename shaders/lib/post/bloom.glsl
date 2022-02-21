@@ -1,12 +1,10 @@
 vec3 GetBloomTile(float lod, vec2 coord, vec2 offset) {
 	float scale = exp2(lod);
 	float resScale = 1.25 * min(360.0, viewHeight) / viewHeight;
-
 	vec2 centerOffset = vec2(0.125 * pw, 0.125 * ph);
 	vec3 bloom = texture2D(colortex1, (coord / scale + offset) * resScale + centerOffset).rgb;
-	bloom *= bloom;
-    bloom *= bloom * 32.0;
-    
+	bloom *= bloom; bloom *= bloom * 32.0;
+	
 	return bloom;
 }
 

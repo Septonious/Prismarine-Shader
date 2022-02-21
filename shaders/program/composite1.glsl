@@ -134,7 +134,8 @@ void main() {
 
 	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither);
+	float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), -1.0, 1.0);
+	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither, VoL);
 	#endif
 	
 	//Nether & End Smoke

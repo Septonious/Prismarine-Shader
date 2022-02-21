@@ -311,10 +311,6 @@ option.NEBULA_STRETCHING=Stretching
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
 
-option.MOON_SMOKE=Moon Smoke
-option.MOON_SMOKE.comment=Adds smoke around the moon.
-option.MOON_SMOKE_BRIGHTNESS=Moon Smoke Brightness
-
 option.SMOKE_AMOUNT=Amount
 option.SMOKE_FREQUENCY=Frequency
 option.SMOKE_FREQUENCY.comment=Increases smoke noise frequency.
@@ -361,7 +357,7 @@ option.LIGHTSHAFT_MIN_DISTANCE=Range
 option.LIGHTSHAFT_MIN_DISTANCE.comment=Adjusts light shafts render distance. Big performance impact! §cDo not adjust it together with sample count if you want to keep the shader playable.
 option.LIGHTSHAFT_MAX_DISTANCE=Max Distance
 option.LIGHTSHAFT_MAX_DISTANCE.comment=Controls how far can the light shafts go (limits their render distance).
-option.LIGHTSHAFT_HEIGHT=Height (Blocks)
+option.LIGHTSHAFT_HEIGHT=Height Factor
 
 option.LIGHT_SHAFT_STRENGTH=Light Shaft Strength
 option.LIGHT_SHAFT_STRENGTH.comment=Adjusts light shaft strength.

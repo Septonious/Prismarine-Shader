@@ -12,15 +12,16 @@ https://bitslablab.com
 //Varyings//
 varying vec2 texCoord;
 
-#ifdef LIGHT_SHAFT
+#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
 varying vec3 sunVec, upVec;
 #endif
 
 //Uniforms//
+uniform float rainStrength;
+
 #ifdef LIGHT_SHAFT
 uniform int isEyeInWater;
 
-uniform float rainStrength;
 uniform float blindFactor;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
@@ -32,11 +33,11 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex8;
 #endif
 
-#ifdef BLUR_FILTERING
+#if defined BLUR_FILTERING || defined VOLUMETRIC_CLOUDS
 uniform float viewWidth, viewHeight;
 #endif
 
-#ifdef LIGHT_SHAFT
+#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
 uniform ivec2 eyeBrightnessSmooth;
 #endif
 
@@ -48,7 +49,7 @@ const bool colortex1MipmapEnabled = true;
 #endif
 
 //Common Variables//
-#ifdef LIGHT_SHAFT
+#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 #endif
@@ -75,23 +76,32 @@ void main() {
 	#endif
 
 	#ifdef LIGHT_SHAFT
-	if (isEyeInWater != 1.0) vl.rgb *= lightCol * 0.25;
+	if (isEyeInWater != 1.0){
+		#ifdef FOG_PERBIOME
+		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.5 * timeBrightness);
+		#endif
+
+		vl.rgb *= lightCol * 0.25;
+	}
 	else vl.rgb *= waterColor.rgb * 0.15 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75) * (1.0 - isEyeInWater * 0.75);
-    vl.rgb *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength) * shadowFade * (1.0 - blindFactor);
+    vl.rgb *= LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor);
 	#endif
 
 	color += vl;
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
-	vec4 cloud = texture2D(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION);
+	vec2 newTexCoord = texCoord * VOLUMETRICS_RENDER_RESOLUTION;
+    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1 / viewHeight), 16.0);
+    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1 / viewHeight), 16.0);
+    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1 / viewWidth,   0.0), 16.0);
+    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1 / viewWidth,   0.0), 16.0);
+    vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
-	#ifdef BLUR_FILTERING
-	cloud.rgb = GaussianBlur(colortex8, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
-	#endif
+	cloud.a = clamp(cloud.a, 0.0, 1.0);
 
 	float rainFactor = 1.0 - rainStrength * 0.75;
-	color.rgb = mix(color.rgb, cloud.rgb * rainFactor, cloud.a * cloud.a);
+	color.rgb = mix(color.rgb, pow(cloud.rgb, vec3(1.0 - rainStrength * 0.25)) * rainFactor, cloud.a * cloud.a);
 	#endif
 
 	/* DRAWBUFFERS:0 */
@@ -106,12 +116,12 @@ void main() {
 //Varyings//
 varying vec2 texCoord;
 
-#ifdef LIGHT_SHAFT
+#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
 varying vec3 sunVec, upVec;
 #endif
 
 //Uniforms//
-#ifdef LIGHT_SHAFT
+#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
 uniform float timeAngle;
 
 uniform mat4 gbufferModelView;
@@ -123,7 +133,7 @@ void main() {
 	
 	gl_Position = ftransform();
 
-	#ifdef LIGHT_SHAFT
+	#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);
 	ang = (ang + (cos(ang * 3.14159265358979) * -0.5 + 0.5 - ang) / 3.0) * 6.28318530717959;
