@@ -28,10 +28,8 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 
 	} else if (mat > 102.9 && mat < 103.1) { // Warped Stem & Hyphae
 		newEmissive = float(length(albedo.rgb) > 0.49) * 0.4 + float(length(albedo.rgb) > 0.59);
-		newEmissive *= GLOW_STRENGTH;
 	} else if (mat > 103.9 && mat < 104.1) { // Crimson Stem & Hyphae
 		newEmissive = (float(length(albedo.rgb) > 0.47) * 0.5 + float(length(albedo.rgb) > 0.50)) * float(albedo.b < 0.25);
-		newEmissive *= GLOW_STRENGTH;
 	} else if (mat > 104.9 && mat < 105.1) { // Warped Nether Warts
 		newEmissive = pow2(float(albedo.g - albedo.b));
 	} else if (mat > 105.9 && mat < 106.1) { // Warped Nylium
@@ -63,7 +61,7 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 	} else if (mat > 121.9 && mat < 122.1) {
 		newEmissive = 0.25;
 	} else if (mat > 122.9 && mat < 123.1) {
-		newEmissive = 0.0;
+		newEmissive = float(length(albedo.rgb) > 0.05 && albedo.r < 0.25) * 0.1;
 	}
 
 	#ifdef DEBRIS_HIGHLIGHT

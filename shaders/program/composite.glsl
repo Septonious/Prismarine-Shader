@@ -94,7 +94,7 @@ void main() {
 			vec4 viewPosZ1 = gbufferProjectionInverse * (screenPosZ1 * 2.0 - 1.0);
 			viewPosZ1 /= viewPosZ1.w;
 
-			color.rgb = getWaterAbsorption(color.rgb, waterColor.rgb, viewPos.xyz, viewPosZ1.xyz, waterData.g);
+			color.rgb = mix(color.rgb, getWaterAbsorption(color.rgb, waterColor.rgb, viewPos.xyz, viewPosZ1.xyz, waterData.g), sunVisibility);
 		}
 		#endif
 	}

@@ -82,7 +82,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color * (1.5 - isEyeInWater * 0.75 - sunVisibility * 0.5);
-				else if (isEyeInWater == 1.0) shadow *= watercol * 32.0 * (0.5 + eBS) * (0.05 + timeBrightness * 0.95);
+				else if (isEyeInWater == 1.0) shadow *= watercol * 32.0 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75);
 
 				if (isEyeInWater == 0){
 					vec3 fogPosition = worldposition.xyz + cameraPosition.xyz;

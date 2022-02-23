@@ -209,7 +209,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define UNDERGROUND_SKY
 #define LIGHT_SHAFT
 #define LIGHT_SHAFT_STRENGTH 1.0 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-#define FOG_DENSITY 2.00 //[0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define FOG_DENSITY 1.00 //[0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 #define WEATHER
 #define WEATHER_OPACITY 2.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
@@ -498,6 +498,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #undef SKY_VANILLA
 #undef REFLECTION_RAIN
 #undef FOG_PERBIOME
+#undef WATER_ABSORPTION
 #endif
 
 #ifdef END
