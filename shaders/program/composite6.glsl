@@ -38,9 +38,10 @@ uniform sampler2D depthtex0;
 uniform sampler2D colortex2;
 #endif
 
+uniform float aspectRatio;
+
 #ifdef LENS_FLARE
 uniform float timeAngle, timeBrightness;
-uniform float aspectRatio;
 
 uniform vec3 sunPosition;
 uniform mat4 gbufferProjection;

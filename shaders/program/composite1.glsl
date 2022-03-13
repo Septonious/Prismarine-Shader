@@ -113,9 +113,7 @@ void main() {
 
 	if (isEyeInWater == 1) {
 		vec4 waterFog = GetWaterFog(viewPos.xyz);
-		waterColor.g = mix(waterColor.g * 2.0, waterColor.g * 4.0, waterFog.a * 0.5);
-		color.rgb = mix(sqrt(color.rgb) * 1.25, sqrt(waterFog.rgb), waterFog.a);
-		color.rgb *= color.rgb;
+		color.rgb = mix(color.rgb, waterFog.rgb, waterFog.a);
 	}
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
@@ -134,8 +132,7 @@ void main() {
 
 	//Overworld Volumetric Light
 	#ifdef LIGHT_SHAFT
-	float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), -1.0, 1.0);
-	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither, VoL);
+	vl += GetLightShafts(viewPosScaled.xyz, z0Scaled, z1Scaled, translucent.rgb, dither);
 	#endif
 	
 	//Nether & End Smoke

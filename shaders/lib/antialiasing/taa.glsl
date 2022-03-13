@@ -65,7 +65,7 @@ vec3 NeighbourhoodClamping(vec3 color, vec3 tempColor, vec2 view, sampler2D colo
 
 	for(int i = 0; i < 8; i++) {
 		vec2 offset = neighbourhoodOffsets[i] * view;
-		vec3 clr = texture2DLod(colortex, texCoord + offset, 0.0).rgb;
+		vec3 clr = texture2D(colortex, texCoord + offset).rgb;
 
 		clr = RGBToYCoCg(clr);
 		minclr = min(minclr, clr); maxclr = max(maxclr, clr);
@@ -78,10 +78,10 @@ vec3 NeighbourhoodClamping(vec3 color, vec3 tempColor, vec2 view, sampler2D colo
 }
 
 vec4 TemporalAA(inout vec3 color, float tempData, sampler2D colortex, sampler2D temptex) {
-	vec3 coord = vec3(texCoord, texture2DLod(depthtex1, texCoord, 0.0).r);
+	vec3 coord = vec3(texCoord, texture2D(depthtex1, texCoord).r);
 	vec2 prvCoord = Reprojection(coord);
 	
-	vec3 tempColor = texture2DLod(temptex, prvCoord, 0).gba;
+	vec3 tempColor = texture2D(temptex, prvCoord).gba;
 	vec2 view = vec2(viewWidth, viewHeight);
 
 	if(tempColor == vec3(0.0)){
@@ -114,13 +114,14 @@ vec3 ToWorld(vec3 pos) {
 
 vec4 TemporalAccumulation(inout vec3 color, float tempData, sampler2D colortex, sampler2D temptex) {
 	float z0 = texture2D(depthtex0, texCoord).r;
+	float shouldWeAccumulate = texture2D(colortex6, texCoord).a;
 
-	vec3 coord = vec3(texCoord, texture2DLod(depthtex1, texCoord, 0.0).r);
+	vec3 coord = vec3(texCoord, texture2D(depthtex1, texCoord).r);
 	vec2 prvCoord = Reprojection(coord);
 	vec2 view = vec2(viewWidth, viewHeight);
 	vec2 velocity = (texCoord - prvCoord.xy) * view;
 
-	vec3 tempColor = texture2DLod(temptex, prvCoord, 0.0).gba;
+	vec3 tempColor = texture2D(temptex, prvCoord).gba;
 	vec3 viewPos = getViewPos(texCoord, z0).xyz;
 	
     float totalWeight = float(clamp(prvCoord, vec2(0.0), vec2(1.0)) == prvCoord);
@@ -129,8 +130,10 @@ vec4 TemporalAccumulation(inout vec3 color, float tempData, sampler2D colortex, 
     vec3 delta = ToWorld(viewPos.xyz) - prevPos;
 	
     float posWeight = max(exp(-dot(delta, delta) * 3.0), 0.0);
-    totalWeight *= GI_ACCUMULATION_STRENGTH * posWeight;
+    totalWeight *= GI_ACCUMULATION_STRENGTH * posWeight * (1.0 - float(z0 < 0.56)) * shouldWeAccumulate;
+	#ifdef GI_VELOCITY_WEIGHT
 	totalWeight *= exp(-length(velocity));
+	#endif
 	
 	color = clamp(mix(color, tempColor, totalWeight), vec3(0.0), vec3(65e3));
 

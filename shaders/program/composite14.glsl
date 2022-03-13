@@ -27,7 +27,7 @@ uniform sampler2D colortex2;
 uniform sampler2D depthtex1;
 
 #if defined GI_ACCUMULATION && defined SSGI
-uniform sampler2D depthtex0;
+uniform sampler2D depthtex0, colortex6;
 #endif
 
 //Optifine Constants//
@@ -40,8 +40,8 @@ const bool colortex1MipmapEnabled = true;
 
 //Program//
 void main() {
-	vec3 color = texture2DLod(colortex1, texCoord, 0.0).rgb;
-    vec4 prev = vec4(texture2DLod(colortex2, texCoord, 0.0).r, 0.0, 0.0, 0.0);
+	vec3 color = texture2D(colortex1, texCoord).rgb;
+    vec4 prev = vec4(texture2D(colortex2, texCoord).r, 0.0, 0.0, 0.0);
 
 	#ifdef TAA
 	prev = TemporalAA(color, prev.r, colortex1, colortex2);

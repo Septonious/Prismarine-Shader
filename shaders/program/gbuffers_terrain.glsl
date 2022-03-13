@@ -134,6 +134,17 @@ float GetLuminance(vec3 color) {
 #endif
 #endif
 
+float getSubsurfaceScatteringData(in float mat, in vec3 albedo, in vec3 viewPos, float leaves) {
+	float subsurface = 0.0;
+	float NoL = clamp(dot(normal, lightVec), 0.0, 1.0);
+	float VoL = pow4(clamp(dot(normalize(viewPos), lightVec), 0.0, 1.0)) * 0.75 + 0.25;
+
+	subsurface += float(mat > 500.9 && mat < 501.1) * float(albedo.b > 0.7) * NoL * VoL * 0.5;
+	subsurface += leaves * NoL * VoL;
+
+	return subsurface;
+}
+
 //Program//
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * vec4(color.rgb, 1.0);
@@ -174,7 +185,7 @@ void main() {
 		float foliage  = float(mat > 0.98 && mat < 1.02);
 		float leaves   = float(mat > 1.98 && mat < 2.02);
 		float candle   = float(mat > 4.98 && mat < 5.02);
-		float lava     = float(mat > 3.98 && mat < 4.02);
+		float lava     = float(mat > 3.98 && mat < 4.02) * 1.5;
 
 		#if defined SSGI && defined EMISSIVE_CONCRETE
 		emissive += isConcrete * 1.5;
@@ -182,12 +193,13 @@ void main() {
 		#endif
 
 		#ifdef INTEGRATED_EMISSION
-		getIntegratedEmission(emissive, lightmap, albedo, worldPos);
+		getIntegratedEmission(emissive, lightmap, albedo, worldPos, viewPos.xyz);
 		#endif
 
 		float metalness      = 0.0;
 			  emission       = emissive + candle + lava;
 		float subsurface     = (foliage + candle) * 0.5 + leaves;
+		subsurface += getSubsurfaceScatteringData(mat, albedo.rgb, viewPos.xyz, leaves);
 		vec3 baseReflectance = vec3(0.04);
 
 		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
@@ -230,12 +242,11 @@ void main() {
 		#endif
 		
 		float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
-
 		float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
 		float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
 			  vanillaDiffuse *= vanillaDiffuse;
-		
+
 		#ifndef NORMAL_PLANTS
 		if (foliage > 0.5) vanillaDiffuse *= 1.8;
 		#endif
@@ -367,15 +378,16 @@ void main() {
 
 	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,6,10 */
-	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
-	gl_FragData[2] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.25 + timeBrightness * 0.50)));
+	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+	gl_FragData[2] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.15 + timeBrightness * 0.60)));
 	#endif
 
 	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
-	/* RENDERTARGETS:0,6,7,10 */
-	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
-	gl_FragData[2] = vec4(fresnel3, 0.0);
-	gl_FragData[3] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.25 + timeBrightness * 0.50)));
+	/* RENDERTARGETS:0,3,6,7,10 */
+	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
+	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+	gl_FragData[3] = vec4(fresnel3, 0.0);
+	gl_FragData[4] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.15 + timeBrightness * 0.60)));
 	#endif
 }
 
@@ -457,6 +469,13 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #include "/lib/surface/integratedEmissionTerrain.glsl"
 #endif
 
+void getSubsurfaceScatteringMaterials(inout float mat) {
+	if (mc_Entity.x == 500) mat = 500.0;
+	if (mc_Entity.x == 501) mat = 501.0;
+	if (mc_Entity.x == 502) mat = 502.0;
+	if (mc_Entity.x == 503) mat = 503.0;
+}
+
 //Program//
 void main() {
 	texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
@@ -481,7 +500,7 @@ void main() {
 	vec2 midCoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;
 	vec2 texMinMidCoord = texCoord - midCoord;
 
-	vTexCoordAM.pq  = abs(texMinMidCoord) * 2;
+	vTexCoordAM.pq  = abs(texMinMidCoord) * 2.0;
 	vTexCoordAM.st  = min(texCoord, midCoord - texMinMidCoord);
 	
 	vTexCoord.xy    = sign(texMinMidCoord) * 0.5 + 0.5;
@@ -528,6 +547,8 @@ void main() {
 	isPlant = 0.0;
 	getIntegratedEmissionMaterials(mat, isPlant);
 	#endif
+
+	getSubsurfaceScatteringMaterials(mat);
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);

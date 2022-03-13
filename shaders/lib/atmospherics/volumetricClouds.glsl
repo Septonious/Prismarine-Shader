@@ -58,7 +58,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	#endif
 
 	float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), 0.0, 1.0);
-	float scattering = moonVisibility + 1.5 + pow8(VoL);
+	float scattering = moonVisibility + 1.5 + pow4(VoL) * 2.0;
 
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
@@ -122,3 +122,98 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	
 	return finalColor;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+float noise(in vec3 x) {
+    vec3 p = floor(x);
+    vec3 f = fract(x);
+	f = f*f*(3.0-2.0*f);
+	vec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;
+	vec2 rg = textureLod(noisetex, (uv+ 0.5)/256.0, 0.0 ).yx;
+	return -1.0+2.0*mix( rg.x, rg.y, f.z );
+}
+
+float map5(in vec3 p) {
+	vec3 q = p - vec3(0.0,0.1,1.0)*frameTimeCounter;
+	float f;
+    f  = 0.50000*noise( q ); q = q*2.02;
+    f += 0.25000*noise( q ); q = q*2.03;
+    f += 0.12500*noise( q ); q = q*2.01;
+    f += 0.06250*noise( q ); q = q*2.02;
+    f += 0.03125*noise( q );
+	return clamp( 1.5 - p.y - 2.0 + 1.75*f, 0.0, 1.0 );
+}
+
+vec4 integrate(in vec4 sum, in float dif, in float den) {
+    // lighting
+    vec3 lin = ambientCol * 0.75 + lightCol * dif;
+    vec4 col = vec4(mix(lightCol, vec3(0.65), den), den);
+    col.xyz *= lin;
+
+    // front to back blending    
+    col.a *= 0.25;
+    col.rgb *= col.a;
+    return sum + col * (1.0 - sum.a);
+}
+
+#define MARCH(STEPS, MAPLOD) for(int i = 0; i < STEPS; i++) { vec3 pos = ro + t * rd; if(pos.y < -3.0 || pos.y > 2.0 || sum.a > 0.99) break; float den = MAPLOD(pos); if (den > 0.01) { float dif = clamp((den - MAPLOD(pos + 0.3 * normalize(sunVec))) / 0.6, 0.0, 1.0); sum = integrate(sum, dif, den); } t += max(0.1, 0.02 * t); }
+
+vec4 raymarch(in vec3 ro, in vec3 rd, in vec3 bgcol) {
+	vec4 sum = vec4(0.0);
+
+	float t = 0.0;
+
+    MARCH(100, map5);
+
+    return clamp(sum, 0.0, 1.0);
+}
+
+vec3 render(in vec3 ro, in vec3 rd) {
+    vec3 col = vec3(0.0);
+
+    // clouds    
+    vec4 res = raymarch(ro, rd, col);
+    col = col * (1.0 - res.w) + res.xyz;
+
+    return col;
+}
+
+void mainImage(out vec3 fragColor, in vec2 fragCoord) {
+    vec2 p = (-vec2(viewWidth, viewHeight) + 2.0 * fragCoord.xy) / viewHeight;
+    
+    // ray
+    vec3 rd = normalize(vec3(p.xy, 1.0));
+    
+    fragColor.rgb = render(rd, rd);
+}
+*/

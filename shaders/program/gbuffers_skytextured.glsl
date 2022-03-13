@@ -143,8 +143,7 @@ void main() {
 	viewPos /= viewPos.w;
 
 	#ifdef END_STARS
-	DrawStars2(albedo.rgb, viewPos.xyz, 0.25, 0.9, 8.0);
-	DrawStars2(albedo.rgb, viewPos.xyz, 0.75, 0.9, 7.0);
+	DrawStars2(albedo.rgb, viewPos.xyz, 0.45, 0.9, 8.0);
 	#endif
 
 	#ifdef END_NEBULA

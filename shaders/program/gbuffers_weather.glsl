@@ -66,7 +66,7 @@ void main() {
 		#endif
 	}
 	
-/* DRAWBUFFERS:0 */
+	/* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;
 }
 

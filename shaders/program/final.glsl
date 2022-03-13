@@ -44,17 +44,22 @@ const float wetnessHalflife = 300.0;
 
 //Common Functions//
 #if defined CAS || defined TAA
+vec2 sharpenOffsets[4] = vec2[4](
+	vec2( 1.0,  0.0),
+	vec2( 0.0,  1.0),
+	vec2(-1.0,  0.0),
+	vec2( 0.0, -1.0)
+);
+
 void SharpenFilter(inout vec3 color, vec2 coord) {
 	float mult = MC_RENDER_QUALITY * 0.0625;
 	vec2 view = 1.0 / vec2(viewWidth, viewHeight);
 
 	color *= MC_RENDER_QUALITY * 0.25 + 1.0;
 
-	for(int i = 0; i < 2; i++) {
-        for (int j = 0; j < 2; j++){
-            vec2 offset = vec2(i, j) * view;
-            color -= texture2DLod(colortex1, coord + offset, 0.0).rgb * mult;
-        }
+	for(int i = 0; i < 4; i++) {
+		vec2 offset = sharpenOffsets[i] * view;
+		color -= texture2DLod(colortex1, coord + offset, 0).rgb * mult;
 	}
 }
 #endif
@@ -63,16 +68,16 @@ void SharpenFilter(inout vec3 color, vec2 coord) {
 void main() {
     vec2 newTexCoord = texCoord;
 
-	vec3 color = texture2DLod(colortex1, newTexCoord, 0.0).rgb;
+	vec3 color = texture2D(colortex1, newTexCoord).rgb;
 
 	#if CHROMATIC_ABERRATION > 0
 	float caStrength = 0.004 * CHROMATIC_ABERRATION;
 	vec2 caScale = vec2(1.0 / aspectRatio, 1.0);
 	color *= vec3(0.0,1.0,0.0);
-	color += texture2DLod(colortex1, mix(newTexCoord, vec2(0.5), caScale * -caStrength), 0).rgb * vec3(1.0,0.0,0.0);
-	color += texture2DLod(colortex1, mix(newTexCoord, vec2(0.5), caScale * -caStrength * 0.5), 0).rgb * vec3(0.5,0.5,0.0);
-	color += texture2DLod(colortex1, mix(newTexCoord, vec2(0.5), caScale * caStrength * 0.5), 0).rgb * vec3(0.0,0.5,0.5);
-	color += texture2DLod(colortex1, mix(newTexCoord, vec2(0.5), caScale* caStrength), 0).rgb * vec3(0.0,0.0,1.0);
+	color += texture2D(colortex1, mix(newTexCoord, vec2(0.5), caScale * -caStrength)).rgb * vec3(1.0,0.0,0.0);
+	color += texture2D(colortex1, mix(newTexCoord, vec2(0.5), caScale * -caStrength * 0.5)).rgb * vec3(0.5,0.5,0.0);
+	color += texture2D(colortex1, mix(newTexCoord, vec2(0.5), caScale * caStrength * 0.5)).rgb * vec3(0.0,0.5,0.5);
+	color += texture2D(colortex1, mix(newTexCoord, vec2(0.5), caScale* caStrength)).rgb * vec3(0.0,0.0,1.0);
 
 	color /= vec3(1.5, 2.0, 1.5);
 	#endif

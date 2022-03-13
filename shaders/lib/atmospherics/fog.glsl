@@ -22,10 +22,15 @@ vec3 GetFogColor(vec3 viewPos) {
 	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 	float ug2 = mix(clamp((cameraPosition.y - 32.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 
-    vec3 fog = mix(GetSkyColor(viewPos, false), vec3(0.25, 0.45, 1.25), (1.0 - eBS)) * 4.0 * baseGradient / SKY_I;
+	vec3 skyColor = GetSkyColor(viewPos, false);
+	vec3 fogColor = mix(skyColor, skyCol, (1.0 - eBS));
+
 	#ifdef FOG_PERBIOME
-	fog = getBiomeFog(vec3(0.25, 0.45, 1.25)) * baseGradient;
+	vec3 fog = getBiomeFog(fogColor) * 4.0 * baseGradient / SKY_I;
+	#else
+	vec3 fog = fogColor * 4.0 * baseGradient / SKY_I;
 	#endif
+
     fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * SKY_I * (1.0 + (VoL * 0.5 + 0.5));
 
 	float nightGradient = exp(-(VoU * 0.5 + 0.5) * 0.35 / nightDensity);
@@ -78,7 +83,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 
 		fogOffset *= 1.0 - rainStrength * 0.75;
 
-		float vanillaFog = 1.0 - (far - (fogFactor + fogOffset)) * 4.0 / (FOG_DENSITY * 0.5 * far);
+		float vanillaFog = 1.0 - (far - (fogFactor + fogOffset)) / (FOG_DENSITY * 0.25 * far);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 	
 		if (vanillaFog > 0.0){
@@ -103,8 +108,10 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	fog = 1.0 - exp(-fog);
 	vec3 fogColor = netherCol.rgb * 0.04;
 	#endif
-
-	color = mix(color, fogColor, fog * (1.0 - float(isEyeInWater > 0.9 && isEyeInWater < 1.1)));
+	
+	#ifndef END
+	color = mix(color, fogColor, fog);
+	#endif
 }
 
 void BlindFog(inout vec3 color, vec3 viewPos) {
@@ -132,7 +139,7 @@ void DenseFog(inout vec3 color, vec3 viewPos) {
 }
 
 void Fog(inout vec3 color, vec3 viewPos) {
-	NormalFog(color, viewPos);
+	if (isEyeInWater == 0) NormalFog(color, viewPos);
 	if (isEyeInWater > 1) DenseFog(color, viewPos);
 	if (blindFactor > 0.0) BlindFog(color, viewPos);
 }

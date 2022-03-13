@@ -25,6 +25,9 @@ uniform int isEyeInWater;
 uniform float blindFactor;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
+
+uniform sampler2D depthtex0;
+uniform mat4 gbufferProjectionInverse;
 #endif
 
 uniform sampler2D colortex0;
@@ -70,21 +73,29 @@ void main() {
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	#ifdef BLUR_FILTERING
-	vec3 vl = GaussianBlur(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.0).rgb;
+	vec3 vl = GaussianBlur(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.5).rgb;
 	#else
 	vec3 vl = texture2D(colortex1, texCoord * VOLUMETRICS_RENDER_RESOLUTION).rgb;
 	#endif
 
 	#ifdef LIGHT_SHAFT
+	float z0 = texture2D(depthtex0, texCoord).r;
+    vec4 screenPos = vec4(texCoord, z0, 1.0);
+    vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+    viewPos /= viewPos.w;
+
+	float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), 0.0, 1.0);
+	float scattering = 1.0 + pow4(VoL) * 2.0;
+
 	if (isEyeInWater != 1.0){
 		#ifdef FOG_PERBIOME
-		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.5 * timeBrightness);
+		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.6 * timeBrightness);
 		#endif
 
-		vl.rgb *= lightCol * 0.25;
+		vl.rgb *= lightCol * (0.5 + rainStrength * 0.5);
 	}
-	else vl.rgb *= waterColor.rgb * 0.15 * (0.5 + eBS) * (0.25 + timeBrightness * 0.75) * (1.0 - isEyeInWater * 0.75);
-    vl.rgb *= LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor);
+	else vl.rgb *= sqrt(waterColor.rgb) * 0.25 * (0.25 + eBS * 0.75) * (0.25 + timeBrightness * 0.75) * (2.0 - sunVisibility);
+    vl.rgb *= LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor) * scattering;
 	#endif
 
 	color += vl;
@@ -92,10 +103,10 @@ void main() {
 
 	#ifdef VOLUMETRIC_CLOUDS
 	vec2 newTexCoord = texCoord * VOLUMETRICS_RENDER_RESOLUTION;
-    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1 / viewHeight), 16.0);
-    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1 / viewHeight), 16.0);
-    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1 / viewWidth,   0.0), 16.0);
-    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1 / viewWidth,   0.0), 16.0);
+    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight) * 2.0, 0.0);
+    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight) * 2.0, 0.0);
+    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0) * 2.0, 0.0);
+    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0) * 2.0, 0.0);
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
 	cloud.a = clamp(cloud.a, 0.0, 1.0);

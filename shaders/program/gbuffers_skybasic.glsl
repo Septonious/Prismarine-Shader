@@ -59,9 +59,9 @@ float GetLuminance(vec3 color) {
 }
 
 void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor) {
-	float VoL = clamp(dot(normalize(viewPos), sunVec), -1.0, 1.0);
+	float VoL = dot(normalize(viewPos), sunVec);
 	float isMoon = float(VoL < 0.0);
-	float sun = pow(abs(VoL), 800.0 * isMoon + 800.0) * (1.0 - sqrt(rainStrength));
+	float sun = pow(abs(VoL), 3600.0 * isMoon + 1800.0 * (1.0 - isMoon)) * (1.0 - sqrt(rainStrength));
 
 	vec3 sunMoonCol = mix(moonColor * moonVisibility, sunColor * sunVisibility, float(VoL > 0.25));
 
@@ -91,7 +91,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	visibility *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
 	#endif
 
-	color += lightCol * visibility * (1.0 + 0.25 * isEyeInWater);
+	color += lightCol * visibility * (0.5 + 0.5 * isEyeInWater);
 }
 
 //Includes//
@@ -109,16 +109,17 @@ vec3 GetSmoke(vec3 viewPos) {
 	float VoU = dot(normalize(viewPos.xyz), upVec);
 
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-	float visibility = float(VoU > 0.0) * (1.0 - rainStrength) * (1.0 - timeBrightness) * eBS;
+	float visibility = sqrt(sqrt(clamp(VoU * 10.0 - 1.0, 0.0, 1.0))) * (1.0 - rainStrength) * (1.0 - timeBrightness) * eBS;
 
 	vec3 wpos = mat3(gbufferModelViewInverse) * viewPos;
-	vec2 planeCoord = wpos.xz / (wpos.y + length(wpos.xz) * 0.5) * 0.25;
+	vec2 wind = vec2(frametime, 0.0);
+	vec2 planeCoord = wpos.xz / (wpos.y + length(wpos.xz) * 0.5) * 0.25 + wind * 0.001;
 
 	float smokeNoise  = texture2D(noisetex, planeCoord * 0.025).r;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.050).r * 0.6;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.300).r * 0.4;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.500).r * 0.2;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.700).r * 0.1;
+		  smokeNoise -= texture2D(noisetex, planeCoord * 0.050).r * 0.35;
+		  smokeNoise -= texture2D(noisetex, planeCoord * 0.300).r * 0.30;
+		  smokeNoise -= texture2D(noisetex, planeCoord * 0.600).r * 0.15;
+		  smokeNoise -= texture2D(noisetex, planeCoord * 0.900).r * 0.10;
 
 	lightNight *= mix(lightNight, lightNight * vec3(0.3, 1.4, 0.7), smokeNoise);
 
@@ -260,15 +261,15 @@ void main() {
 	#ifdef ROUND_SUN_MOON
 	vec3 lightMA = mix(lightMorning, lightEvening, mefade);
     vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);
-    vec3 moonColor = sqrt(lightNight);
+    vec3 moonColor = sqrt(lightNight) * 1.5;
 
-	RoundSunMoon(albedo, viewPos.xyz, sunColor, moonColor);
+	RoundSunMoon(albedo, viewPos.xyz, sunColor * 1.5, moonColor);
 	SunGlare(albedo.rgb, viewPos.xyz, lightCol.rgb);
 	#endif
 
 	#ifdef STARS
 	DrawStars(albedo.rgb, viewPos.xyz, 0.2, 0.9, 1.5);
-	DrawStars(albedo.rgb, viewPos.xyz, 0.35, 1.0, 0.75);
+	DrawStars(albedo.rgb, viewPos.xyz, 0.35, 1.1, 0.75);
 	#endif
 
 	float dither = Bayer64(gl_FragCoord.xy);

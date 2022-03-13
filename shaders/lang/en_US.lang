@@ -417,7 +417,7 @@ option.VCLOUDS_VERTICAL_THICKNESS=Vertical Thickness
 option.VCLOUDS_VERTICAL_THICKNESS.comment=Adjusts clouds stretching factor. Higher values make clouds way taller and more obstructive.
 
 option.CLOUD_THICKNESS=Thickness
-option.CLOUD_THICKNESS.comment=Adjusts cloud thickness, higher thickness makes artifacts more visible.
+option.CLOUD_THICKNESS.comment=Adjusts cloud thickness, higher thickness makes dithering more visible.
 value.CLOUD_THICKNESS.1=tiny cloods
 value.CLOUD_THICKNESS.2=Very Low
 value.CLOUD_THICKNESS.4=Low
@@ -438,15 +438,17 @@ value.CLOUD_AMOUNT.12.0=Very Low
 value.CLOUD_AMOUNT.11.0=Low
 value.CLOUD_AMOUNT.10.0=Medium
 value.CLOUD_AMOUNT.9.0=High
-value.CLOUD_AMOUNT.8.0 =Very High
+value.CLOUD_AMOUNT.8.0=Very High
+
+option.CLOUD_VERTICAL_THICKNESS=Vertical Thickness
 
 option.CLOUD_HEIGHT=Height
 option.CLOUD_HEIGHT.comment=Adjusts cloud height.
-value.CLOUD_HEIGHT.5.0 =Very Low
-value.CLOUD_HEIGHT.7.5=Low
-value.CLOUD_HEIGHT.10.0=Medium
-value.CLOUD_HEIGHT.12.5=High
-value.CLOUD_HEIGHT.15.0=Very High
+value.CLOUD_HEIGHT.5.0=Very Low
+value.CLOUD_HEIGHT.7.0=Low
+value.CLOUD_HEIGHT.9.0=Medium
+value.CLOUD_HEIGHT.11.0=High
+value.CLOUD_HEIGHT.13.0=Very High
 
 option.CLOUD_SPEED=Wind Speed
 option.CLOUD_SPEED.comment=Adjusts cloud speed.

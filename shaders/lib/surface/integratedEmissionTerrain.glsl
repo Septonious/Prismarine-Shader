@@ -1,6 +1,7 @@
 #ifdef FSH
-void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albedo, in vec3 worldPos){
+void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albedo, in vec3 worldPos, in vec3 viewPos){
 	float newEmissive = 0.0;
+	float lengthAlbedo = length(albedo.rgb);
 
 	#ifdef EMISSIVE_ORES
     if (mat > 99.9 && mat < 100.1) { // Emissive Ores
@@ -27,41 +28,47 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
         }
 
 	} else if (mat > 102.9 && mat < 103.1) { // Warped Stem & Hyphae
-		newEmissive = float(length(albedo.rgb) > 0.49) * 0.4 + float(length(albedo.rgb) > 0.59);
+		newEmissive = float(lengthAlbedo > 0.49) * 0.4 + float(lengthAlbedo > 0.59);
 	} else if (mat > 103.9 && mat < 104.1) { // Crimson Stem & Hyphae
-		newEmissive = (float(length(albedo.rgb) > 0.47) * 0.5 + float(length(albedo.rgb) > 0.50)) * float(albedo.b < 0.25);
+		newEmissive = (float(lengthAlbedo > 0.47) * 0.5 + float(lengthAlbedo > 0.50)) * float(albedo.b < 0.25);
 	} else if (mat > 104.9 && mat < 105.1) { // Warped Nether Warts
 		newEmissive = pow2(float(albedo.g - albedo.b));
 	} else if (mat > 105.9 && mat < 106.1) { // Warped Nylium
 		newEmissive = float(albedo.g > albedo.b && albedo.g > albedo.r) * pow(float(albedo.g - albedo.b), 3.0);
 	} else if (mat > 107.9 && mat < 108.1) { // Amethyst
-		newEmissive = float(length(albedo.rgb) > 0.5) * 0.1;
+		newEmissive = float(lengthAlbedo > 0.5) * 0.1;
 	} else if (mat > 109.9 && mat < 110.1) { // Glow Lichen
 		newEmissive = (1.0 - lightmap.y) * (0.1 + float(albedo.r > albedo.g || albedo.r > albedo.b));
 	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
-		newEmissive = float(albedo.r > 0.9) * 0.1;
+		newEmissive = float(albedo.r > 0.9) * 0.25;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
-		newEmissive = float(length(albedo.rgb) > 0.9) * 0.25;
+		newEmissive = float(lengthAlbedo > 0.9) * 0.25;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
 		newEmissive = float(albedo.r > 0.65) * 0.25;
 	} else if (mat > 113.9 && mat < 114.1) { // Glow berries
-		newEmissive = float(albedo.r > albedo.g || albedo.r > albedo.b);
+		newEmissive = float(albedo.r > 0.5) * 0.5;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
-		newEmissive = float(length(albedo.rgb) > 0.99) * 0.25;
+		newEmissive = float(lengthAlbedo > 0.99) * 0.25;
 	} else if (mat > 115.9 && mat < 116.1) { // Furnaces
-		newEmissive = float(albedo.r > 0.8) * 0.5;
+		newEmissive = float(albedo.r > 0.8 || (albedo.r > 0.6 && albedo.b < 0.5)) * 0.25;
 	} else if (mat > 116.9 && mat < 117.1) { // Chorus
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25;
 	} else if (mat > 117.9 && mat < 118.1) { // Enchanting Table
-		newEmissive = float(length(albedo.rgb) > 0.75) * 0.1;
+		newEmissive = float(lengthAlbedo > 0.75) * 0.1;
 	} else if (mat > 118.9 && mat < 119.1) { // Soul Campfire
 		newEmissive = float(albedo.b > albedo.r || albedo.b > albedo.g) * 0.05;
 	} else if (mat > 119.9 && mat < 120.1) { // Normal Campfire
 		newEmissive = float(albedo.r > 0.65 && albedo.b < 0.35) * 0.1;
 	} else if (mat > 121.9 && mat < 122.1) {
-		newEmissive = 0.25;
-	} else if (mat > 122.9 && mat < 123.1) {
-		newEmissive = float(length(albedo.rgb) > 0.05 && albedo.r < 0.25) * 0.1;
+		newEmissive = 0.3;
+	} else if (mat > 122.9 && mat < 123.1) { // Sculks
+		newEmissive = float(lengthAlbedo > 0.05 && albedo.r < 0.25) * 0.1;
+	} else if (mat > 123.9 && mat < 124.1) { // Redstone Lamp
+		newEmissive = 0.05 + float(lengthAlbedo > 0.75) * 0.25;
+	} else if (mat > 124.9 && mat < 125.1) { // Sea Lantern
+		newEmissive = float(lengthAlbedo > 0.95) * 0.2 + float(albedo.g > 0.4) * 0.05;
+	} else if (mat > 125.9 && mat < 126.1) { // Nether Wart
+		newEmissive = float(lengthAlbedo > 0.25) * 0.25 + float(lengthAlbedo > 0.75) * 0.5;
 	}
 
 	#ifdef DEBRIS_HIGHLIGHT
@@ -111,6 +118,9 @@ void getIntegratedEmissionMaterials(inout float mat, inout float isPlant){
 	if (mc_Entity.x == 20020) mat = 120.0;
 	if (mc_Entity.x == 20022) mat = 122.0;
 	if (mc_Entity.x == 20023) mat = 123.0;
+	if (mc_Entity.x == 20024) mat = 124.0;
+	if (mc_Entity.x == 20025) mat = 125.0;
+	if (mc_Entity.x == 20026) mat = 126.0;
 
 	#ifdef DEBRIS_HIGHLIGHT
 	if (mc_Entity.x == 20021) mat = 121.0;

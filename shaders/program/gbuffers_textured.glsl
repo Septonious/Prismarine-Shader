@@ -84,21 +84,13 @@ float GetLinearDepth(float depth) {
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 
-#ifdef TAA
-#include "/lib/util/jitter.glsl"
-#endif
-
 //Program//
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * color;
 
 	if (albedo.a > 0.001) {
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
-		#ifdef TAA
-		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
-		#else
 		vec3 viewPos = ToNDC(screenPos);
-		#endif
 		vec3 worldPos = ToWorld(viewPos);
 	
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
@@ -124,7 +116,7 @@ void main() {
 		
 		vec3 shadow = vec3(0.0);
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, 1.0, NoL, 1.0,
-				    1.0, 0.0, 0.0);
+				    1.0, float(length(albedo.rgb) > 0.95) * 0.25, 0.0);
 
 		#if defined FOG && MC_VERSION >= 11500
 		Fog(albedo.rgb, viewPos);
@@ -152,10 +144,14 @@ void main() {
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
 
+	#ifdef SSGI
+	/* RENDERTARGETS:0,6,10 */
+	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
+	gl_FragData[2] = vec4(albedo.rgb, float(length(albedo.rgb) > 0.95));
+	#endif
+
 	#ifdef ADVANCED_MATERIALS
 	/* DRAWBUFFERS:0367 */
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
-	gl_FragData[2] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
 	#endif
 }
@@ -182,12 +178,6 @@ uniform float timeAngle;
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferModelView, gbufferModelViewInverse;
-
-#ifdef TAA
-uniform int frameCounter;
-
-uniform float viewWidth, viewHeight;
-#endif
 
 #ifdef SOFT_PARTICLES
 uniform float far, near;
@@ -216,10 +206,6 @@ float GetLogarithmicDepth(float depth) {
 #endif
 
 //Includes//
-#ifdef TAA
-#include "/lib/util/jitter.glsl"
-#endif
-
 #ifdef WORLD_CURVATURE
 #include "/lib/vertex/worldCurvature.glsl"
 #endif
@@ -255,10 +241,6 @@ void main() {
 	gl_Position.z = GetLinearDepth(gl_Position.z / gl_Position.w) * (far - near);
 	gl_Position.z -= 0.25;
 	gl_Position.z = GetLogarithmicDepth(gl_Position.z / (far - near)) * gl_Position.w;
-	#endif
-	
-	#ifdef TAA
-	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
 	#endif
 }
 

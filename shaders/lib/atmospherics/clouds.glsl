@@ -6,7 +6,7 @@ void erodeCoord(inout vec2 coord, in float currentStep, in float erosionStrength
 float CloudNoise(vec2 coord, vec2 wind){
 
 	float windMult = 0.5;
-	float frequencyMult = 0.2;
+	float frequencyMult = 0.5;
 	float noiseMult = 1.0, noiseFactor = 0.0;
 	float noise = 0.0;
 
@@ -37,16 +37,16 @@ float CloudNoise(vec2 coord, vec2 wind){
 }
 
 float CloudCoverage(float noise, float VoU, float coverage){
-	float noiseMix = mix(noise, 21.0, 0.33 * rainStrength);
-	float noiseFade = clamp(sqrt(VoU * 16.0), 0.0, 1.0);
+	float noiseMix = mix(noise, 21.0, 0.25 * rainStrength);
+	float noiseFade = clamp(sqrt(VoU * 32.0), 0.0, 1.0);
 	float noiseCoverage = (coverage * coverage) + CLOUD_AMOUNT;
-	float multiplier = 1.0 - 0.5 * rainStrength;
+	float multiplier = 1.0 - 0.4 * rainStrength;
 
 	return max(noiseMix * noiseFade - noiseCoverage, 0.0) * multiplier;
 }
 
 vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
-	float VoS = dot(normalize(viewPos), sunVec);
+	float VoL = dot(normalize(viewPos), sunVec);
 	float VoU = dot(normalize(viewPos), upVec);
 	
 	#ifdef TAA
@@ -55,10 +55,11 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 
 	float cloud = 0.0;
 	float cloudGradient = 0.0;
-	float colorMultiplier = CLOUD_BRIGHTNESS * (0.5 - 0.25 * (1.0 - sunVisibility) * (1.0 - rainStrength));
+	float cloudOpacity = CLOUD_OPACITY * (1.0 - timeBrightness * 0.2) * (1.0 - rainStrength * 0.3);
+	float colorMultiplier = CLOUD_BRIGHTNESS * (1.0 - rainStrength * 0.45);
 	float gradientMix = dither * 0.1667;
 	float noiseMultiplier = CLOUD_THICKNESS * 0.2;
-	float scattering = pow(VoS * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
+	float scattering = pow(VoL * 0.5 + 0.5, 4.0);
 
 	vec2 wind = vec2(
 		frametime * CLOUD_SPEED * 0.001,
@@ -70,9 +71,10 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 	if (VoU > 0.0){
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < 6; i++) {
-			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * 0.75) / wpos.y) * 0.025;
+			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * CLOUD_VERTICAL_THICKNESS) / wpos.y) * 0.005;
+
 			vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
-				 erodeCoord(coord, i + dither, 0.001 * CLOUD_OCTAVES);
+				 erodeCoord(coord, i + dither, 0.002 * CLOUD_OCTAVES);
 				#ifdef BLOCKY_CLOUDS
 				coord = floor(coord * 8.0);
 				#endif
@@ -89,11 +91,12 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 			);
 
 			cloud = mix(cloud, 1.0, noise);
+			
 			gradientMix += 0.1667;
 		}
 		cloudColor = mix(
 			ambientCol * (0.5 * sunVisibility + 0.5),
-			lightCol * (1.0 + scattering + rainStrength),
+			lightCol * (1.0 + scattering * 0.5),
 			cloudGradient * cloud
 		);
 
@@ -107,11 +110,10 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 		cloud *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 		#endif
 
-		cloudColor *= 1.0 - 0.6 * rainStrength;
-		cloud *= sqrt(sqrt(clamp(VoU * 10.0 - 1.0, 0.0, 1.0))) * (1.0 - 0.6 * rainStrength);
+		cloud *= sqrt(sqrt(clamp(VoU * 18.0 - 1.0, 0.0, 1.0)));
 	}
 
-	return vec4(cloudColor * colorMultiplier, cloud * cloud * CLOUD_OPACITY);
+	return vec4(cloudColor * colorMultiplier, cloud * cloud * cloudOpacity);
 }
 #endif
 
@@ -142,7 +144,6 @@ void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float b
 	star = clamp(star - 0.75, 0.0, 1.0) * multiplier;
 
 	#ifdef OVERWORLD
-
 	#if MC_VERSION >= 11800
 	star *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 	#else
@@ -152,10 +153,9 @@ void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float b
 	#ifdef UNDERGROUND_SKY
 	star *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 	#endif
-	
 	#endif
 
-	color += star * vec3(0.5, 0.75, 1.00) * brightness * (1.0 - timeBrightness * 0.75) * clamp(frametime * 0.5, 0.0, 1.0);
+	color += star * vec3(0.5, 0.75, 1.00) * brightness * (1.0 - timeBrightness * 0.95) * clamp(frametime * 0.5, 0.0, 1.0);
 }
 
 #ifdef AURORA

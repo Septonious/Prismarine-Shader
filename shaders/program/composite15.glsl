@@ -32,7 +32,7 @@ float GetLuminance(vec3 color) {
 
 //Program//
 void main() {
-	vec3 color = texture2DLod(colortex1, texCoord, 0.0).rgb;
+	vec3 color = texture2D(colortex1, texCoord).rgb;
 
 	#ifdef FXAA
 	color = FXAA311(color);	

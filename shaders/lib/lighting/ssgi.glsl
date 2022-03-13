@@ -155,14 +155,14 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
         bool hit = IntersectSSRay(hitPos, currentPosition, sampleDir, dither, STRIDE);
         currentPosition = hitPos;
 
-        if (hit && hand < 0.5 && length(albedo) < 0.5) {
-            vec3 hitAlbedo = texture2D(colortex10, currentPosition.xy).rgb * clamp(ILLUMINATION_STRENGTH, 1.0, 6.0);
+        if (hit && hand < 0.5 && length(albedo) < 0.25) {
+            vec3 hitAlbedo = texture2D(colortex10, currentPosition.xy).rgb;
             float isEmissive = float(texture2D(colortex10, currentPosition.xy).a > 0.25);
 
-            weight *= hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo * hitAlbedo;
-            illumination += hitAlbedo * isEmissive;
+            weight *= hitAlbedo;
+            illumination += weight * isEmissive;
         }
     }
 
-    return illumination * illumination;
+    return illumination;
 }

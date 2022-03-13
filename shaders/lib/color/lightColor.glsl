@@ -43,7 +43,7 @@ vec3 getBiomeFog(vec3 inCol){
 			weatherSwamp * isSwamp + weatherMushroom * isMushroom + weatherSavanna  * isSavanna +
 			weatherForest * isForest + weatherJungle * isJungle + weatherTaiga * isTaiga
 		) / max(fogWeight, 0.0001),
-		fogWeight
+		fogWeight * 0.75
 	);
 }
 #endif

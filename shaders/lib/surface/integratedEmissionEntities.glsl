@@ -34,7 +34,7 @@ void getIntegratedEmission(inout float emission, inout vec2 lightmap, in vec4 al
     }
 
     if (mat > 106.9 && mat < 107.1){ // Warden
-        newEmissive = float(albedo.b > 0.5 && length(albedo.rgb) > 0.7 && albedo.r < 0.25) * 2.0 * length(albedo.rgb);
+        newEmissive = float(albedo.b > 0.5 && length(albedo.rgb) > 0.7 && albedo.r < 0.25) * 2.0 * clamp(length(albedo.rgb), 0.0, 1.0);
     }
 
     #ifdef ENTITY_BRIGHT_PARTS_HIGHLIGHT
