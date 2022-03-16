@@ -58,10 +58,6 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 #endif
 
 //Includes//
-#ifdef BLUR_FILTERING
-#include "/lib/filters/blur.glsl"
-#endif
-
 #ifdef LIGHT_SHAFT
 #include "/lib/color/waterColor.glsl"
 #include "/lib/color/lightColor.glsl"
@@ -70,12 +66,17 @@ float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 //Program//
 void main() {
     vec3 color = texture2D(colortex0, texCoord.xy).rgb;
+	vec2 newTexCoord = texCoord * VOLUMETRICS_RENDER_RESOLUTION;
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	#ifdef BLUR_FILTERING
-	vec3 vl = GaussianBlur(colortex1, texCoord.xy * VOLUMETRICS_RENDER_RESOLUTION, 1.5).rgb;
+    vec3 vl1 = texture2DLod(colortex1, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight) * 3.0, 0.0).rgb;
+    vec3 vl2 = texture2DLod(colortex1, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight) * 3.0, 0.0).rgb;
+    vec3 vl3 = texture2DLod(colortex1, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0) * 3.0, 0.0).rgb;
+    vec3 vl4 = texture2DLod(colortex1, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0) * 3.0, 0.0).rgb;
+    vec3 vl = (vl1 + vl2 + vl3 + vl4) * 0.25;
 	#else
-	vec3 vl = texture2D(colortex1, texCoord * VOLUMETRICS_RENDER_RESOLUTION).rgb;
+	vec3 vl = texture2DLod(colortex1, newTexCoord.xy, 0.0).rgb;
 	#endif
 
 	#ifdef LIGHT_SHAFT
@@ -93,6 +94,7 @@ void main() {
 		#endif
 
 		vl.rgb *= lightCol * (0.5 + rainStrength * 0.5);
+		vl.b *= 1.25 + timeBrightness * 0.75;
 	}
 	else vl.rgb *= sqrt(waterColor.rgb) * 0.25 * (0.25 + eBS * 0.75) * (0.25 + timeBrightness * 0.75) * (2.0 - sunVisibility);
     vl.rgb *= LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor) * scattering;
@@ -102,11 +104,10 @@ void main() {
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
-	vec2 newTexCoord = texCoord * VOLUMETRICS_RENDER_RESOLUTION;
-    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight) * 2.0, 0.0);
-    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight) * 2.0, 0.0);
-    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0) * 2.0, 0.0);
-    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0) * 2.0, 0.0);
+    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight) * 2.0, 2.0);
+    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight) * 2.0, 2.0);
+    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0) * 2.0, 2.0);
+    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0) * 2.0, 2.0);
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
 	cloud.a = clamp(cloud.a, 0.0, 1.0);

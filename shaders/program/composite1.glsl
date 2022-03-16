@@ -119,7 +119,7 @@ void main() {
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
     vec4 translucent = texture2D(colortex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION));
 
-	float dither = InterleavedGradientNoiseVL();
+	float dither = Bayer128(gl_FragCoord.xy);
 	float z0Scaled = texture2D(depthtex0, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION)).r;
 	float z1Scaled = texture2D(depthtex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION)).r;
 

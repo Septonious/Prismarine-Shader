@@ -308,8 +308,6 @@ void main() {
 			albedo.a = waterAlpha;
 			#endif
 
-			albedo.a = albedo.a + clamp(clamp(length(worldPos.xyz), 0.0, 1.0) * isEyeInWater * 0.25, 0.0, 0.95);
-
 			baseReflectance = vec3(1.0);
 		}
 
@@ -492,7 +490,7 @@ void main() {
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
 				#endif
 
-				skyReflection *= eBS;
+				skyReflection *= lightmap.y;
 				#endif
 
 				skyReflection *= clamp(1.0 - isEyeInWater, 0.0, 1.0);

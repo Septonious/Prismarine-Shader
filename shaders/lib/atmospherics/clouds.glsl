@@ -38,7 +38,7 @@ float CloudNoise(vec2 coord, vec2 wind){
 
 float CloudCoverage(float noise, float VoU, float coverage){
 	float noiseMix = mix(noise, 21.0, 0.25 * rainStrength);
-	float noiseFade = clamp(sqrt(VoU * 32.0), 0.0, 1.0);
+	float noiseFade = clamp(sqrt(VoU * 30.0), 0.0, 1.0);
 	float noiseCoverage = (coverage * coverage) + CLOUD_AMOUNT;
 	float multiplier = 1.0 - 0.4 * rainStrength;
 
@@ -55,7 +55,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 
 	float cloud = 0.0;
 	float cloudGradient = 0.0;
-	float cloudOpacity = CLOUD_OPACITY * (1.0 - timeBrightness * 0.2) * (1.0 - rainStrength * 0.3);
+	float cloudOpacity = clamp(CLOUD_OPACITY * (1.0 - rainStrength * 0.3), moonVisibility, 1.0);
 	float colorMultiplier = CLOUD_BRIGHTNESS * (1.0 - rainStrength * 0.45);
 	float gradientMix = dither * 0.1667;
 	float noiseMultiplier = CLOUD_THICKNESS * 0.2;
@@ -74,7 +74,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * CLOUD_VERTICAL_THICKNESS) / wpos.y) * 0.005;
 
 			vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
-				 erodeCoord(coord, i + dither, 0.002 * CLOUD_OCTAVES);
+				 erodeCoord(coord, i + dither, 0.0018 * CLOUD_OCTAVES);
 				#ifdef BLOCKY_CLOUDS
 				coord = floor(coord * 8.0);
 				#endif
@@ -110,7 +110,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 		cloud *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 		#endif
 
-		cloud *= sqrt(sqrt(clamp(VoU * 18.0 - 1.0, 0.0, 1.0)));
+		cloud *= sqrt(sqrt(clamp(VoU * 20.0 - 1.0, 0.0, 1.0)));
 	}
 
 	return vec4(cloudColor * colorMultiplier, cloud * cloud * cloudOpacity);

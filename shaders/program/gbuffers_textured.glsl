@@ -116,7 +116,7 @@ void main() {
 		
 		vec3 shadow = vec3(0.0);
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, 1.0, NoL, 1.0,
-				    1.0, float(length(albedo.rgb) > 0.95) * 0.25, 0.0);
+				    1.0, float(length(albedo.rgb) > 0.99) * 0.25, 0.0);
 
 		#if defined FOG && MC_VERSION >= 11500
 		Fog(albedo.rgb, viewPos);
@@ -147,7 +147,7 @@ void main() {
 	#ifdef SSGI
 	/* RENDERTARGETS:0,6,10 */
 	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
-	gl_FragData[2] = vec4(albedo.rgb, float(length(albedo.rgb) > 0.95));
+	gl_FragData[2] = vec4(albedo.rgb, float(length(albedo.rgb) > 0.99));
 	#endif
 
 	#ifdef ADVANCED_MATERIALS
