@@ -99,6 +99,10 @@ float GetLuminance(vec3 color) {
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 
+#ifdef TAA
+#include "/lib/util/jitter.glsl"
+#endif
+
 #ifdef INTEGRATED_EMISSION
 #include "/lib/surface/integratedEmissionEntities.glsl"
 #endif
@@ -178,7 +182,11 @@ void main() {
 		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
+		#ifdef TAA
+		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
+		#else
 		vec3 viewPos = ToNDC(screenPos);
+		#endif
 		vec3 worldPos = ToWorld(viewPos);
 
 		#ifdef ADVANCED_MATERIALS
@@ -335,6 +343,12 @@ varying vec4 color;
 varying float mat;
 #endif
 
+#ifdef TAA
+uniform int frameCounter;
+
+uniform float viewWidth, viewHeight;
+#endif
+
 #ifdef ADVANCED_MATERIALS
 varying float dist;
 
@@ -376,6 +390,10 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 //Includes//
 #ifdef INTEGRATED_EMISSION
 #include "/lib/surface/integratedEmissionEntities.glsl"
+#endif
+
+#ifdef TAA
+#include "/lib/util/jitter.glsl"
 #endif
 
 #ifdef WORLD_CURVATURE
@@ -434,6 +452,10 @@ void main() {
 	#else
 	gl_Position = ftransform();
     #endif
+
+	#ifdef TAA
+	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
+	#endif
 }
 
 #endif

@@ -31,7 +31,6 @@ uniform vec3 cameraPosition;
 uniform mat4 gbufferProjectionInverse;
 
 uniform sampler2D texture;
-uniform sampler2D gaux1;
 
 #ifndef MC_RENDER_STAGE_SUN
 #define MC_RENDER_STAGE_SUN 1
@@ -107,18 +106,10 @@ void main() {
 	albedo *= color;
 	albedo.rgb = pow(albedo.rgb,vec3(2.2)) * SKYBOX_BRIGHTNESS * albedo.a;
 
-	#if defined PLANAR_CLOUDS
-	if (albedo.a > 0.0) {
-		float cloudAlpha = texture2D(gaux1, gl_FragCoord.xy / vec2(viewWidth, viewHeight)).r;
-		float alphaMult = 1.0 - 0.6 * rainStrength;
-		albedo.a *= 1.0 - cloudAlpha / (alphaMult * alphaMult);
-	}
-	
 	#ifdef ROUND_SUN_MOON
 	if (renderStage == MC_RENDER_STAGE_SUN || renderStage == MC_RENDER_STAGE_MOON) {
 		albedo *= 0.0;
 	}
-	#endif
 	#endif
 	
 	#ifdef SKY_DESATURATION

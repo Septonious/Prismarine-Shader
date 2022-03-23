@@ -10,12 +10,12 @@ vec4 GetWaterFog(vec3 viewPos) {
 
     #ifdef OVERWORLD
     float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), 0.0, 1.0);
-	float scattering = 1.0 + pow(VoL, 6.0) * 2.5 * eBS;
+	float scattering = 1.0 + pow(VoL, 6.0) * 3.0 * eBS;
     #endif
 
     vec3 waterFogColor  = waterColor.rgb * waterColor.rgb;
          #ifdef OVERWORLD
-         waterFogColor *= clamp(max(pow4(timeBrightness) * 0.5, 0.1) + moonVisibility * 0.4, 0.0, 1.0);
+         waterFogColor *= clamp(max(pow2(timeBrightness) * 0.6, 0.1) + moonVisibility * 0.4, 0.0, 1.0);
          waterFogColor  = mix(waterFogColor, sqrt(waterFogColor) * weatherCol.rgb * 0.25, rainStrength);
          waterFogColor *= scattering;
          #else

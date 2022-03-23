@@ -37,7 +37,7 @@ float CloudNoise(vec2 coord, vec2 wind){
 }
 
 float CloudCoverage(float noise, float VoU, float coverage){
-	float noiseMix = mix(noise, 21.0, 0.25 * rainStrength);
+	float noiseMix = mix(noise, 21.0, 0.3 * rainStrength);
 	float noiseFade = clamp(sqrt(VoU * 30.0), 0.0, 1.0);
 	float noiseCoverage = (coverage * coverage) + CLOUD_AMOUNT;
 	float multiplier = 1.0 - 0.4 * rainStrength;
@@ -68,9 +68,9 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 
 	vec3 cloudColor = vec3(0.0);
 
-	if (VoU > 0.0){
+	if (VoU > -0.25){
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
-		for(int i = 0; i < 6; i++) {
+		for(int i = 0; i < 5; i++) {
 			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * CLOUD_VERTICAL_THICKNESS) / wpos.y) * 0.005;
 
 			vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
@@ -99,6 +99,8 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 			lightCol * (1.0 + scattering * 0.5),
 			cloudGradient * cloud
 		);
+
+		cloudColor = pow(cloudColor, vec3(0.9 + sunVisibility * 0.1 + (rainStrength * moonVisibility * 0.1)));
 
 		#if MC_VERSION >= 11800
 		cloudColor *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);

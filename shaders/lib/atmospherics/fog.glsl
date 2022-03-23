@@ -29,11 +29,11 @@ vec3 GetFogColor(vec3 viewPos) {
 	fogColor = getBiomeFog(skyCol);
 	#endif
 
-	fogColor = mix(skyColor, fogColor, max(timeBrightness - eBS, 0.0) * 0.5);
+	fogColor = mix(sqrt(skyColor), fogColor, max(timeBrightness - eBS, 0.0) * 0.5);
 
 	vec3 fog = fogColor * (4.0 - timeBrightness) * baseGradient / SKY_I;
 
-    fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * SKY_I * (1.0 + (VoL * 0.5 + 0.5));
+    fog = fog * exposure * sunVisibility * SKY_I * (1.0 + (VoL * 0.5 + 0.5));
 
 	float nightGradient = exp(-(VoU * 0.5 + 0.5) * 0.35 / nightDensity);
     vec3 nightFog = lightNight * lightNight * 6.0 * nightGradient * nightExposure;
@@ -63,7 +63,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float density = (0.25 + eBS * 0.75) * altitudeFactor * FOG_DENSITY * (1.0 + rainStrength * 0.5) * (1.0 - pow2(timeBrightness) * 0.5);
+	float density = (0.25 + eBS * 0.75) * altitudeFactor * FOG_DENSITY * (1.0 + rainStrength) * (1.0 - sunVisibility * 0.5);
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0), eBS);

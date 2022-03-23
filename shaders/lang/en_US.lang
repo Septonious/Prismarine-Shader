@@ -449,6 +449,7 @@ value.CLOUD_HEIGHT.7.0=Low
 value.CLOUD_HEIGHT.9.0=Medium
 value.CLOUD_HEIGHT.11.0=High
 value.CLOUD_HEIGHT.13.0=Very High
+value.CLOUD_HEIGHT.15.0=VERY High
 
 option.CLOUD_SPEED=Wind Speed
 option.CLOUD_SPEED.comment=Adjusts cloud speed.

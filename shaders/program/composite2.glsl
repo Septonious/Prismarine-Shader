@@ -55,9 +55,14 @@ const bool colortex1MipmapEnabled = true;
 #if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
+vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
 
 //Includes//
+#if defined BLUR_FILTERING && (defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE)
+#include "/lib/filters/blur.glsl"
+#endif
+
 #ifdef LIGHT_SHAFT
 #include "/lib/color/waterColor.glsl"
 #include "/lib/color/lightColor.glsl"
@@ -70,13 +75,9 @@ void main() {
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	#ifdef BLUR_FILTERING
-    vec3 vl1 = texture2DLod(colortex1, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight) * 3.0, 0.0).rgb;
-    vec3 vl2 = texture2DLod(colortex1, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight) * 3.0, 0.0).rgb;
-    vec3 vl3 = texture2DLod(colortex1, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0) * 3.0, 0.0).rgb;
-    vec3 vl4 = texture2DLod(colortex1, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0) * 3.0, 0.0).rgb;
-    vec3 vl = (vl1 + vl2 + vl3 + vl4) * 0.25;
+	vec3 vl = GaussianBlur(colortex1, newTexCoord, 1.5).rgb;
 	#else
-	vec3 vl = texture2DLod(colortex1, newTexCoord.xy, 0.0).rgb;
+	vec3 vl = texture2D(colortex1, newTexCoord).rgb;
 	#endif
 
 	#ifdef LIGHT_SHAFT
@@ -85,19 +86,21 @@ void main() {
     vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
     viewPos /= viewPos.w;
 
-	float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), 0.0, 1.0);
+	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
 	float scattering = 1.0 + pow4(VoL) * 2.0;
 
 	if (isEyeInWater != 1.0){
 		#ifdef FOG_PERBIOME
-		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.6 * timeBrightness);
+		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.5 * timeBrightness);
 		#endif
 
 		vl.rgb *= lightCol * (0.5 + rainStrength * 0.5);
-		vl.b *= 1.25 + timeBrightness * 0.75;
+		vl.r *= 1.0 - pow2(timeBrightness) * 0.25;
+		vl.b *= (1.2 + timeBrightness * 0.8) * (1.0 - rainStrength * 0.3);
+	} else {
+		vl.rgb *= 0.25;
 	}
-	else vl.rgb *= sqrt(waterColor.rgb) * 0.25 * (0.25 + eBS * 0.75) * (0.25 + timeBrightness * 0.75) * (2.0 - sunVisibility);
-    vl.rgb *= LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor) * scattering;
+    vl.rgb *= LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor) * scattering * (6.0 - sunVisibility * 5.0);
 	#endif
 
 	color += vl;
