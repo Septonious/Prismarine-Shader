@@ -141,6 +141,7 @@ float getSubsurfaceScatteringData(in float mat, in vec3 albedo, in vec3 viewPos,
 
 	subsurface += float(mat > 500.9 && mat < 501.1) * float(albedo.b > 0.7) * NoL * VoL * 0.5;
 	subsurface += leaves * NoL * VoL;
+	subsurface += float(mat > 499.9 && mat < 500.1) * NoL * VoL * 0.5;
 
 	return subsurface;
 }
@@ -470,7 +471,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
 void getSubsurfaceScatteringMaterials(inout float mat) {
-	if (mc_Entity.x == 500) mat = 500.0;
+	if (mc_Entity.x == 500 || mc_Entity.x == 29999) mat = 500.0;
 	if (mc_Entity.x == 501) mat = 501.0;
 	if (mc_Entity.x == 502) mat = 502.0;
 	if (mc_Entity.x == 503) mat = 503.0;

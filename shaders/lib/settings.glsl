@@ -29,6 +29,7 @@ Please don't edit anything from Undefine section and onwards.
 #define TAA_JITTER
 
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
+#define SHARPENING_STRENGTH 10 //[0 1 2 3 4 5 6 7 8 9 10]
 //#define POWDER_SNOW_HIGHLIGHT
 //#define ENTITY_HIGHLIGHT
 //#define DEBRIS_HIGHLIGHT

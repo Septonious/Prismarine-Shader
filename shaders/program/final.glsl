@@ -82,6 +82,15 @@ void main() {
 	color /= vec3(1.5, 2.0, 1.5);
 	#endif
 
+	#if SHARPENING_STRENGTH > 0 && !defined DOF
+	vec2 view = 1.0 / vec2(viewWidth, viewHeight);
+	color *= SHARPENING_STRENGTH * 0.1 + 1.0;
+	color -= texture2D(colortex1, texCoord.xy + vec2(1.0,  0.0) * view).rgb * SHARPENING_STRENGTH * 0.025;
+	color -= texture2D(colortex1, texCoord.xy + vec2(0.0,  1.0) * view).rgb * SHARPENING_STRENGTH * 0.025;
+	color -= texture2D(colortex1, texCoord.xy + vec2(-1.0, 0.0) * view).rgb * SHARPENING_STRENGTH * 0.025;
+	color -= texture2D(colortex1, texCoord.xy + vec2(0.0, -1.0) * view).rgb * SHARPENING_STRENGTH * 0.025;
+	#endif
+
     #if defined CAS || defined TAA
     SharpenFilter(color.rgb, newTexCoord);
     #endif
