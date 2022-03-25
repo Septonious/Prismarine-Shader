@@ -9,7 +9,7 @@ vec3 GetFogColor(vec3 viewPos) {
 	vec3 nViewPos = normalize(viewPos);
 
     float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
-	float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), 0.0, 1.0);
+	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
 	
 	float density = 0.50;
     float nightDensity = 0.75;
