@@ -147,12 +147,12 @@ vec3 DepthOfField(vec3 color, vec3 viewPos, float z) {
 	#endif
 	
 	if (coc > 0.0 && hand < 0.5) {
-		for(int i = 0; i < 60; i++) {
+		for(int i = 0; i < BLUR_SAMPLES; i++) {
 			vec2 offset = dofOffsets[i] * coc * 0.015 * fovScale * vec2(1.0 / aspectRatio, 1.0);
 			float lod = log2(viewHeight * aspectRatio * coc * fovScale / 320.0);
 			dof += texture2DLod(colortex0, texCoord + offset, lod).rgb;
 		}
-		dof /= 60.0;
+		dof /= BLUR_SAMPLES;
 	}
 	else dof = color;
 	return dof;

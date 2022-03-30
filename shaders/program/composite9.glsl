@@ -46,10 +46,14 @@ void main() {
     gi = NormalAwareBlur(colortex11).rgb;
     #endif
 
-    gi *= ILLUMINATION_STRENGTH * 8.0;
+    gi *= ILLUMINATION_STRENGTH * (1.5 - clamp(length(color), 0.0, 1.0));
 
-    #ifdef NETHER
-    gi *= 0.25;
+
+    #if defined NETHER || defined END
+    gi *= 0.75;
+    #ifdef END
+    gi *= 0.5;
+    #endif
     #endif
 
     color.rgb *= vec3(1.0) + gi;

@@ -546,7 +546,10 @@ value.WATER_PIXEL.0=OFF
 option.DISTANT_BLUR=Distant Blur
 option.DISTANT_BLUR.comment=Blurs far objects.
 option.DISTANT_BLUR_RANGE=Dist. Blur Range
+option.DISTANT_BLUR_RANGE.comment=Higher values make blur appear closer to the camera.
 option.DISTANT_BLUR_STRENGTH=Dist. Blur Strength
+option.BLUR_SAMPLES=Blur Samples
+option.BLUR_SAMPLES.comment=Controls the amount of samples used for DoF and Distant Blur. Higher values decrease performance!
 option.DOF=Depth of Field
 options.DOF.comment=Enables camera focus effect.
 option.DOF_STRENGTH=DoF Strength
@@ -834,6 +837,8 @@ option.WAVING_LIQUID=Liquids
 option.WAVING_LIQUID.comment=Allows water and lava to wave.
 option.WAVING_EXTRA=Extras
 option.WAVING_EXTRA.comment=Allows fire and lantern to wave.
+option.WAVING_AMPLITUDE=Waving Amplidude
+option.WAVING_AMPLITUDE.comment=Adjusts waving strength.
 
 #Curvature
 option.WORLD_CURVATURE=World Curvature

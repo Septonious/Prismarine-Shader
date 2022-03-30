@@ -107,6 +107,7 @@ float GetLuminance(vec3 color) {
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
+#include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
@@ -171,7 +172,7 @@ void main() {
 	#endif
 
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-	float emission = 0.0;
+	float emission = 0.0; float lava = 0.0;
 
 	if (albedo.a > 0.001) {
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
@@ -186,11 +187,11 @@ void main() {
 		float foliage  = float(mat > 0.98 && mat < 1.02);
 		float leaves   = float(mat > 1.98 && mat < 2.02);
 		float candle   = float(mat > 4.98 && mat < 5.02);
-		float lava     = float(mat > 3.98 && mat < 4.02) * 1.5;
+		lava     = float(mat > 3.98 && mat < 4.02);
 
 		#if defined SSGI && defined EMISSIVE_CONCRETE
 		emissive += isConcrete * 1.5;
-		albedo.rgb *= 1.0 + isConcrete * 0.25;
+		albedo.rgb *= 1.0 + isConcrete * 0.5;
 		#endif
 
 		#ifdef INTEGRATED_EMISSION
@@ -380,7 +381,7 @@ void main() {
 	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,6,10 */
 	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[2] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.15 + timeBrightness * 0.60)));
+	gl_FragData[2] = vec4(albedo.rgb, emission);
 	#endif
 
 	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
@@ -388,7 +389,7 @@ void main() {
 	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[3] = vec4(fresnel3, 0.0);
-	gl_FragData[4] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.15 + timeBrightness * 0.60)));
+	gl_FragData[4] = vec4(albedo.rgb, emission);
 	#endif
 }
 

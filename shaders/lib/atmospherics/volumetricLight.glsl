@@ -78,7 +78,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
-				if (depth0 < minDist) shadow *= color * (1.5 - isEyeInWater * 0.75 - sunVisibility * 0.5);
+				if (depth0 < minDist) shadow *= color * (1.0 - isEyeInWater * 0.75);
 				else if (isEyeInWater == 1.0) {
 					shadow *= sqrt(waterColor.rgb) * 128.0 * (0.25 + eBS * 0.75) * (0.1 + pow4(timeBrightness));
 					shadow.b *= 0.7 + sunVisibility * 0.3;
@@ -93,7 +93,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 					float n3da = texture2D(noisetex, npos.xz * 0.00025 + floor(npos.y * 0.15) * 0.25).r;
 					float n3db = texture2D(noisetex, npos.xz * 0.00025 + floor(npos.y * 0.15 + 1.0) * 0.25).r;
 					float noise = mix(n3da, n3db, fract(npos.y * 0.15));
-					noise = sin(noise * 16.0 + frametime * 0.5) * (0.4 + rainStrength * 0.1) + (0.6 - rainStrength * 0.1);
+					noise = sin(noise * 16.0 + frametime * 0.5) * (0.3 + rainStrength * 0.2) + (0.7 - rainStrength * 0.2);
 					shadow *= noise;
 					#endif
 				}

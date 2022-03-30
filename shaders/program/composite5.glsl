@@ -50,7 +50,7 @@ vec3 BloomTile(float lod, vec2 coord, vec2 offset) {
 		bloom /= 256.0;
 	}
 
-	return pow(bloom / 32.0, vec3(0.25));
+	return sqrt(sqrt(bloom)) * 0.25;
 }
 
 //Includes//
@@ -66,10 +66,8 @@ void main() {
 	     blur += BloomTile(3.0, bloomCoord, vec2(0.51     , 0.26  ));
 	     blur += BloomTile(4.0, bloomCoord, vec2(0.645    , 0.26  ));
 	     blur += BloomTile(5.0, bloomCoord, vec2(0.7175   , 0.26  ));
-	     blur += BloomTile(6.0, bloomCoord, vec2(0.645    , 0.3325));
-	     blur += BloomTile(7.0, bloomCoord, vec2(0.670625 , 0.3325));
 		
-		 blur = clamp(blur + (Bayer64(gl_FragCoord.xy) - 0.5) / 384.0, vec3(0.0), vec3(1.0));
+		 blur = clamp(blur + (Bayer64(gl_FragCoord.xy) - 0.5) / 64.0, vec3(0.0), vec3(1.0));
 	#else
 	vec3 blur = texture2D(colortex0, texCoord.xy).rgb;
 	#endif

@@ -94,13 +94,13 @@ void main() {
 		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.5 * timeBrightness);
 		#endif
 
-		vl.rgb *= lightCol * (0.5 + rainStrength * 0.5);
+		vl.rgb *= pow(lightCol, vec3(0.75)) * (0.5 + rainStrength * 0.5);
 		vl.r *= 1.0 - pow2(timeBrightness) * 0.25;
 		vl.b *= (1.2 + timeBrightness * 0.8) * (1.0 - rainStrength * 0.3);
 	} else {
 		vl.rgb *= 0.15;
 	}
-    vl.rgb *= LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor) * scattering * (6.0 - sunVisibility * 5.0);
+    vl.rgb *= LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor) * scattering * (4.0 - sunVisibility * 3.0);
 	#endif
 
 	color += vl;

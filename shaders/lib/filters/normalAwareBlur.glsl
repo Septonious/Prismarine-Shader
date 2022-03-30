@@ -164,10 +164,10 @@ vec3 NormalAwareBlur(sampler2D colortex) {
         float currentDepth = texture2D(depthtex0, texCoord.xy + offset).x;
         float currentDepthLinear = GetLinearDepth(currentDepth);
 
-        float depthDifference = exp2(1.0 - abs(currentDepthLinear - centerDepthLinear));
+        float depthDifference = pow(exp2(1.0 - abs(currentDepthLinear - centerDepthLinear)), 32.0);
         float normalDifference = dot(normal, currentNormal);
 
-        weight *= pow8(clamp(depthDifference * normalDifference, 0.001, 1.0));
+        weight *= pow(clamp(depthDifference * normalDifference, 0.001, 1.0), 8.0);
 
         blur += weight * texture2D(colortex, texCoord + offset).rgb;
         totalWeight += weight;

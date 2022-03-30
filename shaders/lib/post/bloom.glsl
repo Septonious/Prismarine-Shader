@@ -1,4 +1,6 @@
 vec3 GetBloomTile(float lod, vec2 coord, vec2 offset) {
+	float dither = (Bayer64(gl_FragCoord.xy) - 0.5);
+	offset += vec2(dither * pw, dither * ph);
 	float scale = exp2(lod);
 	float resScale = 1.25 * min(360.0, viewHeight) / viewHeight;
 
@@ -14,8 +16,6 @@ void Bloom(inout vec3 color, vec2 coord) {
 	vec3 blur3 = GetBloomTile(3.0, coord, vec2(0.51     , 0.26  ));
 	vec3 blur4 = GetBloomTile(4.0, coord, vec2(0.645    , 0.26  ));
 	vec3 blur5 = GetBloomTile(5.0, coord, vec2(0.7175   , 0.26  ));
-	vec3 blur6 = GetBloomTile(6.0, coord, vec2(0.645    , 0.3325)) * 0.9;
-	vec3 blur7 = GetBloomTile(7.0, coord, vec2(0.670625 , 0.3325)) * 0.7;
 
 	#if BLOOM_RADIUS == 1
 	vec3 blur = blur1 * 0.667;
@@ -27,10 +27,6 @@ void Bloom(inout vec3 color, vec2 coord) {
 	vec3 blur = (blur1 + blur2 + blur3 + blur4) * 0.212;
 	#elif BLOOM_RADIUS == 5
 	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5) * 0.175;
-	#elif BLOOM_RADIUS == 6
-	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6) * 0.151;
-	#elif BLOOM_RADIUS == 7
-	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6 + blur7) * 0.137;
 	#endif
 
 	float strength = BLOOM_STRENGTH;

@@ -100,8 +100,6 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 			cloudGradient * cloud
 		);
 
-		cloudColor = pow(cloudColor, vec3(0.9 + sunVisibility * 0.1 + (rainStrength * moonVisibility * 0.1)));
-
 		#if MC_VERSION >= 11800
 		cloudColor *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
 		#else
@@ -263,7 +261,7 @@ float InterleavedGradientNoise1() {
 }
 
 vec3 DrawNebula(vec3 viewPos) {
-	int samples = 6;
+	int samples = 12;
 
 	float dither = InterleavedGradientNoise1();
 

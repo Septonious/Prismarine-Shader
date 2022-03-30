@@ -95,6 +95,7 @@ float GetLuminance(vec3 color) {
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
+#include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
@@ -314,7 +315,7 @@ void main() {
 	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,3,6,10 */
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[3] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.15 + timeBrightness * 0.60)));
+	gl_FragData[3] = vec4(albedo.rgb, emission);
 	#endif
 
 	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
@@ -322,7 +323,7 @@ void main() {
 	gl_FragData[1] = vec4(smoothness, skyOcclusion, isEmissive, 1.0);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[3] = vec4(fresnel3, 0.0);
-	gl_FragData[4] = vec4(albedo.rgb, emission * (1.0 - lightmap.y * (0.15 + timeBrightness * 0.60)));
+	gl_FragData[4] = vec4(albedo.rgb, emission);
 	#endif
 }
 

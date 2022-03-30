@@ -11,7 +11,7 @@ vec3 GetFogColor(vec3 viewPos) {
     float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
 	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
 	
-	float density = 0.50;
+	float density = 0.75;
     float nightDensity = 0.75;
     float weatherDensity = exp2(1.0);
     
@@ -23,15 +23,7 @@ vec3 GetFogColor(vec3 viewPos) {
 	float ug2 = mix(clamp((cameraPosition.y - 32.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 
 	vec3 skyColor = GetSkyColor(viewPos, false);
-	vec3 fogColor = skyCol;
-
-	#ifdef FOG_PERBIOME
-	fogColor = getBiomeFog(skyCol);
-	#endif
-
-	fogColor = mix(sqrt(skyColor), fogColor, max(timeBrightness - eBS, 0.0) * 0.5);
-
-	vec3 fog = fogColor * (4.0 - timeBrightness) * baseGradient / SKY_I;
+	vec3 fog = skyColor * (4.0 - timeBrightness) * baseGradient / SKY_I;
 
     fog = fog * exposure * sunVisibility * SKY_I * (1.0 + (VoL * 0.5 + 0.5));
 
@@ -63,7 +55,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float density = (0.25 + eBS * 0.75) * altitudeFactor * FOG_DENSITY * (1.0 + rainStrength) * (1.0 - sunVisibility * 0.5);
+	float density = (0.25 + eBS * 0.75) * altitudeFactor * FOG_DENSITY * (1.0 + rainStrength) * (1.0 - sunVisibility * 0.5) * (1.0 - pow2(timeBrightness) * 0.5);
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0), eBS);
@@ -77,13 +69,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3
 	if(isEyeInWater == 0.0){
-		#if MC_VERSION >= 11800
-		float fogOffset = 0.0;
-		#else
-		float fogOffset = 12.0;
-		#endif
-
-		float vanillaFog = 1.0 - (far - (fogFactor + fogOffset)) / (FOG_DENSITY * 0.25 * far);
+		float vanillaFog = 1.0 - (far - fogFactor) / (far * 0.25);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 	
 		if (vanillaFog > 0.0){

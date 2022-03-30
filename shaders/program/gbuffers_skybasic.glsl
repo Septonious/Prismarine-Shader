@@ -109,7 +109,7 @@ vec3 GetSmoke(vec3 viewPos) {
 	float VoU = dot(normalize(viewPos.xyz), upVec);
 
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-	float visibility = sqrt(sqrt(clamp(VoU * 16.0 - 1.0, 0.0, 1.0))) * (1.0 - rainStrength) * (1.0 - sqrt(timeBrightness)) * eBS;
+	float visibility = sqrt(sqrt(clamp(VoU * 10.0 - 1.0, 0.0, 1.0))) * (1.0 - rainStrength) * (1.0 - sunVisibility) * eBS;
 
 	vec3 wpos = mat3(gbufferModelViewInverse) * viewPos;
 	vec2 wind = vec2(frametime, 0.0);
@@ -117,11 +117,10 @@ vec3 GetSmoke(vec3 viewPos) {
 
 	float smokeNoise  = texture2D(noisetex, planeCoord * 0.025).r;
 		  smokeNoise -= texture2D(noisetex, planeCoord * 0.050).r * 0.26;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.300).r * 0.21;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.600).r * 0.17;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.900).r * 0.09;
+		  smokeNoise -= texture2D(noisetex, planeCoord * 0.300).r * 0.22;
+		  smokeNoise -= texture2D(noisetex, planeCoord * 0.600).r * 0.18;
 
-	lightNight *= mix(lightNight, lightNight * vec3(0.3, 1.4, 0.7), smokeNoise);
+	lightNight *= mix(lightNight, lightNight * vec3(0.5, 1.4, 0.7), smokeNoise);
 
 	vec3 smoke = clamp(pow2(smokeNoise), 0.0, 1.0) * lightNight * visibility;
 
@@ -170,7 +169,7 @@ void main() {
     vec3 sunColor = sqrt(mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness));
     vec3 moonColor = sqrt(lightNight) * 1.5;
 
-	RoundSunMoon(albedo, viewPos.xyz, sunColor * 1.5, moonColor);
+	RoundSunMoon(albedo, viewPos.xyz, sunColor * 2.0, moonColor);
 	SunGlare(albedo.rgb, viewPos.xyz, lightCol.rgb);
 	#endif
 
@@ -187,8 +186,7 @@ void main() {
 
 	#ifdef STARS
 	vec3 star = vec3(0.0);
-	DrawStars(star.rgb, viewPos.xyz, 0.2, 0.9, 1.5);
-	DrawStars(star.rgb, viewPos.xyz, 0.35, 1.1, 0.75);
+	DrawStars(star.rgb, viewPos.xyz, 0.25, 0.95, 2.0);
 	#ifdef PLANAR_CLOUDS
 	star *= 1.0 - clamp(cloud.a * 8.0, 0.0, 1.0);
 	#endif

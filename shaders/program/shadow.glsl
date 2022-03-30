@@ -66,7 +66,7 @@ void main() {
 		waterColor.g *= 0.7;
 		waterColor.b *= 1.4;
 		float caustics = getCaustics(position.xyz + cameraPosition.xyz);
-		if (isEyeInWater == 0) albedo.rgb = mix(albedo.rgb, waterColor.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness * 0.75), caustics);
+		if (isEyeInWater == 0) albedo.rgb = mix(waterColor.rgb, waterColor.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness * 0.75), caustics);
 		else albedo.rgb *= caustics * waterColor.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness * 0.75);
 	}
 	#endif

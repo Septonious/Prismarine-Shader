@@ -103,6 +103,7 @@ vec2 GetLightPos() {
 #include "/lib/post/tonemap.glsl"
 
 #ifdef BLOOM
+#include "/lib/util/dither.glsl"
 #include "/lib/post/bloom.glsl"
 #endif
 

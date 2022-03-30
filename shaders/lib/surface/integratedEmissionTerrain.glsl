@@ -7,7 +7,7 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
     if (mat > 99.9 && mat < 100.1) { // Emissive Ores
         float stoneDif = max(abs(albedo.r - albedo.g), max(abs(albedo.r - albedo.b), abs(albedo.g - albedo.b)));
         float ore = max(max(stoneDif - 0.175, 0.0), 0.0);
-        newEmissive = sqrt(ore);
+        newEmissive = ore * 2.0;
     } 
 	#endif
 	if (mat > 100.9 && mat < 101.1) { // Crying Obsidian and Respawn Anchor
