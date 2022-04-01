@@ -20,7 +20,7 @@ uniform sampler2D texture;
 //Program//
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
-	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 0.25;
+	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 0.5;
 
 	#if ALPHA_BLEND == 0
 	albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));

@@ -30,7 +30,11 @@ uniform float shadowFade, voidFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
 
-uniform ivec2 eyeBrightnessSmooth, atlasSize;
+uniform ivec2 eyeBrightnessSmooth;
+
+#ifdef INTEGRATED_EMISSION
+uniform ivec2 atlasSize;
+#endif
 
 uniform vec3 cameraPosition;
 
@@ -107,16 +111,41 @@ void main() {
 		albedo.rgb = vec3(0.35);
 		#endif
 
+		float emission = 0.0;
 		float NoL = 1.0;
-
 		float NoU = clamp(dot(normal, upVec), -1.0, 1.0);
 		float NoE = clamp(dot(normal, eastVec), -1.0, 1.0);
 		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
 			  vanillaDiffuse*= vanillaDiffuse;
 		
+		#ifdef INTEGRATED_EMISSION // almost entirely stolen from complementary, blame me now
+			if (atlasSize.x < 900.0) { // We don't want to detect particles from the block atlas
+				float lengthAlbedo = length(albedo.rgb);
+				vec3 pos = worldPos + cameraPosition;
+
+				if (albedo.b > 1.15 * (albedo.r + albedo.g) && albedo.g > albedo.r * 1.25 && albedo.g < 0.425 && albedo.b > 0.75) // Water Particle
+					albedo.rgb = vec3(0.7, 0.9, 1.2) * 2.0 * lengthAlbedo;
+
+				else if (albedo.r == albedo.g && albedo.r - 0.5 * albedo.b < 0.06) { // Underwater Particle
+					if (isEyeInWater == 1) {
+						albedo.rgb = vec3(0.7, 0.9, 1.2) * 2.0 * lengthAlbedo;
+						if (fract(pos.r + pos.g + pos.b) > 0.2) discard;
+					}
+				}
+
+				else if (max(abs(albedo.r - albedo.b), abs(albedo.b - albedo.g)) < 0.001) { // Grayscale Particles
+					if (lengthAlbedo > 0.5 && color.g < 0.5 && color.b > color.r * 1.1 && color.r > 0.3) // Ender Particle, Crying Obsidian Drop
+						emission = max(pow(albedo.r, 5.0), 0.1);
+					if (lengthAlbedo > 0.5 && color.g < 0.5 && color.r > (color.g + color.b) * 3.0) // Redstone Particle
+						lightmap = vec2(0.0);
+						emission = max(pow(albedo.r, 5.0), 0.1);
+				}
+			}
+		#endif
+
 		vec3 shadow = vec3(0.0);
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, 1.0, NoL, 1.0,
-				    1.0, float(length(albedo.rgb) > 0.99) * 0.25, 0.0);
+				    1.0, emission, 0.0);
 
 		#if defined FOG && MC_VERSION >= 11500
 		Fog(albedo.rgb, viewPos);
