@@ -47,6 +47,9 @@ float getCloudSample(vec3 pos){
 	return clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 }
 
+vec3 cloudLightCol = mix(lightCol * lightCol, lightCol, moonVisibility);
+vec3 cloudAmbientCol = ambientCol * (1.0 - moonVisibility * 0.9) * (1.0 - length(ambientCol));
+
 vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 translucent){
 	vec4 wpos = vec4(0.0);
 	vec4 finalColor = vec4(0.0);
@@ -96,8 +99,8 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 				//Find the lower and upper parts of the cloud
 				float sampleHeightFactor = smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y);
 
-				vec3 densityLighting = mix(lightCol * lightCol, ambientCol * max(1.0 - moonVisibility + rainStrength * 0.25, 0.25), noise);
-				vec3 heightLighting = mix(lightCol * lightCol, ambientCol * max(1.0 - moonVisibility + rainStrength * 0.25, 0.25), sampleHeightFactor);
+				vec3 densityLighting = mix(cloudLightCol, cloudAmbientCol, noise);
+				vec3 heightLighting = mix(cloudLightCol, cloudAmbientCol, sampleHeightFactor);
 				vec3 cloudLighting = sqrt(densityLighting * heightLighting) * scattering;
 
 				vec4 cloudsColor = vec4(cloudLighting, noise);

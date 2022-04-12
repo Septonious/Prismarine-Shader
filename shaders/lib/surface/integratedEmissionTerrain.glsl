@@ -48,9 +48,9 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 	} else if (mat > 113.9 && mat < 114.1) { // Glow berries
 		newEmissive = float(albedo.r > 0.5) * 0.5;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches
-		newEmissive = float(lengthAlbedo > 0.99) * 0.25;
+		newEmissive = float(lengthAlbedo > 0.99) * 0.5;
 	} else if (mat > 115.9 && mat < 116.1) { // Furnaces
-		newEmissive = float(albedo.r > 0.8 || (albedo.r > 0.6 && albedo.b < 0.5)) * 0.25;
+		newEmissive = float(albedo.r > 0.8 || (albedo.r > 0.6 && albedo.b < 0.5)) * 0.1;
 	} else if (mat > 116.9 && mat < 117.1) { // Chorus
 		newEmissive = float(albedo.r > albedo.b || albedo.r > albedo.g) * float(albedo.b > 0.575) * 0.25;
 	} else if (mat > 117.9 && mat < 118.1) { // Enchanting Table
@@ -64,7 +64,7 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 	} else if (mat > 122.9 && mat < 123.1) { // Sculks
 		newEmissive = float(lengthAlbedo > 0.05 && albedo.r < 0.25) * 0.1;
 	} else if (mat > 123.9 && mat < 124.1) { // Redstone Lamp
-		newEmissive = 0.05 + float(lengthAlbedo > 0.75) * 0.25;
+		newEmissive = 0.05 + float(lengthAlbedo > 0.75) * 0.5;
 	} else if (mat > 124.9 && mat < 125.1) { // Sea Lantern
 		newEmissive = float(lengthAlbedo > 0.95) * 0.2 + float(albedo.g > 0.4) * 0.05;
 	} else if (mat > 125.9 && mat < 126.1) { // Nether Wart

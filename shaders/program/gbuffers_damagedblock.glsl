@@ -29,6 +29,11 @@ void main() {
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;
+
+	#ifdef SSGI
+	/* DRAWBUFFERS:6 */
+	gl_FragData[1] = vec4(0.0);
+	#endif
 }
 
 #endif

@@ -472,7 +472,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
 void getSubsurfaceScatteringMaterials(inout float mat) {
-	if (mc_Entity.x == 500 || mc_Entity.x == 29999) mat = 500.0;
+	if (mc_Entity.x == 29999) mat = 500.0;
 	if (mc_Entity.x == 501) mat = 501.0;
 	if (mc_Entity.x == 502) mat = 502.0;
 	if (mc_Entity.x == 503) mat = 503.0;

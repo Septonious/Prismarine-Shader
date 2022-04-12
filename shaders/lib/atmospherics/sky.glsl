@@ -29,10 +29,10 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     vec3 newSkyColor = skyCol;
 
 	#ifdef FOG_PERBIOME
-	newSkyColor = getBiomeFog(skyCol);
+	newSkyColor = getBiomeFog(newSkyColor);
 	#endif
 
-    vec3 sky = newSkyColor * baseGradient / (SKY_I * SKY_I);
+    vec3 sky = newSkyColor * (0.75 + timeBrightness * 0.25) * baseGradient / (SKY_I * SKY_I);
     #ifdef SKY_VANILLA
     sky = mix(sky, fogCol * baseGradient, pow(1.0 - max(VoU, 0.0), 4.0));
     #endif
@@ -43,12 +43,12 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     float horizonMix = pow(1.0 - abs(VoU), 2.5) * 0.4 * (1.0 - timeBrightness * 0.4);
     float lightMix = (1.0 - (1.0 - sunMix) * (1.0 - horizonMix));
 
-    vec3 lightSky = pow(lightSun, vec3(3.0 - sunVisibility)) * baseGradient;
+    vec3 lightSky = pow(lightSun, vec3(3.0 - sunVisibility)) * baseGradient * (1.0 - clamp(TONEMAP_WHITE_CURVE, 0.0, 1.0) * 0.5);
     lightSky = lightSky / (1.0 + lightSky * rainStrength);
 
     sky = mix(
         sqrt(sky * (1.0 - lightMix)), 
-        sqrt(lightSky), 
+        pow(lightSky, vec3(0.75)), 
         lightMix
     );
     sky *= sky;

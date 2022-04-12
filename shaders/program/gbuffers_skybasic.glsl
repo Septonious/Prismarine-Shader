@@ -188,7 +188,7 @@ void main() {
 	vec3 star = vec3(0.0);
 	DrawStars(star.rgb, viewPos.xyz, 0.25, 0.95, 2.0);
 	#ifdef PLANAR_CLOUDS
-	star *= 1.0 - clamp(cloud.a * 8.0, 0.0, 1.0);
+	star *= 1.0 - clamp(cloud.a * 16.0, 0.0, 1.0);
 	#endif
 	albedo.rgb += star;
 	#endif
@@ -202,6 +202,11 @@ void main() {
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
+
+	#ifdef SSGI
+	/* DRAWBUFFERS:06 */
+	gl_FragData[1] = vec4(0.0);
+	#endif
 }
 
 #endif

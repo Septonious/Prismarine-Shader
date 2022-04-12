@@ -1,6 +1,4 @@
-vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos) {
-    float dither = InterleavedGradientNoiseVL();
-
+vec3 GetVolumetricSmoke(float z0, float z1, vec3 viewPos, float dither) {
 	#ifdef TAA
 	dither = fract(dither + frameCounter / 32.0);
 	#endif

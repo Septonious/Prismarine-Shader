@@ -91,7 +91,8 @@ float GetLinearDepth(float depth) {
 //Program//
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * color;
-
+	float emission = 0.0;
+	
 	if (albedo.a > 0.001) {
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		vec3 viewPos = ToNDC(screenPos);
@@ -111,7 +112,6 @@ void main() {
 		albedo.rgb = vec3(0.35);
 		#endif
 
-		float emission = 0.0;
 		float NoL = 1.0;
 		float NoU = clamp(dot(normal, upVec), -1.0, 1.0);
 		float NoE = clamp(dot(normal, eastVec), -1.0, 1.0);
@@ -123,23 +123,17 @@ void main() {
 				float lengthAlbedo = length(albedo.rgb);
 				vec3 pos = worldPos + cameraPosition;
 
-				if (albedo.b > 1.15 * (albedo.r + albedo.g) && albedo.g > albedo.r * 1.25 && albedo.g < 0.425 && albedo.b > 0.75) // Water Particle
-					albedo.rgb = vec3(0.7, 0.9, 1.2) * 2.0 * lengthAlbedo;
-
-				else if (albedo.r == albedo.g && albedo.r - 0.5 * albedo.b < 0.06) { // Underwater Particle
+				if (albedo.r == albedo.g && albedo.r - 0.5 * albedo.b < 0.06) { // Underwater Particle
 					if (isEyeInWater == 1) {
 						albedo.rgb = vec3(0.7, 0.9, 1.2) * 2.0 * lengthAlbedo;
 						if (fract(pos.r + pos.g + pos.b) > 0.2) discard;
 					}
 				}
 
-				else if (max(abs(albedo.r - albedo.b), abs(albedo.b - albedo.g)) < 0.001) { // Grayscale Particles
-					if (lengthAlbedo > 0.5 && color.g < 0.5 && color.b > color.r * 1.1 && color.r > 0.3) // Ender Particle, Crying Obsidian Drop
-						emission = max(pow(albedo.r, 5.0), 0.1);
-					if (lengthAlbedo > 0.5 && color.g < 0.5 && color.r > (color.g + color.b) * 3.0) // Redstone Particle
-						lightmap = vec2(0.0);
-						emission = max(pow(albedo.r, 5.0), 0.1);
-				}
+				if (albedo.r > 0.15 && albedo.b > 0.15 && albedo.g < 0.5) // Ender Particle, Crying Obsidian Drop
+					emission = 0.5;
+				if (lengthAlbedo > 0.5 && albedo.r > 0.75 && albedo.g < 0.25) // Redstone Particle
+					emission = 1.0;
 			}
 		#endif
 
@@ -173,10 +167,10 @@ void main() {
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
 
-	#ifdef SSGI
+	#if defined SSGI && !defined ADVANCED_MATERIALS && !defined REFLECTION_SPECULAR
 	/* RENDERTARGETS:0,6,10 */
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
-	gl_FragData[2] = vec4(albedo.rgb, float(length(albedo.rgb) > 0.99));
+	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 0.0);
+	gl_FragData[2] = vec4(albedo.rgb, emission);
 	#endif
 
 	#ifdef ADVANCED_MATERIALS

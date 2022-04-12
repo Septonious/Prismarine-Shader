@@ -118,7 +118,7 @@ void DenseFog(inout vec3 color, vec3 viewPos) {
 	vec3 denseFogColor0 = denseFogColor[isEyeInWater - 2];
 
 	#ifdef OVERWORLD
-	denseFogColor0 *- clamp(timeBrightness, 0.1, 1.0);
+	denseFogColor0 *- clamp(timeBrightness, 0.01, 1.0);
 	#endif
 
 	color = mix(color, denseFogColor0, fog);

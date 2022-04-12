@@ -24,7 +24,7 @@ uniform sampler2D noisetex;
 //Program//
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
-	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 4.0;
+	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 	
 	#ifdef WHITE_WORLD
 	albedo.rgb = vec3(2.0);
@@ -35,14 +35,13 @@ void main() {
 	#endif
 
 	#ifdef CUSTOM_BEACON_BEAM
-	float noise = texture2D(noisetex, texCoord * 0.03).r * 0.1;
-		  noise+= texture2D(noisetex, texCoord * 0.02).r * 0.2;
-		  noise+= texture2D(noisetex, texCoord * 0.01).r * 0.3;
+	float noise = texture2D(noisetex, texCoord * 0.03).r * 0.3;
+		  noise+= texture2D(noisetex, texCoord * 0.02).r * 0.4;
+		  noise+= texture2D(noisetex, texCoord * 0.01).r * 0.5;
 		
-	noise = min(max(0.0, noise * noise), 1.0);
+	noise = clamp(noise, 0.0, 1.0);
 
-	albedo.a -= noise;
-	albedo.rgb += noise;
+	albedo.rgb *= 1.4 + noise;
 	#endif
     
     /* DRAWBUFFERS:0 */

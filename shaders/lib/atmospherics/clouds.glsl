@@ -1,5 +1,7 @@
-void erodeCoord(inout vec2 coord, in float currentStep, in float erosionStrength){
-	coord += cos(mix(vec2(cos(currentStep), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.0), sin(currentStep * 4.00)), currentStep) * erosionStrength);
+void erodeCoord(inout vec2 coord, int i, float dither, in float erosionStrength){
+		float ang1 = (i + frameTimeCounter * 0.025) * 2.0;
+		float ang2 = ang1 + 2.0;
+		coord += mix(vec2(cos(ang1), sin(ang1)), vec2(cos(ang2), sin(ang2)), dither * 0.25 + 0.25) * erosionStrength;
 }
 
 #if defined PLANAR_CLOUDS && defined OVERWORLD
@@ -38,7 +40,7 @@ float CloudNoise(vec2 coord, vec2 wind){
 
 float CloudCoverage(float noise, float VoU, float coverage){
 	float noiseMix = mix(noise, 21.0, 0.3 * rainStrength);
-	float noiseFade = clamp(sqrt(VoU * 30.0), 0.0, 1.0);
+	float noiseFade = clamp(sqrt(VoU * 36.0), 0.0, 1.0);
 	float noiseCoverage = (coverage * coverage) + CLOUD_AMOUNT;
 	float multiplier = 1.0 - 0.4 * rainStrength;
 
@@ -74,7 +76,9 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * CLOUD_VERTICAL_THICKNESS) / wpos.y) * 0.005;
 
 			vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
-				 erodeCoord(coord, i + dither, 0.002 * CLOUD_OCTAVES);
+				#ifndef BLOCKY_CLOUDS
+				 erodeCoord(coord, i, dither, 0.0025);
+				#endif
 				#ifdef BLOCKY_CLOUDS
 				coord = floor(coord * 8.0);
 				#endif
@@ -110,7 +114,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 		cloud *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 		#endif
 
-		cloud *= sqrt(sqrt(clamp(VoU * 20.0 - 1.0, 0.0, 1.0)));
+		cloud *= sqrt(sqrt(clamp(VoU * 24.0 - 1.0, 0.0, 1.0)));
 	}
 
 	return vec4(cloudColor * colorMultiplier, cloud * cloud * cloudOpacity);
@@ -288,8 +292,7 @@ vec3 DrawNebula(vec3 viewPos) {
 		vec2 coord = (cameraPosition.xz * 0.000005 + planeCoord.xz);
 		coord += vec2(coord.y, -coord.x) * 1.00 * NEBULA_DISTORTION;
 
-		erodeCoord(coord, currentStep, 0.1);
-		erodeCoord(coord, currentStep, 0.2);
+		erodeCoord(coord, i, dither, 0.001);
 
 		float noise = nebulaSample(coord, wind, VoU);
 			 noise *= texture2D(noisetex, coord * 0.25 + wind * 0.25).r;

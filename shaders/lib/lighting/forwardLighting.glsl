@@ -40,7 +40,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
 	auroraVisibility *= isCold * isCold;
 	#endif
 
-    float noise1 = texture2D(noisetex, (worldPos.xz + cameraPosition.xz) * 0.00005).r * 0.65;
+    float noise1 = texture2D(noisetex, (worldPos.xz + cameraPosition.xz) * 0.00005).r * 0.25;
     auroraVisibility *= noise1;
 
     vec3 auroraLowColSqrt1 = vec3(AURORA_LR, AURORA_LG, AURORA_LB) * AURORA_LI / 255.0;

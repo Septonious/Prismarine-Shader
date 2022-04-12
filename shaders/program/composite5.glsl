@@ -13,7 +13,7 @@ https://bitslablab.com
 varying vec2 texCoord;
 
 //Uniforms//
-uniform float viewHeight, aspectRatio;
+uniform float viewHeight, viewWidth;
 
 uniform sampler2D colortex0;
 
@@ -22,52 +22,48 @@ uniform sampler2D colortex0;
 const bool colortex0MipmapEnabled = true;
 
 //Common Variables//
-float ph = 0.8 / min(360.0, viewHeight);
-float pw = ph / aspectRatio;
+float ph = 1.0 / viewHeight;
+float pw = 1.0 / viewWidth;
 
-float weight[5] = float[5](1.0, 4.0, 6.0, 4.0, 1.0);
+float weight[7] = float[7](1.0, 6.0, 15.0, 20.0, 15.0, 6.0, 1.0);
 
 //Common Functions//
 vec3 BloomTile(float lod, vec2 coord, vec2 offset) {
-	vec3 bloom = vec3(0.0), temp = vec3(0.0);
+	vec3 bloom = vec3(0.0);
 	float scale = exp2(lod);
 	coord = (coord - offset) * scale;
 	float padding = 0.5 + 0.005 * scale;
 
 	if (abs(coord.x - 0.5) < padding && abs(coord.y - 0.5) < padding) {
-		for(int i = 0; i < 5; i++) {
-			for(int j = 0; j < 5; j++) {
-				float wg = weight[i] * weight[j];
+		for(int i = -3; i < 3; i++) {
+			for(int j = -3; j < 3; j++) {
+				float wg = weight[i + 3] * weight[j + 3];
 				#ifdef ANAMORPHIC_BLOOM
 				vec2 pixelOffset = vec2((float(i) - 2.0) * pw, 0.0);
 				#else
-				vec2 pixelOffset = vec2((float(i) - 2.0) * pw, (float(j) - 2.0) * ph);
+				vec2 pixelOffset = vec2(i * pw, j * ph);
 				#endif
 				vec2 sampleCoord = coord + pixelOffset * scale;
 				bloom += texture2D(colortex0, sampleCoord).rgb * wg;
 			}
 		}
-		bloom /= 256.0;
+		bloom /= 4096.0;
 	}
 
-	return sqrt(sqrt(bloom)) * 0.25;
+	return pow(bloom / 128.0, vec3(0.25));
 }
-
-//Includes//
-#include "/lib/util/dither.glsl"
 #endif
 
 //Program//
 void main() {
 	#ifdef BLOOM
-	vec2 bloomCoord = texCoord * viewHeight * 0.8 / min(360.0, viewHeight);
-	vec3 blur =  BloomTile(1.0, bloomCoord, vec2(0.0      , 0.0   ));
-	     blur += BloomTile(2.0, bloomCoord, vec2(0.51     , 0.0   ));
-	     blur += BloomTile(3.0, bloomCoord, vec2(0.51     , 0.26  ));
-	     blur += BloomTile(4.0, bloomCoord, vec2(0.645    , 0.26  ));
-	     blur += BloomTile(5.0, bloomCoord, vec2(0.7175   , 0.26  ));
+	vec3 blur =  BloomTile(1.0, texCoord, vec2(0.0      , 0.0   ));
+	     blur += BloomTile(2.0, texCoord, vec2(0.51     , 0.0   ));
+	     blur += BloomTile(3.0, texCoord, vec2(0.51     , 0.26  ));
+	     blur += BloomTile(4.0, texCoord, vec2(0.645    , 0.26  ));
+	     blur += BloomTile(5.0, texCoord, vec2(0.7175   , 0.26  ));
 		
-		 blur = clamp(blur + (Bayer64(gl_FragCoord.xy) - 0.5) / 64.0, vec3(0.0), vec3(1.0));
+		 blur = clamp(blur, vec3(0.0), vec3(1.0));
 	#else
 	vec3 blur = texture2D(colortex0, texCoord.xy).rgb;
 	#endif

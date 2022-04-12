@@ -87,7 +87,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
 #include "/lib/atmospherics/stuffForVolumetrics.glsl"
-#include "/lib/util/dither.glsl"
+#include "/lib/util/interleavedGradientNoise.glsl"
 #endif
 
 #ifdef VOLUMETRIC_CLOUDS
@@ -119,7 +119,7 @@ void main() {
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
     vec4 translucent = texture2D(colortex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION));
 
-	float dither = InterleavedGradientNoiseVL();
+	float dither = IGN(ivec2(gl_FragCoord.xy), 0);
 	float z0Scaled = texture2D(depthtex0, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION)).r;
 	float z1Scaled = texture2D(depthtex1, texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION)).r;
 
@@ -137,7 +137,7 @@ void main() {
 	
 	//Nether & End Smoke
 	#if defined NETHER_SMOKE || defined END_SMOKE
-	vl += GetVolumetricSmoke(z0Scaled, z1Scaled, viewPosScaled.xyz);
+	vl += GetVolumetricSmoke(z0Scaled, z1Scaled, viewPosScaled.xyz, dither);
 	#endif
 
 	//Volumetric Clouds

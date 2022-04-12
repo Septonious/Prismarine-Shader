@@ -31,7 +31,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	#ifdef OVERWORLD
 	float VoL = dot(normalize(viewPos.xyz), sunVec);
 	float visibility = (VoL * 0.5 + 0.5) * (1.0 - timeBrightness * eBS * 0.75 * (1.0 - rainStrength));
-	visibility = visibility + float(isEyeInWater == 1);
+	visibility = visibility * (1.0 - float(cameraPosition.y < 50.0) * (1.0 - eBS)) + float(isEyeInWater == 1);
 	#endif
 
 	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
@@ -88,6 +88,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 					vec3 fogPosition = worldposition.xyz + cameraPosition.xyz;
 					float worldHeightFactor = 1.0 - clamp(sqrt(fogPosition.y * 0.001 * LIGHTSHAFT_HEIGHT), 0.0, 1.0);
 					shadow *= worldHeightFactor;
+					
 					#ifdef LIGHTSHAFT_CLOUDY_NOISE
 					vec3 npos = fogPosition * 0.75 + vec3(frametime, 0, 0);
 					float n3da = texture2D(noisetex, npos.xz * 0.00025 + floor(npos.y * 0.15) * 0.25).r;

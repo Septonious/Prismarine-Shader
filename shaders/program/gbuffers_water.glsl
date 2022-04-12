@@ -430,8 +430,8 @@ void main() {
 
 			vec2 wind = vec2(0.0, frametime * 0.1);
 
-			float portal = texture2D(noisetex, portalCoord * 0.25 + wind * 0.03).r * 0.1;
-				  portal+= texture2D(noisetex, portalCoord * 0.15 + wind * 0.02).r * 0.2;
+			float portal = texture2D(noisetex, portalCoord * 0.2 + wind * 0.03).r * 0.1;
+				  portal+= texture2D(noisetex, portalCoord * 0.1 + wind * 0.02).r * 0.2;
 				  portal+= texture2D(noisetex, portalCoord * 0.05 + wind * 0.01).r * 0.3;
 			
 			albedo.rgb = portal * portal * vec3(0.75, 0.25, 1.5);

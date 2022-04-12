@@ -104,7 +104,7 @@ void main() {
 
 	#ifdef OVERWORLD
 	albedo *= color;
-	albedo.rgb = pow(albedo.rgb,vec3(2.2)) * SKYBOX_BRIGHTNESS * albedo.a;
+	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * SKYBOX_BRIGHTNESS * albedo.a;
 
 	#ifdef ROUND_SUN_MOON
 	if (renderStage == MC_RENDER_STAGE_SUN || renderStage == MC_RENDER_STAGE_MOON) {
@@ -150,6 +150,11 @@ void main() {
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;
+
+	#ifdef SSGI
+	/* DRAWBUFFERS:6 */
+	gl_FragData[1] = vec4(0.0);
+	#endif
 }
 
 #endif
