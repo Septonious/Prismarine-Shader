@@ -175,11 +175,6 @@ void main() {
 		getIntegratedEmission(emission, lightmap, albedo);
 		#endif
 
-		#ifdef ENTITY_HIGHLIGHT
-		emission = 0.75;
-		albedo.rgb *= albedo.rgb;
-		#endif
-
 		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);

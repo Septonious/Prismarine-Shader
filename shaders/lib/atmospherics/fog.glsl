@@ -42,6 +42,8 @@ vec3 GetFogColor(vec3 viewPos) {
 }
 #endif
 
+uniform sampler2D colortex9;
+
 void NormalFog(inout vec3 color, vec3 viewPos) {
 	vec4 worldPos = gbufferModelViewInverse * vec4(viewPos, 1.0);
 	worldPos.xyz /= worldPos.w;
@@ -73,7 +75,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 	
 		if (vanillaFog > 0.0){
-			vec3 vanillaFogColor = GetSkyColor(viewPos, false);
+			vec3 vanillaFogColor = texture2D(colortex9, texCoord).rgb;
 			vanillaFogColor *= 1.0 + nightVision;
 
 			fogColor *= fog;

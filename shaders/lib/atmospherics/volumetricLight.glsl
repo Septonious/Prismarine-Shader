@@ -87,7 +87,6 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 				if (isEyeInWater == 0){
 					vec3 fogPosition = worldposition.xyz + cameraPosition.xyz;
 					float worldHeightFactor = 1.0 - clamp(sqrt(fogPosition.y * 0.001 * LIGHTSHAFT_HEIGHT), 0.0, 1.0);
-					shadow *= worldHeightFactor;
 					
 					#ifdef LIGHTSHAFT_CLOUDY_NOISE
 					vec3 npos = fogPosition * 0.75 + vec3(frametime, 0, 0);
@@ -96,7 +95,10 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 					float noise = mix(n3da, n3db, fract(npos.y * 0.15));
 					noise = sin(noise * 16.0 + frametime * 0.5) * (0.3 + rainStrength * 0.2) + (0.7 - rainStrength * 0.2);
 					shadow *= noise;
+					worldHeightFactor *= noise + 1.0;
 					#endif
+
+					shadow *= worldHeightFactor;
 				}
 
 				vl += shadow;

@@ -90,11 +90,11 @@ void main() {
 	float scattering = 1.0 + pow4(VoL) * 2.0;
 
 	if (isEyeInWater != 1.0){
-		#ifdef FOG_PERBIOME
+		#if defined FOG_PERBIOME && defined WEATHER_PERBIOME
 		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.5 * timeBrightness);
 		#endif
 
-		vl.rgb *= pow(lightCol, vec3(0.75)) * (0.5 + rainStrength * 0.5);
+		vl.rgb *= pow(lightCol, vec3(0.75)) * 0.5;
 		vl.r *= 1.0 - pow2(timeBrightness) * 0.25;
 		vl.b *= (1.0 + timeBrightness) * (1.0 - rainStrength * 0.2);
 	} else {

@@ -200,12 +200,13 @@ void main() {
 	albedo.rgb = albedo.rgb + dither / vec3(64.0);
 	#endif
 	
-    /* DRAWBUFFERS:0 */
+    /* DRAWBUFFERS:09 */
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
+	gl_FragData[1] = vec4(albedo, 1.0 - star);
 
 	#ifdef SSGI
-	/* DRAWBUFFERS:06 */
-	gl_FragData[1] = vec4(0.0);
+	/* DRAWBUFFERS:096 */
+	gl_FragData[2] = vec4(0.0);
 	#endif
 }
 

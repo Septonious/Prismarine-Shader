@@ -28,7 +28,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     vec3 newSkyColor = skyCol;
 
-	#ifdef FOG_PERBIOME
+	#if defined FOG_PERBIOME && defined WEATHER_PERBIOME
 	newSkyColor = getBiomeFog(newSkyColor);
 	#endif
 

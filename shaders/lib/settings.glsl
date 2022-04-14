@@ -81,8 +81,8 @@ Please don't edit anything from Undefine section and onwards.
 #define WATER_LIGHTSHAFTS
 #define LIGHTSHAFT_CLOUDY_NOISE
 #define LIGHTSHAFT_SAMPLES 6 //[1 2 3 4 5 6 7 8]
-#define LIGHTSHAFT_MAX_DISTANCE 512.0 //[128.0 256.0 512.0 1024.0]
-#define LIGHTSHAFT_MIN_DISTANCE 12.0 //[1.0 2.0 4.0 8.0 12.0 16.0 24.0]
+#define LIGHTSHAFT_MAX_DISTANCE 128.0 //[128.0 256.0 512.0 1024.0]
+#define LIGHTSHAFT_MIN_DISTANCE 16.0 //[1.0 2.0 4.0 8.0 12.0 16.0 24.0]
 #define LIGHTSHAFT_HEIGHT 8 //[10 9 8 7 6 5 4 3 2 1]
 
 #define VCLOUDS_OCTAVES 3 //[1 2 3 4 5]
@@ -544,6 +544,10 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 
 
 //yes//
+#ifndef WEATHER_PERBIOME
+#undef FOG_PERBIOME
+#endif
+
 #ifdef DENOISE
 #endif
 

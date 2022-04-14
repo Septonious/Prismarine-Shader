@@ -77,7 +77,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 
 			vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
 				#ifndef BLOCKY_CLOUDS
-				 erodeCoord(coord, i, dither, 0.0025);
+				 erodeCoord(coord, i, dither, 0.005);
 				#endif
 				#ifdef BLOCKY_CLOUDS
 				coord = floor(coord * 8.0);
