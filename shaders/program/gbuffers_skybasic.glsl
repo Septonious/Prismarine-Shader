@@ -91,7 +91,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	visibility *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
 	#endif
 
-	color += lightCol * visibility * (0.5 + 0.5 * isEyeInWater);
+	color += lightCol * visibility * (0.25 + 0.75 * isEyeInWater);
 }
 
 //Includes//
@@ -188,9 +188,21 @@ void main() {
 	vec3 star = vec3(0.0);
 	DrawStars(star.rgb, viewPos.xyz, 0.25, 0.95, 2.0);
 	#ifdef PLANAR_CLOUDS
-	star *= 1.0 - clamp(cloud.a * 16.0, 0.0, 1.0);
+	star *= 1.0 - float(cloud.a > 0.0);
 	#endif
 	albedo.rgb += star;
+	#endif
+
+    #ifdef UNDERGROUND_SKY
+    float ug = mix(clamp((cameraPosition.y - 64.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+    albedo.rgb = mix(minLightCol * 0.125, albedo.rgb, ug);
+    #endif
+
+    // sky *= voidFade;
+	#if MC_VERSION >= 11800
+	albedo.rgb *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
+	#else
+	albedo.rgb *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
 	#endif
 
 	albedo.rgb *= 1.0 + nightVision;
@@ -204,7 +216,7 @@ void main() {
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
 	gl_FragData[1] = vec4(albedo, 1.0 - star);
 
-	#ifdef SSGI
+	#ifdef SSPT
 	/* DRAWBUFFERS:096 */
 	gl_FragData[2] = vec4(0.0);
 	#endif

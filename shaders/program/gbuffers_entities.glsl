@@ -108,7 +108,7 @@ float GetLuminance(vec3 color) {
 #include "/lib/surface/integratedEmissionEntities.glsl"
 #endif
 
-#if defined ADVANCED_MATERIALS || defined SSGI
+#if defined ADVANCED_MATERIALS || defined SSPT
 #include "/lib/util/encode.glsl"
 #endif
 
@@ -307,13 +307,13 @@ void main() {
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
 
-	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
+	#if defined SSPT && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,3,6,10 */
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[3] = vec4(albedo.rgb, emission);
 	#endif
 
-	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
+	#if defined SSPT && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,3,6,7,10 */
 	gl_FragData[1] = vec4(smoothness, skyOcclusion, isEmissive, 1.0);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);

@@ -21,10 +21,6 @@ float getTextureNoise(vec3 pos){
 	pos *= 0.30;
 	pos.xz *= 0.20;
 
-	#ifdef END
-	pos.xz *= 0.5;
-	#endif
-
 	vec3 u = floor(pos);
 	vec3 v = fract(pos);
 	v = v * v * (3.0 - 2.0 * v);
@@ -41,10 +37,10 @@ float getTextureNoise(vec3 pos){
 float getFBM(vec3 pos, vec3 wind){
 	pos *= SMOKE_FREQUENCY;
 
-	float noise = getTextureNoise(pos * 1.000 - wind * 0.2);
-	      noise+= getTextureNoise(pos * 0.500 + wind * 0.3);
-          noise+= getTextureNoise(pos * 0.250 - wind * 0.1);
-          noise+= getTextureNoise(pos * 0.125 + wind * 0.4);
+	float noise = getTextureNoise(pos * 1.000 - wind * 0.2) * 0.8;
+	      noise+= getTextureNoise(pos * 0.500 + wind * 0.3) * 0.9;
+          noise+= getTextureNoise(pos * 0.250 - wind * 0.1) * 1.0;
+          noise+= getTextureNoise(pos * 0.125 + wind * 0.4) * 1.1;
 
 	return noise;
 }
@@ -53,27 +49,10 @@ float getFogSample(vec3 pos, float height, float verticalThickness, float thickn
 	float sampleHeight = pow(abs(height - pos.y) / verticalThickness, 2.0);
 	vec3 wind = vec3(frametime * SMOKE_SPEED, 0.0, 0.0);
 
-	#ifdef OVERWORLD
-	wind *= 0.25;
-	#endif
-
-	#ifdef NETHER
-	wind *= 1.5;
-	#endif
-
-	pos *= 0.1;
-
-	#ifdef END
-	pos *= 3.0;
-	#endif
-
-	#ifdef NETHER
-	pos *= 4.0;
-	#endif
+	pos *= 0.25;
 
 	float noise = getFBM(pos, wind);
 	noise *= thicknessMult;
-
 	noise = clamp(noise * 0.6 - (1.0 + sampleHeight), 0.0, 1.0);
 
 	return noise;

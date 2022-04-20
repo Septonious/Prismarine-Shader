@@ -1,42 +1,29 @@
 #ifdef OVERWORLD
-#if MC_VERSION >= 11800
-float altitudeFactor = clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
-#else
-float altitudeFactor = clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
-#endif
-
 vec3 GetFogColor(vec3 viewPos) {
 	vec3 nViewPos = normalize(viewPos);
 
-    float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
+    float VoU = -(clamp(dot(nViewPos, upVec), -1.0, 1.0) * 0.5 + 0.5);
 	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
-	
-	float density = 0.75;
-    float nightDensity = 0.75;
-    float weatherDensity = exp2(1.0);
     
     float exposure = exp2(timeBrightness * 0.75 - 1.00);
     float nightExposure = exp2(-3.5);
 
-	float baseGradient = exp(-(VoU * 0.5 + 0.5) * 0.5 / density);
+	float baseGradient = exp(VoU * 0.5 / 0.4125);
 	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
-	float ug2 = mix(clamp((cameraPosition.y - 32.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 
-	vec3 skyColor = GetSkyColor(viewPos, false);
+	vec3 skyColor = pow(GetSkyColor(viewPos, false), vec3(0.75));
 	vec3 fog = skyColor * (4.0 - timeBrightness) * baseGradient / SKY_I;
 
     fog = fog * exposure * sunVisibility * SKY_I * (1.0 + (VoL * 0.5 + 0.5));
 
-	float nightGradient = exp(-(VoU * 0.5 + 0.5) * 0.35 / nightDensity);
-    vec3 nightFog = lightNight * lightNight * 6.0 * nightGradient * nightExposure;
+	float nightGradient = exp(VoU * 0.35 / 0.6125);
+    vec3 nightFog = lightNight * lightNight * 8.0 * nightGradient * nightExposure;
     fog = mix(nightFog, fog, sunVisibility * sunVisibility);
 
-    float rainGradient = exp(-(VoU * 0.5 + 0.5) * 0.25 / weatherDensity);
+    float rainGradient = exp(VoU * 0.25);
     vec3 weatherFog = weatherCol.rgb * weatherCol.rgb;
     weatherFog *= GetLuminance(ambientCol / (weatherFog)) * (0.4 * sunVisibility + 0.2);
     fog = mix(fog, weatherFog * rainGradient, rainStrength);
-
-	fog = mix(minLightCol, fog, ug2);
 
 	return fog;
 }
@@ -57,7 +44,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float density = (0.25 + eBS * 0.75) * altitudeFactor * FOG_DENSITY * (1.0 + rainStrength) * (1.0 - sunVisibility * 0.5) * (1.0 - pow2(timeBrightness) * 0.5);
+	float density = (0.25 + eBS * 0.75) * FOG_DENSITY * (1.0 + rainStrength) * (1.0 - sunVisibility * 0.5) * (1.0 - pow2(timeBrightness) * 0.5);
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0), eBS);
@@ -88,15 +75,17 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 
 	#ifdef NETHER
+	vec3 fogColor = netherCol.rgb * 0.04;
 	float viewLength = length(viewPos);
 	float fog = 2.0 * pow(viewLength * FOG_DENSITY / 256.0, 1.5);
+
 	#if DISTANT_FADE == 2 || DISTANT_FADE == 3
 	fog += 6.0 * pow4(fogFactor * 1.5 / far);
 	#endif
+
 	fog = 1.0 - exp(-fog);
-	vec3 fogColor = netherCol.rgb * 0.04;
 	#endif
-	
+
 	#ifndef END
 	color = mix(color, fogColor, fog);
 	#endif
@@ -110,7 +99,7 @@ void BlindFog(inout vec3 color, vec3 viewPos) {
 
 vec3 denseFogColor[2] = vec3[2](
 	vec3(1.0, 0.3, 0.01),
-	vec3(0.1, 0.14, 0.24)
+	vec3(0.1, 0.14, 0.24) * 0.5
 );
 
 void DenseFog(inout vec3 color, vec3 viewPos) {

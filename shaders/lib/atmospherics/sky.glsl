@@ -39,8 +39,8 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     sky = sky / sqrt(sky * sky + 1.0) * exposure * sunVisibility * (SKY_I * SKY_I);
 
     float sunMix = (VoL * 0.5 + 0.5) * pow(clamp(1.0 - VoU, 0.0, 1.0), 2.0 - sunVisibility) *
-                   pow(1.0 - timeBrightness * 0.6, 3.0) * 0.25;
-    float horizonMix = pow(1.0 - abs(VoU), 2.5) * 0.4 * (1.0 - timeBrightness * 0.4);
+                   pow(1.0 - timeBrightness * 0.6, 3.0) * 0.3;
+    float horizonMix = pow(1.0 - abs(VoU), 2.5) * 0.5 * (1.0 - timeBrightness * 0.5);
     float lightMix = (1.0 - (1.0 - sunMix) * (1.0 - horizonMix));
 
     vec3 lightSky = pow(lightSun, vec3(3.0 - sunVisibility)) * baseGradient * (1.0 - clamp(TONEMAP_WHITE_CURVE, 0.0, 1.0) * 0.5);
@@ -64,18 +64,6 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     sky *= ground;
 
-    #if MC_VERSION >= 11800
-    float altitudeFactor = clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
-    #else
-    float altitudeFactor = clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
-    #endif
-
-    float ug = mix(clamp((cameraPosition.y - 32.0) / 16.0, 0.0, 1.0), 1.0, eBS);
-
-    #ifdef UNDERGROUND_SKY
-    sky = mix(minLightCol * 0.125, sky, ug);
-    #endif
-
-    return sky * altitudeFactor;
+    return sky;
 }
 #endif

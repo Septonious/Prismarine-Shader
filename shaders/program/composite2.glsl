@@ -75,7 +75,7 @@ void main() {
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	#ifdef BLUR_FILTERING
-	vec3 vl = GaussianBlur(colortex1, newTexCoord, 1.0).rgb;
+	vec3 vl = GaussianBlur(colortex1, newTexCoord, 2.0).rgb;
 	#else
 	vec3 vl = texture2D(colortex1, newTexCoord).rgb;
 	#endif
@@ -91,26 +91,26 @@ void main() {
 
 	if (isEyeInWater != 1.0){
 		#if defined FOG_PERBIOME && defined WEATHER_PERBIOME
-		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.5 * timeBrightness);
+		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.75 * timeBrightness);
 		#endif
 
 		vl.rgb *= pow(lightCol, vec3(0.75)) * 0.5;
 		vl.r *= 1.0 - pow2(timeBrightness) * 0.25;
 		vl.b *= (1.0 + timeBrightness) * (1.0 - rainStrength * 0.2);
 	} else {
-		vl.rgb *= 0.15;
+		vl.rgb *= waterColor.rgb * 0.5;
 	}
-    vl.rgb *= LIGHT_SHAFT_STRENGTH * 0.50 * shadowFade * (1.0 - blindFactor) * scattering * (4.0 - sunVisibility * 3.0);
+    vl.rgb *= LIGHT_SHAFT_STRENGTH * 0.50 * shadowFade * (1.0 - blindFactor) * scattering;
 	#endif
 
 	color += vl;
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
-    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight) * 2.0, 2.0);
-    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight) * 2.0, 2.0);
-    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0) * 2.0, 2.0);
-    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0) * 2.0, 2.0);
+    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight), 128.0);
+    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight), 128.0);
+    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0), 128.0);
+    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0), 128.0);
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
 	cloud.a = clamp(cloud.a, 0.0, 1.0);

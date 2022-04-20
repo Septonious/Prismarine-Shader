@@ -194,7 +194,7 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector, vec2 lightmap)
 #include "/lib/util/jitter.glsl"
 #endif
 
-#ifdef SSGI
+#ifdef SSPT
 #include "/lib/util/encode.glsl"
 #endif
 
@@ -344,7 +344,7 @@ void main() {
 				absorbDist = 1.0 - clamp(difT * 32.0, 0.0, 1.0);
 			}
 			
-			vec3 newAlbedo = mix(absorbColor * absorbColor * (1.0 - WATER_A) * 5.0, terrainColor * terrainColor, absorbDist * absorbDist);
+			vec3 newAlbedo = mix(absorbColor * absorbColor * (1.0 - WATER_A) * 3.0, terrainColor * terrainColor, absorbDist * absorbDist);
 
 			float absorb = sqrt(clamp(lightmap.y + float(mat > 1.98 && mat < 2.02), 0.0, 1.0)) * lightmap.y;
  
@@ -430,12 +430,17 @@ void main() {
 
 			vec2 wind = vec2(0.0, frametime * 0.1);
 
-			float portal = texture2D(noisetex, portalCoord * 0.2 + wind * 0.03).r * 0.1;
-				  portal+= texture2D(noisetex, portalCoord * 0.1 + wind * 0.02).r * 0.2;
-				  portal+= texture2D(noisetex, portalCoord * 0.05 + wind * 0.01).r * 0.3;
+			float noiseA = texture2D(noisetex, portalCoord * 0.20 + wind * 0.03).r * 0.03;
+				  noiseA+= texture2D(noisetex, portalCoord * 0.10 + wind * 0.02).r * 0.05;
+				  noiseA+= texture2D(noisetex, portalCoord * 0.05 + wind * 0.01).r * 0.11;
+
+			float noiseB = texture2D(noisetex, portalCoord * 0.15 + wind * 0.04).r * 0.13;
+				  noiseB+= texture2D(noisetex, portalCoord * 0.10 + wind * 0.03).r * 0.09;
+				  noiseB+= texture2D(noisetex, portalCoord * 0.20 + wind * 0.02).r * 0.04;
 			
-			albedo.rgb = portal * portal * vec3(0.75, 0.25, 1.5);
-			albedo.a = 0.35;
+			albedo.rgb = mix(vec3(0.85, 0.75, 0.1) * noiseB, vec3(0.75, 0.25, 1.5), noiseA);
+			albedo.rgb *= albedo.rgb * 2.0;
+			albedo.a = 0.5;
 		}
 		#endif
 
@@ -594,7 +599,7 @@ void main() {
 	gl_FragData[2] = vec4(0.0, lightmap.y, dist, water);
 	#endif
 
-	#ifdef SSGI
+	#ifdef SSPT
 	/* RENDERTARGETS:0,1,12,10 */
 	gl_FragData[3] = vec4(albedo.rgb, float(mat > 3.98 && mat < 4.02) * 2.0);
 	#endif

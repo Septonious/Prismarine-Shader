@@ -44,7 +44,7 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
 		newEmissive = float(lengthAlbedo > 0.9) * 0.25;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
-		newEmissive = float(albedo.r > 0.65) * 0.25;
+		newEmissive = float(albedo.r > 0.5 && albedo.b < 0.4) * 0.25;
 	} else if (mat > 113.9 && mat < 114.1) { // Glow berries
 		newEmissive = float(albedo.r > 0.5) * 0.5;
 	} else if (mat > 114.9 && mat < 115.1) { // Torches

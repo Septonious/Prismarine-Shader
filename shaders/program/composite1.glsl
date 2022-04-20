@@ -113,7 +113,9 @@ void main() {
 
 	if (isEyeInWater == 1) {
 		vec4 waterFog = GetWaterFog(viewPos.xyz);
-		color.rgb = mix(color.rgb, waterFog.rgb, waterFog.a);
+		waterFog.a = mix(waterAlpha * 0.5, 1.0, waterFog.a);
+		color.rgb = mix(sqrt(color.rgb), sqrt(waterFog.rgb), waterFog.a);
+		color.rgb *= color.rgb;
 	}
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
@@ -137,7 +139,7 @@ void main() {
 	
 	//Nether & End Smoke
 	#if defined NETHER_SMOKE || defined END_SMOKE
-	vl += GetVolumetricSmoke(z0Scaled, z1Scaled, viewPosScaled.xyz, dither);
+	vl += GetVolumetricSmoke(z1Scaled, dither);
 	#endif
 
 	//Volumetric Clouds

@@ -267,7 +267,7 @@ void main() {
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
 
-	#if defined SSGI && !defined ADVANCED_MATERIALS && !defined REFLECTION_SPECULAR
+	#if defined SSPT && !defined ADVANCED_MATERIALS && !defined REFLECTION_SPECULAR
 	/* DRAWBUFFERS:06 */
 	gl_FragData[1] = vec4(0.0);
 	#endif

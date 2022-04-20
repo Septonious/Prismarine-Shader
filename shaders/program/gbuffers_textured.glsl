@@ -121,18 +121,10 @@ void main() {
 		#ifdef INTEGRATED_EMISSION // almost entirely stolen from complementary, blame me now
 			if (atlasSize.x < 900.0) { // We don't want to detect particles from the block atlas
 				float lengthAlbedo = length(albedo.rgb);
-				vec3 pos = worldPos + cameraPosition;
 
-				if (albedo.r == albedo.g && albedo.r - 0.5 * albedo.b < 0.06) { // Underwater Particle
-					if (isEyeInWater == 1) {
-						albedo.rgb = vec3(0.7, 0.9, 1.2) * 2.0 * lengthAlbedo;
-						if (fract(pos.r + pos.g + pos.b) > 0.2) discard;
-					}
-				}
-
-				if (albedo.r > 0.15 && albedo.b > 0.15 && albedo.g < 0.5) // Ender Particle, Crying Obsidian Drop
+				if (albedo.r > 0.1 && albedo.b > 0.1 && albedo.g < 0.1) // Ender Particle, Crying Obsidian Drop, Nether Portal Particle
 					emission = 0.5;
-				if (lengthAlbedo > 0.5 && albedo.r > 0.75 && albedo.g < 0.25) // Redstone Particle
+				if (lengthAlbedo > 0.25 && albedo.r > 0.5 && albedo.g < 0.1) // Redstone Particle
 					emission = 1.0;
 			}
 		#endif
@@ -167,15 +159,9 @@ void main() {
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
 
-	#if defined SSGI && !defined ADVANCED_MATERIALS && !defined REFLECTION_SPECULAR
-	/* RENDERTARGETS:0,6,10 */
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 0.0);
-	gl_FragData[2] = vec4(albedo.rgb, emission);
-	#endif
-
-	#ifdef ADVANCED_MATERIALS
-	/* DRAWBUFFERS:0367 */
-	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+	#if defined SSPT && !defined ADVANCED_MATERIALS && !defined REFLECTION_SPECULAR
+	/* RENDERTARGETS:0,10 */
+	gl_FragData[1] = vec4(albedo.rgb, emission);
 	#endif
 }
 

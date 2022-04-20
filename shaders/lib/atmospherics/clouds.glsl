@@ -61,7 +61,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 	float colorMultiplier = CLOUD_BRIGHTNESS * (1.0 - rainStrength * 0.45);
 	float gradientMix = dither * 0.1667;
 	float noiseMultiplier = CLOUD_THICKNESS * 0.2;
-	float scattering = pow(VoL * 0.5 + 0.5, 4.0);
+	float scattering = pow3(VoL * 0.5 + 0.5);
 
 	vec2 wind = vec2(
 		frametime * CLOUD_SPEED * 0.001,
@@ -77,7 +77,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 
 			vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
 				#ifndef BLOCKY_CLOUDS
-				 erodeCoord(coord, i, dither, 0.005);
+				 erodeCoord(coord, i, dither, 0.003);
 				#endif
 				#ifdef BLOCKY_CLOUDS
 				coord = floor(coord * 8.0);
@@ -159,7 +159,7 @@ void DrawStars(inout vec3 color, vec3 viewPos, float size, float amount, float b
 	#endif
 	#endif
 
-	color += star * vec3(0.5, 0.75, 1.00) * brightness * (1.0 - timeBrightness * 0.95) * clamp(frametime * 0.5, 0.0, 1.0);
+	color += star * vec3(0.5, 0.75, 1.00) * brightness * (1.0 - sunVisibility * 0.9) * clamp(frametime * 0.5, 0.0, 1.0);
 }
 
 #ifdef AURORA

@@ -9,7 +9,7 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
-#if defined SSGI && defined DENOISE
+#if defined SSPT && defined DENOISE
 //Varyings//
 varying vec2 texCoord;
 

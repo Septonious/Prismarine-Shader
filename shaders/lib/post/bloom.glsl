@@ -38,10 +38,6 @@ void Bloom(inout vec3 color, vec2 coord) {
 
 	float strength = BLOOM_STRENGTH;
 
-	#ifdef SSGI
-	strength = 0.0;
-	#endif
-
 	#if BLOOM_CONTRAST == 0
 	color = mix(color, blur, 0.2 * strength);
 	#else

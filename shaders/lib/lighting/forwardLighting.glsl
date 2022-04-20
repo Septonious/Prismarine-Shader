@@ -5,6 +5,7 @@
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
                  float parallaxShadow, float emission, float subsurface) {
+    
     #if EMISSIVE == 0 || (!defined ADVANCED_MATERIALS && EMISSIVE == 1)
     emission = 0.0;
     #endif
@@ -13,8 +14,8 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     subsurface = 0.0;
     #endif
 
-    #ifdef SSGI
-    lightmap.x *= 0.5;
+    #ifdef SSPT
+    lightmap.x *= 0.75;
     #endif
 
     #if defined OVERWORLD || defined END
@@ -22,11 +23,13 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     shadow *= parallaxShadow;
     NoL = clamp(NoL * 1.01 - 0.01, 0.0, 1.0);
     
+    float rainFactor = 1.0 - rainStrength;
+
     float scattering = 0.0;
     if (subsurface > 0.0){
         float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
-        scattering = pow16(VoL) * (1.0 - rainStrength) * subsurface;
-        NoL = mix(NoL, 1.0, sqrt(subsurface) * 0.75);
+        scattering = pow8(VoL) * rainFactor * subsurface;
+        NoL = mix(NoL, 1.0, subsurface * (0.5 + pow2(VoL) * 0.5));
         NoL = mix(NoL, 1.0, scattering);
     }
     
@@ -34,7 +37,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     
     #ifdef OVERWORLD
     #ifdef AURORA
-	float auroraVisibility = moonVisibility * (1.0 - rainStrength) * (1.0 - rainStrength);
+	float auroraVisibility = moonVisibility * rainFactor;
 
 	#ifdef WEATHER_PERBIOME
 	auroraVisibility *= isCold * isCold;
@@ -108,7 +111,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
 
     desatNight *= desatNight; desatWeather *= desatWeather;
     
-    float desatNWMix  = (1.0 - sunVisibility) * (1.0 - rainStrength);
+    float desatNWMix  = (1.0 - sunVisibility) * rainFactor;
 
     vec3 desatColor = mix(desatWeather, desatNight, desatNWMix);
     desatColor = mix(vec3(0.1), desatColor, sqrt(lightmap.y)) * 10.0;

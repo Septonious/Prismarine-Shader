@@ -16,7 +16,7 @@ varying float mat, recolor;
 varying float isPlant;
 #endif
 
-#ifdef SSGI
+#ifdef SSPT
 varying float isConcrete;
 #endif
 
@@ -120,7 +120,7 @@ float GetLuminance(vec3 color) {
 #include "/lib/util/jitter.glsl"
 #endif
 
-#if defined ADVANCED_MATERIALS || defined SSGI
+#if defined ADVANCED_MATERIALS || defined SSPT
 #include "/lib/util/encode.glsl"
 #endif
 
@@ -189,7 +189,7 @@ void main() {
 		float candle   = float(mat > 4.98 && mat < 5.02);
 		lava     = float(mat > 3.98 && mat < 4.02);
 
-		#if defined SSGI && defined EMISSIVE_CONCRETE
+		#if defined SSPT && defined EMISSIVE_CONCRETE
 		emissive += isConcrete * 1.5;
 		albedo.rgb *= 1.0 + isConcrete * 0.5;
 		#endif
@@ -368,6 +368,10 @@ void main() {
 		#endif
 	} else albedo.a = 0.0;
 
+	#ifdef TEST
+	albedo.a = clamp(albedo.a - float(mat > 195870.9 && mat < 195871.1), 0.0, 1.0);
+	#endif
+
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
 
@@ -378,13 +382,13 @@ void main() {
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
 
-	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
+	#if defined SSPT && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,6,10 */
 	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[2] = vec4(albedo.rgb, emission);
 	#endif
 
-	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
+	#if defined SSPT && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,3,6,7,10 */
 	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
@@ -405,7 +409,7 @@ varying float mat, recolor;
 varying float isPlant;
 #endif
 
-#ifdef SSGI
+#ifdef SSPT
 varying float isConcrete;
 #endif
 
@@ -512,7 +516,7 @@ void main() {
 	
 	mat = 0.0; recolor = 0.0;
 
-	#ifdef SSGI
+	#ifdef SSPT
 	isConcrete = 0.0;
 	#endif
 
@@ -541,7 +545,11 @@ void main() {
 	if (mc_Entity.x == 10400)
 		color.a = 1.0;
 
-	#if defined SSGI && defined EMISSIVE_CONCRETE
+	#ifdef TEST
+	if (mc_Entity.x == 0) mat = 195871.0;
+	#endif
+
+	#if defined SSPT && defined EMISSIVE_CONCRETE
 	if (mc_Entity.x == 29999) isConcrete = 1.0;
 	#endif
 

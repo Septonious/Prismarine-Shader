@@ -13,7 +13,7 @@ screen.MATERIAL=Material
 screen.SPECULAR=Specular & Reflections
 screen.NORMALS=Normals & Parallax
 
-screen.SSGI=Path Tracing Config
+screen.SSPT=Path Tracing Config
 screen.NEBULAS=Nebula Config
 screen.SMOKE=Smoke Config
 screen.ATMOSPHERICS=Atmospherics
@@ -99,8 +99,8 @@ option.SHADOW_COLOR.comment=Enables tinted shadow from translucents. §a[+]§rUs
 option.SHADOW_FILTER=Shadow Filtering
 option.SHADOW_FILTER.comment=Enables shadow filtering. §a[+]§rThis effect benefits from TAA.
 
-option.SSGI=Screen Space Path Tracing
-option.SSGI.comment=Provides per-block realistic colored lighting. §f[§c-§f] Causes a massive FPS drop! Don't enable it if you have a low-end PC!!!
+option.SSPT=Screen Space Path Tracing
+option.SSPT.comment=Provides per-block realistic colored lighting. §f[§c-§f] Causes a massive FPS drop! Don't enable it if you have a low-end PC!!!
 option.BOUNCES=Bounces
 option.DENOISE=Denoising
 option.DENOISE_QUALITY=Denoising Quality

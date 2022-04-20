@@ -9,7 +9,7 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
-#if defined SSGI
+#if defined SSPT
 
 //Varyings//
 varying vec2 texCoord;
@@ -48,12 +48,8 @@ void main() {
 
     gi *= ILLUMINATION_STRENGTH * (1.5 - clamp(length(color), 0.0, 1.0));
 
-
-    #if defined NETHER || defined END
-    gi *= 0.75;
     #ifdef END
     gi *= 0.5;
-    #endif
     #endif
 
     color.rgb *= vec3(1.0) + gi;

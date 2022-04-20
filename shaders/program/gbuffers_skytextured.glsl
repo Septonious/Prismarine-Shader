@@ -151,9 +151,14 @@ void main() {
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;
 
-	#ifdef SSGI
-	/* DRAWBUFFERS:6 */
-	gl_FragData[1] = vec4(0.0);
+	#if defined END && (defined END_STARS || defined END_NEBULA)
+	/* DRAWBUFFERS:09 */
+	gl_FragData[1] = albedo;
+	#endif
+
+	#ifdef SSPT
+	/* DRAWBUFFERS:096 */
+	gl_FragData[2] = vec4(0.0);
 	#endif
 }
 

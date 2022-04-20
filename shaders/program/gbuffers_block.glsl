@@ -101,7 +101,7 @@ float GetLuminance(vec3 color) {
 #include "/lib/util/jitter.glsl"
 #endif
 
-#if defined SSGI || defined ADVANCED_MATERIALS
+#if defined SSPT || defined ADVANCED_MATERIALS
 #include "/lib/util/encode.glsl"
 #endif
 
@@ -308,13 +308,13 @@ void main() {
 	gl_FragData[3] = vec4(fresnel3, 1.0);
 	#endif
 
-	#if defined SSGI && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
+	#if defined SSPT && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,6,10 */
 	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[2] = vec4(albedo.rgb, emission);
 	#endif
 
-	#if defined SSGI && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
+	#if defined SSPT && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
 	/* RENDERTARGETS:0,6,7,10 */
 	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[2] = vec4(fresnel3, 0.0);
