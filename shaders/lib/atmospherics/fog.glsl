@@ -35,9 +35,11 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	vec4 worldPos = gbufferModelViewInverse * vec4(viewPos, 1.0);
 	worldPos.xyz /= worldPos.w;
 
+	float lViewPos = length(viewPos);
+
 	#if DISTANT_FADE > 0
 	#if DISTANT_FADE_STYLE == 0
-	float fogFactor = length(viewPos);
+	float fogFactor = lViewPos;
 	#else
 	float fogFactor = length(worldPos.xz);
 	#endif
@@ -45,7 +47,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	
 	#ifdef OVERWORLD
 	float density = (0.25 + eBS * 0.75) * FOG_DENSITY * (1.0 + rainStrength) * (1.0 - sunVisibility * 0.5) * (1.0 - pow2(timeBrightness) * 0.5);
-	float fog = length(viewPos) * density / 256.0;
+	float fog = lViewPos * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= mix(1.0, (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0), eBS);
 	fog = 1.0 - exp(-2.0 * pow(fog, 0.05 * clearDay + 1.35));
@@ -57,7 +59,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	vec3 fogColor = GetFogColor(viewPos);
 
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3
-	if(isEyeInWater == 0.0){
+	if (isEyeInWater == 0){
 		float vanillaFog = 1.0 - (far - fogFactor) / (far * 0.25);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 	
@@ -76,8 +78,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 
 	#ifdef NETHER
 	vec3 fogColor = netherCol.rgb * 0.04;
-	float viewLength = length(viewPos);
-	float fog = 2.0 * pow(viewLength * FOG_DENSITY / 256.0, 1.5);
+	float fog = 2.0 * pow(lViewPos * FOG_DENSITY / 256.0, 1.5);
 
 	#if DISTANT_FADE == 2 || DISTANT_FADE == 3
 	fog += 6.0 * pow4(fogFactor * 1.5 / far);

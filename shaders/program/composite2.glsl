@@ -75,7 +75,7 @@ void main() {
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	#ifdef BLUR_FILTERING
-	vec3 vl = GaussianBlur(colortex1, newTexCoord, 2.0).rgb;
+	vec3 vl = GaussianBlur(colortex1, newTexCoord, 1.0).rgb;
 	#else
 	vec3 vl = texture2D(colortex1, newTexCoord).rgb;
 	#endif
@@ -95,10 +95,8 @@ void main() {
 		#endif
 
 		vl.rgb *= pow(lightCol, vec3(0.75)) * 0.5;
-		vl.r *= 1.0 - pow2(timeBrightness) * 0.25;
-		vl.b *= (1.0 + timeBrightness) * (1.0 - rainStrength * 0.2);
 	} else {
-		vl.rgb *= waterColor.rgb * 0.5;
+		vl.rgb *= waterColor.rgb * 0.25;
 	}
     vl.rgb *= LIGHT_SHAFT_STRENGTH * 0.50 * shadowFade * (1.0 - blindFactor) * scattering;
 	#endif

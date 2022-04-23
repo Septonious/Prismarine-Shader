@@ -125,17 +125,6 @@ option.AO.comment=Adds soft shadows around surface contact or intersection.
 option.AO_STRENGTH=AO Strength
 option.AO_STRENGTH.comment=Adjusts ambient occlusion strength.
 
-option.DESATURATION=Desaturation
-option.DESATURATION.comment=Reduces saturation while adding some tint in darker areas.
-
-option.DESATURATION_FACTOR=Max Desaturation Factor
-option.DESATURATION_FACTOR.comment=Adjusts the maximum amount of desaturation applied.
-value.DESATURATION_FACTOR.2.0=Very Low
-value.DESATURATION_FACTOR.1.5=Low
-value.DESATURATION_FACTOR.1.0=Medium
-value.DESATURATION_FACTOR.0.5=High
-value.DESATURATION_FACTOR.0.0=Very High
-
 option.DYNAMIC_HANDLIGHT=Dynamic Handlight
 option.DYNAMIC_HANDLIGHT.comment=Allows blocklight to be emitted from view when holding certain objects.
 

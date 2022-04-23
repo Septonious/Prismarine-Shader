@@ -141,7 +141,7 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
     vec3 hitNormal = normal;
 
     vec3 illumination = vec3(0.0);
-    vec3 weight = vec3(ILLUMINATION_STRENGTH);
+    vec3 weight = vec3(1.0);
 
     for(int i = 0; i < BOUNCES; i++) {
         vec2 noise = hash(uvec3(gl_FragCoord.xy, speed)).xy;
@@ -155,9 +155,9 @@ vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
         bool hit = IntersectSSRay(hitPos, currentPosition, sampleDir, dither, STRIDE);
         currentPosition = hitPos;
 
-        if (hit && hand < 0.5 && length(albedo) < 0.25) {
+        if (hit && hand < 0.5 && length(albedo) < 0.5) {
             vec3 hitAlbedo = texture2D(colortex10, currentPosition.xy).rgb;
-            float isEmissive = float(texture2D(colortex10, currentPosition.xy).a > 0.25);
+            float isEmissive = float(texture2D(colortex10, currentPosition.xy).a);
 
             weight *= hitAlbedo;
             illumination += weight * isEmissive;

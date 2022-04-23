@@ -23,7 +23,6 @@ float getTextureNoise(vec3 pos){
 
 	vec3 u = floor(pos);
 	vec3 v = fract(pos);
-	v = v * v * (3.0 - 2.0 * v);
 
 	vec2 uv = u.xz + v.xz + u.y * 16.0;
 

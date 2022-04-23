@@ -89,10 +89,10 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 					
 					#ifdef LIGHTSHAFT_CLOUDY_NOISE
 					vec3 npos = fogPosition * 0.75 + vec3(frametime, 0, 0);
-					float n3da = texture2D(noisetex, npos.xz * 0.00025 + floor(npos.y * 0.15) * 0.25).r;
-					float n3db = texture2D(noisetex, npos.xz * 0.00025 + floor(npos.y * 0.15 + 1.0) * 0.25).r;
-					float noise = mix(n3da, n3db, fract(npos.y * 0.15));
-					noise = sin(noise * 16.0 + frametime * 0.5) * (0.3 + rainStrength * 0.2) + (0.7 - rainStrength * 0.2);
+					float n3da = texture2D(noisetex, npos.xz * 0.0001 + floor(npos.y * 0.1) * 0.05).r;
+					float n3db = texture2D(noisetex, npos.xz * 0.0001 + floor(npos.y * 0.1 + 1.0) * 0.05).r;
+					float noise = mix(n3da, n3db, fract(npos.y * 0.1));
+					noise = sin(noise * 16.0 + frametime * 0.5) * (0.4 + rainStrength * 0.2) + (0.6 - rainStrength * 0.2);
 					shadow *= noise;
 					worldHeightFactor *= noise + 1.0;
 					#endif

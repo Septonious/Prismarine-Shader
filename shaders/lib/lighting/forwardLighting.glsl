@@ -15,7 +15,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     #ifdef SSPT
-    lightmap.x *= 0.75;
+    lightmap.x *= 0.5;
     #endif
 
     #if defined OVERWORLD || defined END
@@ -58,7 +58,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
-    vec3 sceneLighting = mix(ambientCol, lightCol, fullShadow * shadowMult);
+    vec3 sceneLighting = mix(ambientCol * max(0.1, pow4(lightmap.y)), lightCol, fullShadow * shadowMult);
     sceneLighting *= pow(lightmap.y, 8.0 - 7.0 * eBS) * (1.0 + scattering * shadow);
     #endif
 
@@ -74,11 +74,6 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     vec3 blockLighting = blocklightCol * newLightmap * newLightmap;
 
     vec3 minLighting = minLightCol * (1.0 - eBS);
-
-    #ifdef TOON_LIGHTMAP
-    minLighting *= floor(smoothLighting * 8.0 + 1.001) / 4.0;
-    smoothLighting = 1.0;
-    #endif
     
     vec3 albedoNormalized = normalize(albedo.rgb + 0.00001);
     vec3 emissiveLighting = mix(albedoNormalized, vec3(1.0), emission * 0.5);
@@ -96,42 +91,6 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     albedo.rgb = albedoNormalized * albedoLength;
     #endif
 
-    //albedo = vec3(0.5);
     albedo *= sceneLighting + blockLighting + emissiveLighting + nightVisionLighting + minLighting;
     albedo *= vanillaDiffuse * smoothLighting * smoothLighting;
-
-    #ifdef DESATURATION
-    #ifdef OVERWORLD
-    float desatAmount = sqrt(max(sqrt(length(fullShadow / 3.0)) * lightmap.y, lightmap.y)) *
-                        sunVisibility * (1.0 - rainStrength * 0.4) + 
-                        sqrt(lightmap.x) + lightFlatten;
-
-    vec3 desatNight   = lightNight / LIGHT_NI;
-    vec3 desatWeather = weatherCol.rgb / 0.5;
-
-    desatNight *= desatNight; desatWeather *= desatWeather;
-    
-    float desatNWMix  = (1.0 - sunVisibility) * rainFactor;
-
-    vec3 desatColor = mix(desatWeather, desatNight, desatNWMix);
-    desatColor = mix(vec3(0.1), desatColor, sqrt(lightmap.y)) * 10.0;
-    #endif
-
-    #ifdef NETHER
-    float desatAmount = sqrt(lightmap.x) + lightFlatten;
-
-    vec3 desatColor = netherColSqrt.rgb / netherColSqrt.a;
-    #endif
-
-    #ifdef END
-    float desatAmount = sqrt(lightmap.x) + lightFlatten;
-
-    vec3 desatColor = endCol.rgb * 1.25;
-    #endif
-
-    desatAmount = clamp(desatAmount, DESATURATION_FACTOR * 0.4, 1.0);
-    desatColor *= 1.0 - desatAmount;
-
-    albedo = mix(GetLuminance(albedo) * desatColor, albedo, desatAmount);
-    #endif
 }

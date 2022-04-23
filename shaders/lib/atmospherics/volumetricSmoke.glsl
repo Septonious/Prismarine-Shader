@@ -12,8 +12,8 @@ vec3 GetVolumetricSmoke(float z1, float dither) {
     vec4 wpos = vec4(0.0);
 
     if (clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {
-        for(int i = 0; i < 4; i++) {
-			float minDist = (i + dither) * 24.0;
+        for(int i = 0; i < 8; i++) {
+			float minDist = (i + dither) * 16.0;
 
 			wpos = GetWorldSpace(GetLogarithmicDepth(minDist), scaledCoord);
 

@@ -241,6 +241,9 @@ void main() {
 		
 		float metalness      = 0.0;
 		float emission       = 0.0;
+		#ifdef CUSTOM_NETHER_PORTAL
+		emission = float(mat > 3.98 && mat < 4.02) * 8.0;
+		#endif
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(1.0);
 
@@ -334,7 +337,7 @@ void main() {
 
 			if (isEyeInWater == 0 && water > 0.5){
 				absorbColor = normalize(waterColor.rgb * WATER_I) * rainFactor * moonFactor * terrainColor;
-				absorbDist = 1.0 - clamp(difT / 12.0, 0.0, 1.0);
+				absorbDist = 1.0 - clamp(difT * 0.125, 0.0, 1.0);
 			}
 
 			if (float(mat > 1.98 && mat < 2.02) > 0.5){
@@ -430,17 +433,16 @@ void main() {
 
 			vec2 wind = vec2(0.0, frametime * 0.1);
 
-			float noiseA = texture2D(noisetex, portalCoord * 0.20 + wind * 0.03).r * 0.03;
-				  noiseA+= texture2D(noisetex, portalCoord * 0.10 + wind * 0.02).r * 0.05;
-				  noiseA+= texture2D(noisetex, portalCoord * 0.05 + wind * 0.01).r * 0.11;
+			float noiseA = texture2D(noisetex, portalCoord * 0.20 + wind * 0.04).r * 0.01;
+				  noiseA+= texture2D(noisetex, portalCoord * 0.15 + wind * 0.03).r * 0.02;
+				  noiseA+= texture2D(noisetex, portalCoord * 0.10 + wind * 0.02).r * 0.06;
+				  noiseA+= texture2D(noisetex, portalCoord * 0.05 + wind * 0.01).r * 0.12;
+			noiseA = clamp(noiseA, 0.0, 1.0);
+			float noiseB = 1.0 - noiseA;
 
-			float noiseB = texture2D(noisetex, portalCoord * 0.15 + wind * 0.04).r * 0.13;
-				  noiseB+= texture2D(noisetex, portalCoord * 0.10 + wind * 0.03).r * 0.09;
-				  noiseB+= texture2D(noisetex, portalCoord * 0.20 + wind * 0.02).r * 0.04;
-			
-			albedo.rgb = mix(vec3(0.85, 0.75, 0.1) * noiseB, vec3(0.75, 0.25, 1.5), noiseA);
-			albedo.rgb *= albedo.rgb * 2.0;
-			albedo.a = 0.5;
+			albedo.rgb = mix(vec3(0.6, 0.1, 0.5) * noiseA, vec3(1.2, 0.2, 0.9) * noiseA, noiseA);
+			albedo.rgb *= albedo.rgb * 24.0;
+			albedo.a = 0.75;
 		}
 		#endif
 
@@ -601,7 +603,7 @@ void main() {
 
 	#ifdef SSPT
 	/* RENDERTARGETS:0,1,12,10 */
-	gl_FragData[3] = vec4(albedo.rgb, float(mat > 3.98 && mat < 4.02) * 2.0);
+	gl_FragData[3] = vec4(albedo.rgb, float(mat > 3.98 && mat < 4.02) * 8.0);
 	#endif
 }
 

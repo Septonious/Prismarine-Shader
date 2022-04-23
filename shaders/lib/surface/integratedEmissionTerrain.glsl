@@ -38,7 +38,7 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 	} else if (mat > 107.9 && mat < 108.1) { // Amethyst
 		newEmissive = float(lengthAlbedo > 0.5) * 0.1;
 	} else if (mat > 109.9 && mat < 110.1) { // Glow Lichen
-		newEmissive = (1.0 - lightmap.y) * (0.1 + float(albedo.r > albedo.g || albedo.r > albedo.b));
+		newEmissive = (1.0 - lightmap.y) * (0.025 + float(albedo.r > albedo.g || albedo.r > albedo.b));
 	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
 		newEmissive = float(albedo.r > 0.9) * 0.25;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives

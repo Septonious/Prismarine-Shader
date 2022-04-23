@@ -58,10 +58,10 @@ float GetLuminance(vec3 color) {
 	return dot(color,vec3(0.299, 0.587, 0.114));
 }
 
-void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor) {
+void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor, float cloud) {
 	float VoL = dot(normalize(viewPos), sunVec);
 	float isMoon = float(VoL < 0.0);
-	float sun = pow(abs(VoL), 3600.0 * isMoon + 1800.0 * (1.0 - isMoon)) * (1.0 - sqrt(rainStrength));
+	float sun = pow(abs(VoL), 3600.0 * isMoon + 1800.0 * (1.0 - isMoon)) * (1.0 - sqrt(rainStrength)) * cloud;
 
 	vec3 sunMoonCol = mix(moonColor * moonVisibility, sunColor * sunVisibility, float(VoL > 0.25));
 
@@ -74,12 +74,12 @@ void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor)
 	color += sun * sunMoonCol;
 }
 
-void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
+void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol, float cloud) {
 	float VoL = dot(normalize(viewPos), lightVec);
 	float visfactor = 0.05 * (-0.8 * timeBrightness + 1.0) * (3.0 * rainStrength + 1.0);
 	float invvisfactor = 1.0 - visfactor;
 
-	float visibility = clamp(VoL * 0.5 + 0.5, 0.0, 1.0);
+	float visibility = clamp(VoL * 0.5 + 0.5, 0.0, 1.0) * cloud;
     visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75) * (1.0 - rainStrength * eBS * 0.875);
@@ -104,27 +104,30 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #include "/lib/atmospherics/sky.glsl"
 
 #if defined OVERWORLD && defined OVERWORLD_NEBULA
-vec3 GetSmoke(vec3 viewPos) {
+void GetNebula(in vec3 viewPos, inout vec3 albedo, inout float nebulaFactor) {
 	float VoL = dot(normalize(viewPos.xyz), -sunVec);
 	float VoU = dot(normalize(viewPos.xyz), upVec);
 
 	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
-	float visibility = sqrt(sqrt(clamp(VoU * 10.0 - 1.0, 0.0, 1.0))) * (1.0 - rainStrength) * (1.0 - sunVisibility) * eBS;
+	float visibility = (1.0 - rainStrength) * (1.0 - sunVisibility) * eBS;
+		  visibility = mix(0.0, visibility * float(VoU > 0.0), sqrt(VoU));
 
 	vec3 wpos = mat3(gbufferModelViewInverse) * viewPos;
 	vec2 wind = vec2(frametime, 0.0);
 	vec2 planeCoord = wpos.xz / (wpos.y + length(wpos.xz) * 0.5) * 0.25 + wind * 0.001;
 
 	float smokeNoise  = texture2D(noisetex, planeCoord * 0.025).r;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.050).r * 0.26;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.300).r * 0.22;
-		  smokeNoise -= texture2D(noisetex, planeCoord * 0.600).r * 0.18;
+		  smokeNoise -= texture2D(noisetex, planeCoord * 0.050).r * 0.4;
+		  smokeNoise -= texture2D(noisetex, planeCoord * 0.100).r * 0.3;
+		  smokeNoise -= texture2D(noisetex, planeCoord * 0.300).r * 0.2;
+		  smokeNoise = clamp(pow2(smokeNoise), 0.0, 1.0);
 
 	lightNight *= mix(lightNight, lightNight * vec3(0.5, 1.4, 0.7), smokeNoise);
 
-	vec3 smoke = clamp(pow2(smokeNoise), 0.0, 1.0) * lightNight * visibility;
+	vec3 smoke = smokeNoise * lightNight * visibility * OVERWORLD_NEBULA_BRIGHTNESS;
 
-	return smoke * OVERWORLD_NEBULA_BRIGHTNESS * OVERWORLD_NEBULA_BRIGHTNESS;
+	albedo.rgb += smoke;
+	nebulaFactor = smokeNoise * 0.5;
 }
 #endif
 
@@ -160,17 +163,10 @@ void main() {
 	albedo += RainbowLens(viewPos.xyz, viewPos.xy, 1.5, -0.5, 0.05) * 0.1;
 	#endif
 
+	float nebulaFactor = 0.0;
+
 	#if defined OVERWORLD && defined OVERWORLD_NEBULA
-	albedo += GetSmoke(viewPos.xyz);
-	#endif
-
-	#ifdef ROUND_SUN_MOON
-	vec3 lightMA = mix(lightMorning, lightEvening, mefade);
-    vec3 sunColor = sqrt(mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness));
-    vec3 moonColor = sqrt(lightNight) * 1.5;
-
-	RoundSunMoon(albedo, viewPos.xyz, sunColor * 2.0, moonColor);
-	SunGlare(albedo.rgb, viewPos.xyz, lightCol.rgb);
+	GetNebula(viewPos.xyz, albedo.rgb, nebulaFactor);
 	#endif
 
 	float dither = Bayer64(gl_FragCoord.xy);
@@ -179,18 +175,29 @@ void main() {
 	albedo.rgb += DrawAurora(viewPos.xyz, dither, 12);
 	#endif
 
+	vec4 cloud = vec4(0.0);
+
 	#if defined PLANAR_CLOUDS
-	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
+	cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
 	#endif
 
 	#ifdef STARS
 	vec3 star = vec3(0.0);
-	DrawStars(star.rgb, viewPos.xyz, 0.25, 0.95, 2.0);
+	DrawStars(star.rgb, viewPos.xyz, 0.4, 0.9 + nebulaFactor, 1.0 + nebulaFactor);
 	#ifdef PLANAR_CLOUDS
 	star *= 1.0 - float(cloud.a > 0.0);
 	#endif
 	albedo.rgb += star;
+	#endif
+
+	#ifdef ROUND_SUN_MOON
+	vec3 lightMA = mix(lightMorning, lightEvening, mefade);
+    vec3 sunColor = sqrt(mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness));
+    vec3 moonColor = sqrt(lightNight) * 1.5;
+
+	RoundSunMoon(albedo, viewPos.xyz, sunColor * 2.0, moonColor, 1.0 - float(cloud.a > 0.4));
+	SunGlare(albedo.rgb, viewPos.xyz, lightCol.rgb, 1.0 - float(cloud.a > 0.4));
 	#endif
 
     #ifdef UNDERGROUND_SKY

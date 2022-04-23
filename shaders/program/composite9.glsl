@@ -46,13 +46,11 @@ void main() {
     gi = NormalAwareBlur(colortex11).rgb;
     #endif
 
-    gi *= ILLUMINATION_STRENGTH * (1.5 - clamp(length(color), 0.0, 1.0));
-
     #ifdef END
     gi *= 0.5;
     #endif
 
-    color.rgb *= vec3(1.0) + gi;
+    color.rgb *= vec3(1.0) + gi * ILLUMINATION_STRENGTH;
 
     /* DRAWBUFFERS:1 */
     gl_FragData[0] = vec4(color, 1.0);

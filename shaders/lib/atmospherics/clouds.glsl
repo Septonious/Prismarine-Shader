@@ -57,8 +57,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 
 	float cloud = 0.0;
 	float cloudGradient = 0.0;
-	float cloudOpacity = clamp(CLOUD_OPACITY * (1.0 - rainStrength * 0.3), moonVisibility, 1.0);
-	float colorMultiplier = CLOUD_BRIGHTNESS * (1.0 - rainStrength * 0.45);
+	float colorMultiplier = CLOUD_BRIGHTNESS * (1.0 - rainStrength * 0.5);
 	float gradientMix = dither * 0.1667;
 	float noiseMultiplier = CLOUD_THICKNESS * 0.2;
 	float scattering = pow3(VoL * 0.5 + 0.5);
@@ -72,7 +71,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 
 	if (VoU > -0.25){
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
-		for(int i = 0; i < 5; i++) {
+		for(int i = 0; i < 6; i++) {
 			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * CLOUD_VERTICAL_THICKNESS) / wpos.y) * 0.005;
 
 			vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
@@ -99,7 +98,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 			gradientMix += 0.1667;
 		}
 		cloudColor = mix(
-			ambientCol * (0.5 * sunVisibility + 0.5),
+			ambientCol,
 			lightCol * (1.0 + scattering * 0.5),
 			cloudGradient * cloud
 		);
@@ -117,7 +116,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 		cloud *= sqrt(sqrt(clamp(VoU * 24.0 - 1.0, 0.0, 1.0)));
 	}
 
-	return vec4(cloudColor * colorMultiplier, cloud * cloud * cloudOpacity);
+	return vec4(cloudColor * colorMultiplier, cloud * cloud * CLOUD_OPACITY);
 }
 #endif
 
