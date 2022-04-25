@@ -89,16 +89,17 @@ void main() {
 	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
 	float scattering = 1.0 + pow4(VoL) * 2.0;
 
-	if (isEyeInWater != 1.0){
+	if (isEyeInWater != 1){
 		#if defined FOG_PERBIOME && defined WEATHER_PERBIOME
 		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.75 * timeBrightness);
 		#endif
 
-		vl.rgb *= pow(lightCol, vec3(0.75)) * 0.5;
+		vl.rgb *= pow(lightCol, vec3(0.75)) * (0.25 - pow2(timeBrightness) * 0.20);
+		vl.b *= 1.0 + pow2(timeBrightness) * (1.0 - rainStrength);
 	} else {
 		vl.rgb *= waterColor.rgb * 0.25;
 	}
-    vl.rgb *= LIGHT_SHAFT_STRENGTH * 0.50 * shadowFade * (1.0 - blindFactor) * scattering;
+    vl.rgb *= LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor) * scattering;
 	#endif
 
 	color += vl;
