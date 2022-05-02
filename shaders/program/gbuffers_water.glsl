@@ -347,7 +347,7 @@ void main() {
 				absorbDist = 1.0 - clamp(difT * 32.0, 0.0, 1.0);
 			}
 			
-			vec3 newAlbedo = mix(absorbColor * absorbColor * (1.0 - WATER_A) * 3.0, terrainColor * terrainColor, absorbDist * absorbDist);
+			vec3 newAlbedo = mix(absorbColor * absorbColor * (1.0 - WATER_A), terrainColor * terrainColor, absorbDist * absorbDist);
 
 			float absorb = sqrt(clamp(lightmap.y + float(mat > 1.98 && mat < 2.02), 0.0, 1.0)) * lightmap.y;
  
