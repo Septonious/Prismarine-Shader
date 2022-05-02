@@ -3,24 +3,22 @@ uniform vec3 fogColor;
 #endif
 
 vec4 GetWaterFog(vec3 viewPos) {
-    float clampEyeBrightness = clamp(eBS, 0.25, 1.0);
-
     float fog = pow2(length(viewPos) / waterFogRange);
     fog = 1.0 - exp(-3.0 * fog);
 
     #ifdef OVERWORLD
     float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
-	float scattering = 1.0 + pow4(VoL) * eBS;
+	float scattering = 1.0 + pow3(VoL) * 3.0 * eBS;
     #endif
 
-    vec3 waterFogColor  = waterColor.rgb * waterColor.rgb;
+    vec3 waterFogColor  = waterColor.rgb * waterColor.rgb * 0.75;
          #ifdef OVERWORLD
          waterFogColor  = mix(waterFogColor, sqrt(waterFogColor) * weatherCol.rgb * 0.25, rainStrength);
          waterFogColor *= scattering * 0.75;
          #else
          waterFogColor * 0.25;
          #endif
-         waterFogColor *= clampEyeBrightness;
+         waterFogColor *= clamp(eBS, 0.25, 1.0);
          waterFogColor *= 1.0 - blindFactor;
 
     #ifdef OVERWORLD

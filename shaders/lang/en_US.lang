@@ -70,13 +70,14 @@ screen.VCLOUDS=Volumetric Clouds
 screen.LIGHT_SHAFT=Light Shafts Config
 screen.BLUR=Blur Effects
 screen.EMISSIVES=Emissives Config
+screen.SHADOW_CONFIG=Shadows Config
 
 screen.WORLD=World
 screen.WAVING=Waving Blocks
 screen.CURVATURE=Curvature
 
 #Settings
-screen.ABOUT=Prismarine Shader
+screen.ABOUT=Prismarine Shader by Septonious
 screen.ABOUT.comment=https://www.curseforge.com/minecraft/customization/prismarine-shader/. If you downloaded Prismarine from a different site, please download it from the link above.
 option.ABOUT=§cSuper Secret Settings
 value.ABOUT.0=ඞ
@@ -92,6 +93,9 @@ value.shadowMapResolution.8192="looks like real life wait what the-" (8192)
 
 option.shadowDistance=Shadow Distance
 option.shadowDIstance.comment=Adsusts shadow distance.
+
+option.SHADOW_BLUR_STRENGTH=Shadow Blur Strength
+option.SHADOW_BLUR_STRENGTH.comment=Adjusts shadow blur strength.
 
 option.SHADOW_COLOR=Colored Shadow
 option.SHADOW_COLOR.comment=Enables tinted shadow from translucents. §a[+]§rUsed for colored volumetric light shafts. §c[-]§rSlightly higher performance cost when using shadow filtering.
@@ -127,9 +131,6 @@ option.AO_STRENGTH.comment=Adjusts ambient occlusion strength.
 
 option.DYNAMIC_HANDLIGHT=Dynamic Handlight
 option.DYNAMIC_HANDLIGHT.comment=Allows blocklight to be emitted from view when holding certain objects.
-
-option.TOON_LIGHTMAP=Toon Lightmap
-option.TOON_LIGHTMAP.comment=Reduces the quality of vanilla lighting for cel shading. §e[*]§rThis option is known for making your game "look bad", only enable this when you need it.
 
 option.WHITE_WORLD=White World
 option.WHITE_WORLD.comment=Replaces textures with flat white color.
@@ -173,8 +174,6 @@ option.GLOW_STRENGTH.comment=Adjusts glow strength of emissive blocks which are 
 
 option.ALBEDO_BALANCING=Albedo Balancing
 option.ALBEDO_BALANCING.comment=Reduces brightness of very bright colored surfaces.
-
-option.BILATERAL_UPSCALING=Bilateral Upscaling
 
 option.BLUR_FILTERING=Blur Filtering
 option.BLUR_FILTERING.comment=Filters volumetrics dither patterns using single pass gaussian blur.
@@ -240,6 +239,9 @@ option.PARALLAX_QUALITY.comment=Adjusts the quality of parallax occlusion mappin
 
 option.PARALLAX_DISTANCE=Parallax Distance*
 option.PARALLAX_DISTANCE.comment=Adjusts how far parallax occlusion mapping and self shadows can be rendered.
+
+option.SHADOWS=Shadows
+option.SHADOWS.comment=Toggles shadows. Has a big performance impact.
 
 option.SELF_SHADOW=Self Shadows*
 option.SELF_SHADOW.comment=Allows a surface to cast shadow to itself using heightmap.

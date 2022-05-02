@@ -171,15 +171,19 @@ void main() {
 
 	float dither = Bayer64(gl_FragCoord.xy);
 
-	#ifdef AURORA
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 12);
-	#endif
-
 	vec4 cloud = vec4(0.0);
 
 	#if defined PLANAR_CLOUDS
 	cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
+	#endif
+
+	#ifdef AURORA
+	vec3 aurora = DrawAurora(viewPos.xyz, dither, 10);
+	albedo.rgb += aurora;
+	#ifdef PLANAR_CLOUDS
+	aurora.rgb *= 1.0 - float(cloud.a > 0.0);
+	#endif
 	#endif
 
 	#ifdef STARS

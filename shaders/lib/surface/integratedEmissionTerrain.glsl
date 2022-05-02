@@ -40,7 +40,7 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 	} else if (mat > 109.9 && mat < 110.1) { // Glow Lichen
 		newEmissive = (1.0 - lightmap.y) * (0.025 + float(albedo.r > albedo.g || albedo.r > albedo.b));
 	} else if (mat > 110.9 && mat < 111.1) { // Redstone Things
-		newEmissive = float(albedo.r > 0.9) * 0.25;
+		newEmissive = float(albedo.r > 0.9) * 0.5;
 	} else if (mat > 111.9 && mat < 112.1) { // Soul Emissives
 		newEmissive = float(lengthAlbedo > 0.9) * 0.25;
 	} else if (mat > 112.9 && mat < 113.1) { // Brewing Stand
@@ -66,7 +66,7 @@ void getIntegratedEmission(inout float emissive, in vec2 lightmap, in vec4 albed
 	} else if (mat > 123.9 && mat < 124.1) { // Redstone Lamp
 		newEmissive = 0.05 + float(lengthAlbedo > 0.75) * 0.5;
 	} else if (mat > 124.9 && mat < 125.1) { // Sea Lantern
-		newEmissive = float(lengthAlbedo > 0.95) * 0.2 + float(albedo.g > 0.4) * 0.05;
+		newEmissive = float(lengthAlbedo > 0.95) * 0.2 + float(albedo.g > 0.4) * 0.01;
 	} else if (mat > 125.9 && mat < 126.1) { // Nether Wart
 		newEmissive = float(lengthAlbedo > 0.25) * 0.25 + float(lengthAlbedo > 0.75) * 0.5;
 	}

@@ -135,18 +135,6 @@ float GetLuminance(vec3 color) {
 #endif
 #endif
 
-float getSubsurfaceScatteringData(in float mat, in vec3 albedo, in vec3 viewPos, float leaves) {
-	float subsurface = 0.0;
-	float NoL = clamp(dot(normal, lightVec), 0.0, 1.0);
-	float VoL = pow4(clamp(dot(normalize(viewPos), lightVec), 0.0, 1.0)) * 0.75 + 0.25;
-
-	subsurface += float(mat > 500.9 && mat < 501.1) * float(albedo.b > 0.7) * NoL * VoL * 0.5;
-	subsurface += leaves * NoL * VoL;
-	subsurface += float(mat > 499.9 && mat < 500.1) * NoL * VoL * 0.5;
-
-	return subsurface;
-}
-
 //Program//
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * vec4(color.rgb, 1.0);
@@ -201,7 +189,6 @@ void main() {
 		float metalness      = 0.0;
 			  emission       = emissive + candle + lava;
 		float subsurface     = (foliage + candle) * 0.5 + leaves;
-		subsurface += getSubsurfaceScatteringData(mat, albedo.rgb, viewPos.xyz, leaves);
 		vec3 baseReflectance = vec3(0.04);
 
 		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
@@ -475,13 +462,6 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #include "/lib/surface/integratedEmissionTerrain.glsl"
 #endif
 
-void getSubsurfaceScatteringMaterials(inout float mat) {
-	if (mc_Entity.x == 29999) mat = 500.0;
-	if (mc_Entity.x == 501) mat = 501.0;
-	if (mc_Entity.x == 502) mat = 502.0;
-	if (mc_Entity.x == 503) mat = 503.0;
-}
-
 //Program//
 void main() {
 	texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
@@ -557,8 +537,6 @@ void main() {
 	isPlant = 0.0;
 	getIntegratedEmissionMaterials(mat, isPlant);
 	#endif
-
-	getSubsurfaceScatteringMaterials(mat);
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);

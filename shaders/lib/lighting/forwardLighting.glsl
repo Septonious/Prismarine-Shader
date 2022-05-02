@@ -15,11 +15,17 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     #ifdef SSPT
-    lightmap.x *= 0.5;
+    lightmap.x *= 0.25;
     #endif
 
     #if defined OVERWORLD || defined END
-    if (NoL > 0.0 || subsurface > 0.0) shadow = GetShadow(worldPos, NoL, subsurface, lightmap.y);
+    if (NoL > 0.0 || subsurface > 0.0){
+        #ifdef SHADOWS
+        shadow = GetShadow(worldPos, NoL, subsurface, lightmap.y);
+        #else
+        shadow = vec3(1.0);
+        #endif
+    }
     shadow *= parallaxShadow;
     NoL = clamp(NoL * 1.01 - 0.01, 0.0, 1.0);
     

@@ -25,14 +25,10 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
 
 	#ifdef TAA
-	dither = fract(dither + frameCounter / 32.0);
+	dither = fract(dither + frameCounter / 16.0);
 	#endif
 
-	#ifdef OVERWORLD
-	float visibility = 1.0 - timeBrightness * eBS * (0.5 - rainStrength * 0.5);
-	visibility = visibility * (1.0 - float(cameraPosition.y < 50.0) * (1.0 - eBS)) + float(isEyeInWater == 1);
-	#endif
-
+	float visibility = (1.0 - pow2(timeBrightness) * 0.8) * (1.0 - float(cameraPosition.y < 50.0) * (1.0 - eBS)) + float(isEyeInWater == 1);
 	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 	visibility *= ug;
 
@@ -77,12 +73,10 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
-				if (depth0 < minDist) shadow *= color * (1.0 - isEyeInWater * 0.75);
-				else if (isEyeInWater == 1.0) {
-					shadow *= watercol;
-				}
-
-				if (isEyeInWater == 0){
+				if (depth0 < minDist) shadow *= color;
+				if (isEyeInWater == 1.0) {
+					shadow *= watercol * 4.0 * (0.1 + sunVisibility * 0.9);
+				} else {
 					vec3 fogPosition = worldposition.xyz + cameraPosition.xyz;
 					float worldHeightFactor = 1.0 - clamp(sqrt(fogPosition.y * 0.001 * LIGHTSHAFT_HEIGHT), 0.0, 1.0);
 					

@@ -62,12 +62,9 @@ void main() {
 
 	#ifdef WATER_CAUSTICS
 	if (mat > 2.98 && mat < 3.02){
-		waterColor.r *= 1.1;
-		waterColor.g *= 0.7;
-		waterColor.b *= 1.4;
 		float caustics = getCaustics(position.xyz + cameraPosition.xyz);
-		if (isEyeInWater == 0) albedo.rgb = mix(waterColor.rgb, waterColor.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness * 0.75), caustics);
-		else albedo.rgb *= caustics * waterColor.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness * 0.75);
+		if (isEyeInWater == 0) albedo.rgb = mix(waterColor.rgb, waterColor.rgb * WATER_CAUSTICS_STRENGTH, caustics);
+		else albedo.rgb *= caustics * waterColor.rgb * WATER_CAUSTICS_STRENGTH;
 	}
 	#endif
 	

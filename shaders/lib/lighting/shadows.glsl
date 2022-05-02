@@ -5,28 +5,18 @@ uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
 #endif
 
-vec2 shadowOffsets[16] = vec2[16](
-	vec2( 0.0    ,  0.25  ),
-	vec2(-0.2165 ,  0.125 ),
-	vec2(-0.2165 , -0.125 ),
-	vec2( 0      , -0.25  ),
-	vec2( 0.2165 , -0.125 ),
-	vec2( 0.2165 ,  0.125 ),
-	vec2( 0      ,  0.5   ),
-	vec2(-0.25   ,  0.433 ),
-	vec2(-0.433  ,  0.25  ),
-	vec2(-0.5    ,  0     ),
-	vec2(-0.433  , -0.25  ),
-	vec2(-0.25   , -0.433 ),
-	vec2( 0      , -0.5   ),
-	vec2( 0.25   , -0.433 ),
-	vec2( 0.433  , -0.2   ),
-	vec2( 0.5    ,  0     )
+vec2 shadowOffsets[8] = vec2[8](
+   vec2(0.2921473492144121, 0.03798942536906266),
+   vec2(-0.27714274097351554, 0.3304853027892154),
+   vec2(0.09101981507673855, -0.5188871157785563),
+   vec2(0.44459182774878003, 0.5629069824170247),
+   vec2(-0.6963877647721594, -0.09264703741542105),
+   vec2(0.7417522811565185, -0.4070419658858473),
+   vec2(-0.191856808948964, 0.9084732299066597),
+   vec2(-0.40412395850181015, -0.8212788214021378)
 );
 
-float biasDistribution[10] = float[10](
-    0.0, 0.057, 0.118, 0.184, 0.255, 0.333, 0.423, 0.529, 0.667, 1.0
-);
+float biasDistribution[10] = float[10](0.0, 0.057, 0.118, 0.184, 0.255, 0.333, 0.423, 0.529, 0.667, 1.0);
 
 vec3 DistortShadow(vec3 worldPos, float distortFactor) {
 	worldPos.xy /= distortFactor;
@@ -65,19 +55,19 @@ vec3 SampleFilteredShadow(vec3 shadowPos, float offset, float biasStep) {
     float dither = Bayer64(gl_FragCoord.xy);
     #endif
     
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 8; i++) {
         vec2 shadowOffset = shadowOffsets[i] * offset;
         shadow0 += shadow2D(shadowtex0, vec3(shadowPos.st + shadowOffset, shadowPos.z)).x;
         #if SSS_QUALITY == 1
         if (biasStep > 0.0) shadowPos.z = sz - biasStep * GetCurvedBias(i, dither);
         #endif
     }
-    shadow0 /= 16.0;
+    shadow0 /= 8.0;
 
     vec3 shadowCol = vec3(0.0);
     #ifdef SHADOW_COLOR
     if (shadow0 < 0.999) {
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 8; i++) {
             vec2 shadowOffset = shadowOffsets[i] * offset;
             shadowCol += texture2D(shadowcolor0, shadowPos.st + shadowOffset).rgb *
                          shadow2D(shadowtex1, vec3(shadowPos.st + shadowOffset, shadowPos.z)).x;
@@ -85,7 +75,7 @@ vec3 SampleFilteredShadow(vec3 shadowPos, float offset, float biasStep) {
             if (biasStep > 0.0) shadowPos.z = sz - biasStep * GetCurvedBias(i, dither);
             #endif
         }
-        shadowCol /= 16.0;
+        shadowCol /= 8.0;
     }
     #endif
 
@@ -188,14 +178,14 @@ vec3 GetShadow(vec3 worldPos, float NoL, float subsurface, float skylight) {
     float distanceBias = sqrt(dot(worldPos.xyz, worldPos.xyz)) * 0.005;
     
     float bias = (distortBias * biasFactor + distanceBias + 0.05) / shadowMapResolution;
-    float offset = 4.0 / shadowMapResolution;
+    float offset = SHADOW_BLUR_STRENGTH / shadowMapResolution;
     
     if (subsurface > 0.0) {
-        bias = 0.0002;
+        bias = 0.0001;
         #if defined SHADOW_FILTER && SSS_QUALITY == 1
         bias *= mix(subsurface, 1.0, NoL);
         #endif
-        offset = 0.0007;
+        offset = 0.0001;
     }
     float biasStep = 0.001 * subsurface * (1.0 - NoL);
     

@@ -69,54 +69,53 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 
 	vec3 cloudColor = vec3(0.0);
 
-	if (VoU > -0.25){
-		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
-		for(int i = 0; i < 6; i++) {
-			vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * CLOUD_VERTICAL_THICKNESS) / wpos.y) * 0.005;
+	vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 
-			vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
-				#ifndef BLOCKY_CLOUDS
-				 erodeCoord(coord, i, dither, 0.003);
-				#endif
-				#ifdef BLOCKY_CLOUDS
-				coord = floor(coord * 8.0);
-				#endif
-			float coverage = float(i - 3.0 + dither) * 0.667;
+	for (int i = 0; i < 6; i++) {
+		vec3 planeCoord = wpos * ((CLOUD_HEIGHT + (i + dither) * CLOUD_VERTICAL_THICKNESS) / wpos.y) * 0.005;
 
-			float noise = CloudNoise(coord, wind);
-				  noise = CloudCoverage(noise, VoU, coverage) * noiseMultiplier;
-				  noise = noise / pow(pow(noise, 2.5) + 1.0, 0.4);
+		vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
+			#ifndef BLOCKY_CLOUDS
+			 erodeCoord(coord, i, dither, 0.003);
+			#else
+			coord = floor(coord * 8.0);
+			#endif
 
-			cloudGradient = mix(
-				cloudGradient,
-				mix(gradientMix * gradientMix, 1.0 - noise, 0.25),
-				noise * (1.0 - cloud * cloud)
-			);
+		float coverage = float(i - 3.0 + dither) * 0.667;
 
-			cloud = mix(cloud, 1.0, noise);
-			
-			gradientMix += 0.1667;
-		}
-		cloudColor = mix(
-			ambientCol,
-			lightCol * (1.0 + scattering * 0.5),
-			cloudGradient * cloud
+		float noise = CloudNoise(coord, wind);
+			  noise = CloudCoverage(noise, VoU, coverage) * noiseMultiplier;
+			  noise = noise / pow(pow(noise, 2.5) + 1.0, 0.4);
+
+		cloudGradient = mix(
+			cloudGradient,
+			mix(gradientMix * gradientMix, 1.0 - noise, 0.25),
+			noise * (1.0 - cloud * cloud)
 		);
 
-		#if MC_VERSION >= 11800
-		cloudColor *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
-		#else
-		cloudColor *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
-		#endif
+		cloud = mix(cloud, 1.0, noise);
 		
-		#ifdef UNDERGROUND_SKY
-		cloud *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
-		#endif
-
-		cloud *= sqrt(sqrt(clamp(VoU * 24.0 - 1.0, 0.0, 1.0)));
+		gradientMix += 0.1667;
 	}
+	cloudColor = mix(
+		ambientCol,
+		lightCol * (1.0 + scattering * 0.5),
+		cloudGradient * cloud
+	);
 
-	return vec4(cloudColor * colorMultiplier, cloud * cloud * CLOUD_OPACITY);
+	cloud *= clamp(1.0 - exp(-20.0 * VoU + 0.5), 0.0, 1.0);
+
+	#if MC_VERSION >= 11800
+	cloudColor *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
+	#else
+	cloudColor *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
+	#endif
+		
+	#ifdef UNDERGROUND_SKY
+	cloud *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+	#endif
+
+	return vec4(cloudColor * colorMultiplier, clamp(pow2(cloud), 0.0, 1.0) * CLOUD_OPACITY);
 }
 #endif
 
@@ -234,8 +233,6 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 #endif
 
 #ifdef END_NEBULA
-#include "/lib/color/nebulaColor.glsl"
-
 float nebulaSample(vec2 coord, vec2 wind, float VoU) {
 	#ifdef OVERWORLD
 	coord *= 2.0;

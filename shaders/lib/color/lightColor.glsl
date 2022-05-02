@@ -5,9 +5,9 @@ uniform float isForest, isJungle, isTaiga;
 #endif
 #endif
 
-vec3 lightMorning    = vec3(LIGHT_MR * (1.5 - timeBrightness * 0.5),   LIGHT_MG,   LIGHT_MB)   * LIGHT_MI / 255.0;
+vec3 lightMorning    = vec3(LIGHT_MR,   LIGHT_MG,   LIGHT_MB)   * LIGHT_MI / 255.0;
 vec3 lightDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB)   * LIGHT_DI / 255.0;
-vec3 lightEvening    = vec3(LIGHT_ER * (1.5 - timeBrightness * 0.5),   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI / 255.0;
+vec3 lightEvening    = vec3(LIGHT_ER,   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI / 255.0;
 vec3 lightNight      = vec3(LIGHT_NR,   LIGHT_NG,   LIGHT_NB)   * LIGHT_NI * 0.3 / 255.0;
 
 vec3 ambientMorning  = vec3(AMBIENT_MR, AMBIENT_MG, AMBIENT_MB) * AMBIENT_MI / 255.0;
@@ -71,7 +71,7 @@ vec3 CalcSunColor(vec3 morning, vec3 day, vec3 evening) {
 
 vec3 CalcLightColor(vec3 sun, vec3 night, vec3 weatherCol) {
 	vec3 c = mix(night, sun, sunVisibility);
-	c = mix(c, dot(c, vec3(0.299, 0.587, 0.114)) * weatherCol, rainStrength);
+	c = mix(c, dot(c, vec3(0.299, 0.587, 0.114)) * sqrt(weatherCol), rainStrength);
 	return c * c;
 }
 
