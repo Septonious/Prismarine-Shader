@@ -503,6 +503,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #undef WATER_ABSORPTION
 #undef END_NEBULA
 #undef OVERWORLD_NEBULA
+#undef SSPT
 #endif
 
 #ifdef END
@@ -517,6 +518,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #undef OVERWORLD_NEBULA
 #undef FOG_PERBIOME
 #undef WATER_ABSORPTION
+#undef SSPT
 #endif
 
 #ifdef OVERWORLD

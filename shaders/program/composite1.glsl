@@ -92,6 +92,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 
 #ifdef VOLUMETRIC_CLOUDS
 #include "/lib/atmospherics/volumetricClouds.glsl"
+#include "/lib/util/blueNoise.glsl"
 #endif
 
 #ifdef LIGHT_SHAFT
@@ -146,7 +147,7 @@ void main() {
 	vec4 cloud = vec4(0.0);
 
 	#ifdef VOLUMETRIC_CLOUDS
-	cloud = getVolumetricCloud(viewPosScaled.xyz, z1Scaled, z0Scaled, dither, translucent);
+	cloud = getVolumetricCloud(viewPosScaled.xyz, z1Scaled, z0Scaled, BlueNoise(gl_FragCoord.xy), translucent);
 	#endif
 
 	#if ALPHA_BLEND == 0
