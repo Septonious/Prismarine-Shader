@@ -98,7 +98,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol){
 		gradientMix += 0.1667;
 	}
 	cloudColor = mix(
-		ambientCol,
+		ambientCol * (1.0 - timeBrightness * 0.25),
 		lightCol * (1.0 + scattering * 0.5),
 		cloudGradient * cloud
 	);

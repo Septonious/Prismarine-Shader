@@ -94,7 +94,7 @@ void main() {
 		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.75 * timeBrightness);
 		#endif
 
-		vl.rgb *= lightCol;
+		vl.rgb *= lightCol * 0.5;
 	} else {
 		vl.rgb *= waterColor.rgb * 0.25;
 	}
