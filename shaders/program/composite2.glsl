@@ -24,15 +24,19 @@ uniform float rainStrength;
 uniform float blindFactor;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
-
-uniform sampler2D depthtex0;
-uniform mat4 gbufferProjectionInverse;
 #endif
 
 uniform sampler2D colortex0;
 
+#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
+uniform sampler2D depthtex0;
+uniform mat4 gbufferProjectionInverse;
+#endif
+
 #ifdef VOLUMETRIC_CLOUDS
 uniform sampler2D colortex8;
+
+uniform float eyeAltitude;
 #endif
 
 #if defined BLUR_FILTERING || defined VOLUMETRIC_CLOUDS
@@ -67,6 +71,13 @@ void main() {
     vec3 color = texture2D(colortex0, texCoord.xy).rgb;
 	vec2 newTexCoord = texCoord * VOLUMETRICS_RENDER_RESOLUTION;
 
+	#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
+	float z0 = texture2D(depthtex0, texCoord).r;
+    vec4 screenPos = vec4(texCoord, z0, 1.0);
+    vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+    viewPos /= viewPos.w;
+	#endif
+
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 	#ifdef BLUR_FILTERING
 	vec3 vl = GaussianBlur(colortex1, newTexCoord, 1.0).rgb;
@@ -75,11 +86,6 @@ void main() {
 	#endif
 
 	#ifdef LIGHT_SHAFT
-	float z0 = texture2D(depthtex0, texCoord).r;
-    vec4 screenPos = vec4(texCoord, z0, 1.0);
-    vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
-    viewPos /= viewPos.w;
-
 	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
 	float scattering = 1.0 + pow4(VoL);
 
@@ -99,14 +105,17 @@ void main() {
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
-    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight), 128.0);
-    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight), 128.0);
-    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0), 128.0);
-    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0), 128.0);
+	float VoU = dot(normalize(viewPos.xyz), upVec);
+
+    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight), 16.0);
+    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight), 16.0);
+    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0), 16.0);
+    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0), 16.0);
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
 	cloud.a = clamp(cloud.a, 0.0, 1.0);
-	color.rgb = mix(color.rgb, cloud.rgb, cloud.a * cloud.a);
+	if (eyeAltitude < VCLOUDS_HEIGHT - 40.0) cloud.a *= clamp(1.0 - exp(-16.0 * VoU + 0.5), 0.0, 1.0);
+	color.rgb = mix(color.rgb, cloud.rgb, cloud.a * cloud.a * 0.75);
 	#endif
 
 	/* DRAWBUFFERS:0 */

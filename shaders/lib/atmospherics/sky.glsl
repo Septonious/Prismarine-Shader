@@ -59,7 +59,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     float rainGradient = exp(-max(VoU, 0.0) / SKY_DENSITY_W);
     vec3 weatherSky = weatherCol.rgb * weatherExposure;
-    weatherSky *= GetLuminance(ambientCol / (weatherSky)) * 1.5 * (1.0 - moonVisibility * 0.5);
+    weatherSky *= GetLuminance(ambientCol / (weatherSky)) * 1.5;
     sky = mix(sky, weatherSky * rainGradient, rainStrength);
 
     sky *= ground;

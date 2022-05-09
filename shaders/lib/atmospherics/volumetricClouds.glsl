@@ -49,7 +49,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 		for (int i = 0; i < VCLOUDS_SAMPLES; i++) {
 			float minDist = (i + dither) * VCLOUDS_RANGE;
 
-			if (depth1 < minDist || minDist > 1024.0 || finalColor.a > 0.99 || isEyeInWater > 1.0 || altitudeFactor2 < 0.25){
+			if (depth1 < minDist || minDist > 1024.0 || finalColor.a > 0.99 || isEyeInWater > 0.0 || altitudeFactor2 < 0.25){
 				break;
 			}
 			
@@ -74,7 +74,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 				vec4 cloudsColor = vec4(cloudLighting, noise);
 					 cloudsColor.rgb *= cloudsColor.a;
 
-				finalColor += cloudsColor * (1.0 - finalColor.a) * (1.0 - isEyeInWater * (1.0 - eBS));
+				finalColor += cloudsColor * (1.0 - finalColor.a);
 
 				//Translucency blending, works half correct
 				if (depth0 < minDist){
