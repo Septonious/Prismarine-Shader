@@ -33,6 +33,8 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	dither = fract(dither + frameCounter / 8.0);
 	#endif
 
+	float ug = mix(clamp((cameraPosition.y - 64.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
 
@@ -42,14 +44,11 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	float altitudeFactor = clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
 	#endif
 
-	float altitudeFactor2 = pow2(clamp(cameraPosition.y * 0.1, 0.0, 1.0));
-	altitudeFactor2 *= clamp(eBS + 0.25, 0.0, 1.0);
-
-	if (clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord && eBS > 0.2){
+	if (clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord && eBS > 0.1){
 		for (int i = 0; i < VCLOUDS_SAMPLES; i++) {
 			float minDist = (i + dither) * VCLOUDS_RANGE;
 
-			if (depth1 < minDist || minDist > 1024.0 || finalColor.a > 0.99 || isEyeInWater > 0.0 || altitudeFactor2 < 0.25){
+			if (depth1 < minDist || minDist > 1024.0 || finalColor.a > 0.99 || isEyeInWater > 0.0 || ug == 0){
 				break;
 			}
 			
