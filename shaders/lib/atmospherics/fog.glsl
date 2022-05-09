@@ -45,7 +45,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-    float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+	float ug = mix(clamp((cameraPosition.y - 64.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 	float density = ug * FOG_DENSITY * (1.0 + rainStrength);
 	float fog = lViewPos * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
@@ -58,11 +58,20 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 
 	vec3 fogColor = GetFogColor(viewPos);
 
+    #ifdef UNDERGROUND_SKY
+    fogColor = mix(minLightCol * 0.125, fogColor, ug);
+    #endif
+
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3
 	if (isEyeInWater == 0){
-		float vanillaFog = 1.0 - (far - fogFactor) / (far * 0.25);
-		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
-	
+		float vanillaFog = pow8(lViewPos * FOG_DENSITY / 256.0);
+
+		#if DISTANT_FADE == 2 || DISTANT_FADE == 3
+		vanillaFog += pow8(fogFactor / far);
+		#endif
+
+		vanillaFog = clamp(1.0 - exp(-vanillaFog), 0.0, 1.0);
+
 		if (vanillaFog > 0.0){
 			vec3 vanillaFogColor = texture2D(colortex9, texCoord).rgb;
 			fogColor *= fog;

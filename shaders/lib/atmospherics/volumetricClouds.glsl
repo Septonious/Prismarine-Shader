@@ -2,36 +2,15 @@ float GetNoise(vec2 pos) {
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
-float getPerlinNoise(vec3 pos){
-	vec3 u = floor(pos);
-	vec3 v = fract(pos);
-
-	v = v * v * (3.0 - 2.0 * v);
-	u.y *= 32.0;
-
-	float noisebdl = GetNoise(u.xz + u.y);
-	float noisebdr = GetNoise(u.xz + u.y + vec2(1.0, 0.0));
-	float noisebul = GetNoise(u.xz + u.y + vec2(0.0, 1.0));
-	float noisebur = GetNoise(u.xz + u.y + vec2(1.0, 1.0));
-	float noisetdl = GetNoise(u.xz + u.y + 32.0);
-	float noisetdr = GetNoise(u.xz + u.y + 32.0 + vec2(1.0, 0.0));
-	float noisetul = GetNoise(u.xz + u.y + 32.0 + vec2(0.0, 1.0));
-	float noisetur = GetNoise(u.xz + u.y + 32.0 + vec2(1.0, 1.0));
-
-	float noise = mix(mix(mix(noisebdl, noisebdr, v.x), mix(noisebul, noisebur, v.x), v.z), mix(mix(noisetdl, noisetdr, v.x), mix(noisetul, noisetur, v.x), v.z), v.y);
-
-	return noise;
-}
-
 float getCloudSample(vec3 pos){
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 
 	float amount = VCLOUDS_AMOUNT * (0.90 + rainStrength * 0.40);
 
 	float noiseA = 0.0;
-	float frequency = 0.15, speed = 0.5;
+	float frequency = 0.25, speed = 0.5;
 	for (int i = 1; i <= VCLOUDS_OCTAVES; i++){
-		noiseA += getPerlinNoise(pos * frequency - wind * speed) * i * VCLOUDS_HORIZONTAL_THICKNESS;
+		noiseA += getTextureNoise(pos * frequency - wind * speed) * i * VCLOUDS_HORIZONTAL_THICKNESS;
 		frequency *= VCLOUDS_FREQUENCY;
 		speed *= 0.2;
 	}
@@ -39,16 +18,10 @@ float getCloudSample(vec3 pos){
 	float sampleHeight = abs(VCLOUDS_HEIGHT - pos.y) / VCLOUDS_VERTICAL_THICKNESS;
 
 	//Shaping
-	noiseA -= getPerlinNoise(pos * 0.5 - wind * speed) * 1.5;
-	float noiseB = clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
-	float density = pow(smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noiseB, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noiseB, pos.y), 0.25);
-	sampleHeight = pow(sampleHeight, 8.0 * pow2(1.0 - density * 0.85));
+	noiseA -= getTextureNoise(pos * 0.75 - wind * speed) * 2.0;
 
 	return clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 }
-
-vec3 cloudLightCol = mix(lightCol * lightCol, lightCol, moonVisibility);
-vec3 cloudAmbientCol = ambientCol * (1.0 - moonVisibility * 0.5) * (1.0 - length(ambientCol));
 
 vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 translucent){
 	vec4 wpos = vec4(0.0);
@@ -59,9 +32,6 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	#ifdef TAA
 	dither = fract(dither + frameCounter / 8.0);
 	#endif
-
-	float VoL = clamp(dot(normalize(viewPos.xyz), sunVec), 0.0, 1.0);
-	float scattering = moonVisibility + 1.5 + pow4(VoL) * 2.0;
 
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
@@ -99,9 +69,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 				//Find the lower and upper parts of the cloud
 				float sampleHeightFactor = smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y);
 
-				vec3 densityLighting = mix(cloudLightCol, cloudAmbientCol, noise);
-				vec3 heightLighting = mix(cloudLightCol, cloudAmbientCol, sampleHeightFactor);
-				vec3 cloudLighting = sqrt(densityLighting * heightLighting) * scattering;
+				vec3 cloudLighting = mix(lightCol, ambientCol, sampleHeightFactor);
 
 				vec4 cloudsColor = vec4(cloudLighting, noise);
 					 cloudsColor.rgb *= cloudsColor.a;
@@ -116,12 +84,6 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 			}
 		}
 	}
-
-	#if MC_VERSION >= 11800
-	finalColor.rgb *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
-	#else
-	finalColor.rgb *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
-	#endif
 	
-	return finalColor;
+	return finalColor * altitudeFactor;
 }

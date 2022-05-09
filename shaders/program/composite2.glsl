@@ -17,11 +17,10 @@ varying vec3 sunVec, upVec;
 #endif
 
 //Uniforms//
-uniform float rainStrength;
-
 #ifdef LIGHT_SHAFT
 uniform int isEyeInWater;
 
+uniform float rainStrength;
 uniform float blindFactor;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
@@ -40,10 +39,6 @@ uniform sampler2D colortex8;
 uniform float viewWidth, viewHeight;
 #endif
 
-#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
-uniform ivec2 eyeBrightnessSmooth;
-#endif
-
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 uniform sampler2D colortex1;
 
@@ -53,7 +48,6 @@ const bool colortex1MipmapEnabled = true;
 
 //Common Variables//
 #if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
-float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 #endif
@@ -112,9 +106,7 @@ void main() {
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
 	cloud.a = clamp(cloud.a, 0.0, 1.0);
-
-	float rainFactor = 1.0 - rainStrength * 0.75;
-	color.rgb = mix(color.rgb, pow(cloud.rgb, vec3(1.0 - rainStrength * 0.25)) * rainFactor, cloud.a * cloud.a);
+	color.rgb = mix(color.rgb, cloud.rgb, cloud.a * cloud.a);
 	#endif
 
 	/* DRAWBUFFERS:0 */

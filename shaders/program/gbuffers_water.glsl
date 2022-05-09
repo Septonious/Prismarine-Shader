@@ -341,9 +341,9 @@ void main() {
 			}
 
 			if (float(mat > 1.98 && mat < 2.02) > 0.5){
-				albedo.a += albedo.a * 0.25;
+				albedo.a += albedo.a * 0.5;
 				albedo.a = clamp(albedo.a, 0.5, 0.95);
-				absorbColor = normalize(albedo.rgb * albedo.rgb) * terrainColor;
+				absorbColor = normalize(albedo.rgb * albedo.rgb) * terrainColor * 2.0;
 				absorbDist = 1.0 - clamp(difT * 32.0, 0.0, 1.0);
 			}
 			

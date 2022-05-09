@@ -274,7 +274,7 @@ option.NORMAL_PLANTS.comment=Adjusts plant shading. §e[*]§rDisable this if non
 
 #Atmospherics
 option.CLOUDS=Clouds
-option.CLOUDS.comment=Enables clouds. §e[+]§rPlanar clouds have a low performance impact. §e[*]§rVanilla clouds requires vanilla cloud setting set to default or on. §c[+]§rVolumetric clouds have a high performance impact.
+option.CLOUDS.comment=Enables clouds. §e[+]§rPlanar clouds have a low performance impact. §e[*]§rVanilla clouds require vanilla cloud setting set to default or on. §e[+]§rVolumetric clouds have a medium performance impact.
 value.CLOUDS.0=§cOFF
 value.CLOUDS.1=Planar
 value.CLOUDS.2=Vanilla
