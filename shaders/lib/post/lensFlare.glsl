@@ -34,19 +34,6 @@ float AnamorphicLens(vec2 lightPos, float size, float dist) {
 	return lens;
 }
 
-vec3 RainbowLens(vec2 lightPos, float size, float dist, float rad) {
-	vec2 lensCoord = (texCoord + (lightPos * dist - 0.5)) * vec2(aspectRatio, 1.0);
-	float lens = clamp(1.0 - length(lensCoord) / (size * fovmult), 0.0, 1.0);
-	
-	vec3 rainbowLens = 
-		(smoothstep(0.0, rad, lens) - smoothstep(rad, rad * 2.0, lens)) * vec3(1.0, 0.0, 0.0) +
-		(smoothstep(rad * 0.5, rad * 1.5, lens) - smoothstep(rad * 1.5, rad * 2.5, lens)) * vec3(0.0, 1.0, 0.0) +
-		(smoothstep(rad, rad * 2.0, lens) - smoothstep(rad * 2.0, rad * 3.0, lens)) * vec3(0.0, 0.0, 1.0)
-	;
-
-	return rainbowLens;
-}
-
 vec3 LensTint(vec3 lens, float truePos) {
 	float isMoon = truePos * 0.5 + 0.5;
 
@@ -84,9 +71,7 @@ void LensFlare(inout vec3 color, vec2 lightPos, float truePos, float multiplier)
 			RingLens(lightPos, 0.25, 0.43, 0.45) * vec3(0.10, 0.35, 2.50) * 1.5 +
 			RingLens(lightPos, 0.18, 0.98, 0.99) * vec3(0.15, 1.00, 2.55) * 2.5
 		) * (falloffIn - falloffOut) + (
-			AnamorphicLens(lightPos, 1.0, -1.0) * vec3(0.3,0.7,1.0) * 0.35 +
-			RainbowLens(lightPos, 0.525, -1.0, 0.2) * 0.05 +
-			RainbowLens(lightPos, 2.0, 4.0, 0.1) * 0.05
+			AnamorphicLens(lightPos, 1.0, -1.0) * vec3(0.3,0.7,1.0) * 0.35
 		) * (1.0 - falloffOut);
 
 		lensFlare = LensTint(lensFlare, truePos);

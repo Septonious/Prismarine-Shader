@@ -10,7 +10,7 @@ float getCloudSample(vec3 pos){
 	float noiseA = 0.0;
 	float frequency = 0.25, speed = 0.5;
 	for (int i = 1; i <= VCLOUDS_OCTAVES; i++){
-		noiseA += getTextureNoise(pos * frequency - wind * speed) * i * VCLOUDS_HORIZONTAL_THICKNESS;
+		noiseA += getTextureNoise(pos * frequency - wind * speed) * i * VCLOUDS_HORIZONTAL_THICKNESS * (3.0 - VCLOUDS_OCTAVES * 0.5);
 		frequency *= VCLOUDS_FREQUENCY;
 		speed *= 0.2;
 	}
