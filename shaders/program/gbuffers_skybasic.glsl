@@ -146,7 +146,7 @@ vec3 RainbowLens(vec3 viewPos, vec2 lightPos, float size, float dist, float rad)
 		(smoothstep(rad, rad * 2.0, lens) - smoothstep(rad * 2.0, rad * 3.0, lens)) * vec3(0.0, 0.0, 1.0)
 	;
 
-	return rainbowLens * float(VoU > 0.0) * wetness * (1.0 - rainStrength);
+	return rainbowLens * float(VoU > 0.0) * wetness * (1.0 - rainStrength) * sunVisibility;
 }
 #endif
 
