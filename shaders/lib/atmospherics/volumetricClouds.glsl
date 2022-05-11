@@ -30,7 +30,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, float dither, vec4 tra
 	vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
 
 	#ifdef TAA
-	dither = fract(dither + frameCounter / 8.0);
+	dither = fract(16.0 * frameTimeCounter + dither);
 	#endif
 
 	float ug = mix(clamp((cameraPosition.y - 64.0) / 16.0, 0.0, 1.0), 1.0, eBS);
