@@ -28,11 +28,6 @@ float GetCurvedBias(int i, float dither) {
     return mix(biasDistribution[i], biasDistribution[i+1], dither);
 }
 
-float InterleavedGradientNoise() {
-	float n = 52.9829189 * fract(0.06711056 * gl_FragCoord.x + 0.00583715 * gl_FragCoord.y);
-	return fract(n + frameCounter / 8.0);
-}
-
 vec3 SampleBasicShadow(vec3 shadowPos) {
     float shadow0 = shadow2D(shadowtex0, vec3(shadowPos.st, shadowPos.z)).x;
 

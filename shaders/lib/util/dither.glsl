@@ -11,3 +11,4 @@ float Bayer2(vec2 a) {
 #define Bayer64(a)  (Bayer32( 0.5 * (a)) * 0.25 + Bayer2(a))
 #define Bayer128(a) (Bayer64( 0.5 * (a)) * 0.25 + Bayer2(a))
 #define Bayer256(a) (Bayer128(0.5 * (a)) * 0.25 + Bayer2(a))
+#define Bayer512(a) (Bayer256(0.5 * (a)) * 0.25 + Bayer2(a))

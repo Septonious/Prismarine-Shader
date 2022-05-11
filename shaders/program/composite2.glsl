@@ -107,15 +107,15 @@ void main() {
 	#ifdef VOLUMETRIC_CLOUDS
 	float VoU = dot(normalize(viewPos.xyz), upVec);
 
-    vec4 cloud1 = texture2D(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight));
-    vec4 cloud2 = texture2D(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight));
-    vec4 cloud3 = texture2D(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0));
-    vec4 cloud4 = texture2D(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0));
+    vec4 cloud1 = texture2D(colortex8, newTexCoord.xy + vec2( 0.0,  1.5 / viewHeight));
+    vec4 cloud2 = texture2D(colortex8, newTexCoord.xy + vec2( 0.0, -1.5 / viewHeight));
+    vec4 cloud3 = texture2D(colortex8, newTexCoord.xy + vec2( 1.5 / viewHeight,  0.0));
+    vec4 cloud4 = texture2D(colortex8, newTexCoord.xy + vec2(-1.5 / viewHeight,  0.0));
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
 	cloud.a = clamp(cloud.a, 0.0, 1.0);
 	if (eyeAltitude < VCLOUDS_HEIGHT - 40.0) cloud.a *= clamp(1.0 - exp(-16.0 * VoU + 0.5), 0.0, 1.0);
-	color.rgb = mix(color.rgb, cloud.rgb, cloud.a * cloud.a * (0.9 - sunVisibility * 0.55));
+	color.rgb = mix(color.rgb, cloud.rgb, pow4(cloud.a) * (0.9 - sunVisibility * 0.55));
 	#endif
 
 	/* DRAWBUFFERS:0 */
