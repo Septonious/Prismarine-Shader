@@ -118,7 +118,7 @@ void main() {
 	float cloudA = clamp(cloud.a * (0.8 - sunVisibility * 0.6 + pow4(timeBrightness) * 0.3), 0.0, 1.0);
 
 	cloud.a = mix(cloudA, cloud.a, clamp(eyeAltitude * 0.001, 0.0, 1.0));
-	cloud.a = mix(cloud.a * clamp(1.0 - exp(-8.0 * VoU + 0.5), 0.0, 1.0), cloud.a, clamp(eyeAltitude * 0.005, 0.0, 1.0));
+	cloud.a = mix(cloud.a * clamp(1.0 - exp(-16.0 * VoU + 0.5), 0.0, 1.0), cloud.a, clamp(eyeAltitude * 0.007, 0.0, 1.0));
 
 	color.rgb = mix(color.rgb, cloud.rgb, cloud.a);
 	#endif
