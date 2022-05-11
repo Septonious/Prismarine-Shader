@@ -115,7 +115,7 @@ void main() {
 
 	cloud.a = clamp(cloud.a, 0.0, 1.0);
 	if (eyeAltitude < VCLOUDS_HEIGHT - 40.0) cloud.a *= clamp(1.0 - exp(-16.0 * VoU + 0.5), 0.0, 1.0);
-	color.rgb = mix(color.rgb, cloud.rgb, pow4(cloud.a) * (0.9 - sunVisibility * 0.55));
+	color.rgb = mix(color.rgb, cloud.rgb, pow4(cloud.a) * (1.0 - sunVisibility * 0.5));
 	#endif
 
 	/* DRAWBUFFERS:0 */
