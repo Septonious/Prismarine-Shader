@@ -92,7 +92,6 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 
 #ifdef VOLUMETRIC_CLOUDS
 #include "/lib/atmospherics/volumetricClouds.glsl"
-#include "/lib/util/blueNoise.glsl"
 #endif
 
 #ifdef LIGHT_SHAFT

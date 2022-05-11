@@ -107,10 +107,10 @@ void main() {
 	#ifdef VOLUMETRIC_CLOUDS
 	float VoU = dot(normalize(viewPos.xyz), upVec);
 
-    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight), 2.0);
-    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight), 2.0);
-    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0), 2.0);
-    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0), 2.0);
+    vec4 cloud1 = texture2D(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight));
+    vec4 cloud2 = texture2D(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight));
+    vec4 cloud3 = texture2D(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0));
+    vec4 cloud4 = texture2D(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0));
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
 	cloud.a = clamp(cloud.a, 0.0, 1.0);
