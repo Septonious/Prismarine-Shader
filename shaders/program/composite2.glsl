@@ -73,10 +73,10 @@ void main() {
 	#endif
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
-    vec3 vl1 = texture2D(colortex1, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight)).rgb;
-    vec3 vl2 = texture2D(colortex1, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight)).rgb;
-    vec3 vl3 = texture2D(colortex1, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0)).rgb;
-    vec3 vl4 = texture2D(colortex1, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0)).rgb;
+    vec3 vl1 = texture2D(colortex1, newTexCoord.xy + vec2( 0.0,  1.5 / viewHeight)).rgb;
+    vec3 vl2 = texture2D(colortex1, newTexCoord.xy + vec2( 0.0, -1.5 / viewHeight)).rgb;
+    vec3 vl3 = texture2D(colortex1, newTexCoord.xy + vec2( 1.5 / viewHeight,  0.0)).rgb;
+    vec3 vl4 = texture2D(colortex1, newTexCoord.xy + vec2(-1.5 / viewHeight,  0.0)).rgb;
     vec3 vl = (vl1 + vl2 + vl3 + vl4) * 0.25;
 
 	#ifdef LIGHT_SHAFT
@@ -101,13 +101,13 @@ void main() {
 	#ifdef VOLUMETRIC_CLOUDS
 	float VoU = dot(normalize(viewPos.xyz), upVec);
 
-    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight), 32.0);
-    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight), 32.0);
-    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0), 32.0);
-    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0), 32.0);
+    vec4 cloud1 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight), 16.0);
+    vec4 cloud2 = texture2DLod(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight), 16.0);
+    vec4 cloud3 = texture2DLod(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0), 16.0);
+    vec4 cloud4 = texture2DLod(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0), 16.0);
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
-	cloud.a *= cloud.a * cloud.a * cloud.a;
+	cloud.a *= cloud.a * cloud.a * cloud.a * cloud.a;
 
 	float cloudA = clamp(cloud.a * (1.0 - sunVisibility * 0.7 + timeBrightness * 0.3), 0.0, 1.0);
 

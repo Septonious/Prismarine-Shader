@@ -28,7 +28,7 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 	dither = fract(dither + frameCounter / 16.0);
 	#endif
 
-	float visibility = (1.0 - pow2(timeBrightness) * 0.8) * (1.0 - float(cameraPosition.y < 50.0) * (1.0 - eBS)) + float(isEyeInWater == 1);
+	float visibility = (1.0 - pow2(timeBrightness) * 0.5) * (1.0 - float(cameraPosition.y < 50.0) * (1.0 - eBS)) + float(isEyeInWater == 1);
 	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 	visibility *= ug;
 
