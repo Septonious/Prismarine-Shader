@@ -25,7 +25,7 @@ Read lang/en_US.lang to get the description of what every option does.
 Please don't edit anything from Undefine section and onwards.
 */
 
-#define VOLUMETRICS_RENDER_RESOLUTION 0.5 //[0.5 0.6 0.7 0.8 0.9 1.0]
+#define VOLUMETRICS_RENDER_RESOLUTION 0.7 //[0.5 0.6 0.7 0.8 0.9 1.0]
 #define TAA_JITTER
 
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
@@ -87,7 +87,7 @@ Please don't edit anything from Undefine section and onwards.
 #define LIGHTSHAFT_HEIGHT 8 //[10 9 8 7 6 5 4 3 2 1]
 
 #define VCLOUDS_OCTAVES 3 //[1 2 3 4 5]
-#define VCLOUDS_SAMPLES 20 //[2 4 6 8 10 12 14 16 18 20 22 24]
+#define VCLOUDS_SAMPLES 16 //[2 4 6 8 10 12 14 16 18 20 22 24]
 #define VCLOUDS_HEIGHT 180 //[10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 200 210 220 230 240 250 260 270 280 290 300 310 320 330 340 350 360 370 380 390 400]
 #define VCLOUDS_VERTICAL_THICKNESS 16 //[2 4 6 8 10 12 14 16]
 #define VCLOUDS_SPEED 0.25 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]

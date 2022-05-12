@@ -29,6 +29,7 @@ uniform float timeAngle, timeBrightness;
 uniform sampler2D colortex0;
 
 #if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
+uniform float viewWidth, viewHeight;
 uniform sampler2D depthtex0;
 uniform mat4 gbufferProjectionInverse;
 #endif
@@ -39,15 +40,12 @@ uniform sampler2D colortex8;
 uniform float eyeAltitude;
 #endif
 
-#if defined BLUR_FILTERING || defined VOLUMETRIC_CLOUDS
-uniform float viewWidth, viewHeight;
-#endif
-
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 uniform sampler2D colortex1;
 
 //Optifine Constants//
 const bool colortex1MipmapEnabled = true;
+const bool colortex8MipmapEnabled = true;
 #endif
 
 //Common Variables//
@@ -57,10 +55,6 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 #endif
 
 //Includes//
-#if defined BLUR_FILTERING && (defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE)
-#include "/lib/filters/blur.glsl"
-#endif
-
 #ifdef LIGHT_SHAFT
 #include "/lib/color/waterColor.glsl"
 #include "/lib/color/lightColor.glsl"
@@ -79,11 +73,11 @@ void main() {
 	#endif
 
 	#if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
-	#ifdef BLUR_FILTERING
-	vec3 vl = GaussianBlur(colortex1, newTexCoord, 1.0).rgb;
-	#else
-	vec3 vl = texture2D(colortex1, newTexCoord).rgb;
-	#endif
+    vec3 vl1 = texture2D(colortex1, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight)).rgb;
+    vec3 vl2 = texture2D(colortex1, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight)).rgb;
+    vec3 vl3 = texture2D(colortex1, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0)).rgb;
+    vec3 vl4 = texture2D(colortex1, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0)).rgb;
+    vec3 vl = (vl1 + vl2 + vl3 + vl4) * 0.25;
 
 	#ifdef LIGHT_SHAFT
 	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
