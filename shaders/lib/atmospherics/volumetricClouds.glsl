@@ -18,7 +18,7 @@ float getCloudSample(vec3 pos){
 	float sampleHeight = abs(VCLOUDS_HEIGHT - pos.y) / VCLOUDS_VERTICAL_THICKNESS;
 
 	//Shaping
-	noiseA -= getTextureNoise(pos * 0.75 - wind * speed);
+	noiseA -= getTextureNoise(pos * 0.75 - wind * speed) * 1.5;
 
 	return clamp(noiseA * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 }
