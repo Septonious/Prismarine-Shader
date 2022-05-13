@@ -379,7 +379,7 @@ option.SKYBOX_BRIGHTNESS.comment=Adjusts skybox brightness. §e[*]§rSet to 1.00
 
 #Cloud Config
 option.VOLUMETRICS_RENDER_RESOLUTION=Render Resolution
-option.VOLUMETRICS_RENDER_RESOLUTION.comment=Decreases render resolution of volumetric effects. Lower resolution increase performance at cost of quality.
+option.VOLUMETRICS_RENDER_RESOLUTION.comment=Decreases render resolution of volumetric effects. Lower resolution increases performance at cost of quality.
 
 option.VCLOUDS_HEIGHT=Height
 option.VCLOUDS_HEIGHT.comment=Adjusts cloud height.

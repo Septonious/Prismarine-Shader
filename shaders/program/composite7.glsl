@@ -24,13 +24,14 @@ uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 
 uniform sampler2D colortex6, colortex10;
-uniform sampler2D depthtex0, depthtex1, depthtex2;
+uniform sampler2D depthtex0, depthtex1;
 
 //Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;
 
 //Includes//
 #include "/lib/util/encode.glsl"
+#include "/lib/util/blueNoise.glsl"
 #include "/lib/lighting/ssgi.glsl"
 
 //Program//

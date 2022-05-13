@@ -42,9 +42,6 @@ uniform float eyeAltitude;
 
 #if defined LIGHT_SHAFT || defined NETHER_SMOKE || defined END_SMOKE
 uniform sampler2D colortex1;
-
-//Optifine Constants//
-const bool colortex1MipmapEnabled = true;
 #endif
 
 //Common Variables//
@@ -62,7 +59,7 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 //Program//
 void main() {
     vec3 color = texture2D(colortex0, texCoord.xy).rgb;
-	vec2 newTexCoord = texCoord * VOLUMETRICS_RENDER_RESOLUTION;
+    vec2 newTexCoord = texCoord * VOLUMETRICS_RENDER_RESOLUTION;
 
 	#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
 	float z0 = texture2D(depthtex0, texCoord).r;
@@ -98,19 +95,13 @@ void main() {
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
-	float VoU = dot(normalize(viewPos.xyz), upVec);
-
-    vec4 cloud1 = texture2D(colortex8, newTexCoord.xy + vec2( 0.0,  1.0 / viewHeight));
-    vec4 cloud2 = texture2D(colortex8, newTexCoord.xy + vec2( 0.0, -1.0 / viewHeight));
-    vec4 cloud3 = texture2D(colortex8, newTexCoord.xy + vec2( 1.0 / viewHeight,  0.0));
-    vec4 cloud4 = texture2D(colortex8, newTexCoord.xy + vec2(-1.0 / viewHeight,  0.0));
+    vec4 cloud1 = texture2D(colortex8, texCoord.xy + vec2( 0.0,  2.0 / viewHeight));
+    vec4 cloud2 = texture2D(colortex8, texCoord.xy + vec2( 0.0, -2.0 / viewHeight));
+    vec4 cloud3 = texture2D(colortex8, texCoord.xy + vec2( 2.0 / viewHeight,  0.0));
+    vec4 cloud4 = texture2D(colortex8, texCoord.xy + vec2(-2.0 / viewHeight,  0.0));
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
-	cloud.a *= cloud.a * cloud.a * cloud.a * cloud.a;
-
-	float cloudA = clamp(cloud.a, 0.0, 1.0);
-
-	color.rgb = mix(color.rgb, cloud.rgb, cloud.a);
+	color.rgb = mix(color.rgb, cloud.rgb, pow4(cloud.a) * (1.0 - sunVisibility * 0.25));
 	#endif
 
 	/* DRAWBUFFERS:0 */

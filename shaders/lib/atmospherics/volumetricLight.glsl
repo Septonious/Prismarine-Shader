@@ -19,13 +19,11 @@ vec4 GetShadowSpace(vec4 wpos) {
 }
 
 //Light shafts from Robobo1221 (modified)
-vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
+vec3 GetLightShafts(vec3 viewPos, float z0, float z1, vec2 scaledCoord, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
-	vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
-
 	#ifdef TAA
-	dither = fract(dither + frameCounter / 16.0);
+	dither = fract(dither + 0.6180339887498967 * (frameCounter & 127));
 	#endif
 
 	float visibility = (1.0 - pow2(timeBrightness) * 0.5) * (1.0 - float(cameraPosition.y < 50.0) * (1.0 - eBS)) + float(isEyeInWater == 1);
@@ -36,8 +34,8 @@ vec3 GetLightShafts(vec3 viewPos, float pixeldepth0, float pixeldepth1, vec3 col
 		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE * (1.0 - isEyeInWater * 0.5);
 		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 
-		float depth0 = GetLinearDepth2(pixeldepth0);
-		float depth1 = GetLinearDepth2(pixeldepth1);
+		float depth0 = GetLinearDepth2(z0);
+		float depth1 = GetLinearDepth2(z1);
 
 		vec4 worldposition = vec4(0.0);
 		vec4 shadowposition = vec4(0.0);

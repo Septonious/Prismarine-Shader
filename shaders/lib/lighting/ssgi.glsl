@@ -124,17 +124,11 @@ vec3 generateCosineVector(vec3 vector, vec2 xy) {
     return normalize(vector + dir);
 }
 
-float blueNoise() {
-    float noise = texelFetch(depthtex2, ivec2(gl_FragCoord.xy) & 255, 0).r;
-
-    return fract(noise);
-}
-
 vec3 computeGI(vec3 screenPos, vec3 normal, float hand) {
 	int speed = frameCounter % 100;
 
-    float dither = blueNoise();
-          dither = fract(frameCounter / 8.0 + dither);
+    float dither = BlueNoise(gl_FragCoord.xy);
+          dither = fract(dither + 0.6180339887498967 * (frameCounter & 127));
 
     vec3 albedo = texture2D(colortex10, texCoord.xy).rgb;
     vec3 currentPosition = screenPos;

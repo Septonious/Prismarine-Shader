@@ -25,7 +25,7 @@ Read lang/en_US.lang to get the description of what every option does.
 Please don't edit anything from Undefine section and onwards.
 */
 
-#define VOLUMETRICS_RENDER_RESOLUTION 0.7 //[0.5 0.6 0.7 0.8 0.9 1.0]
+#define VOLUMETRICS_RENDER_RESOLUTION 0.5 //[0.5 0.6 0.7 0.8 0.9 1.0]
 #define TAA_JITTER
 
 ///////////////////////////////////////////////// P R I S M A R I N E /////////////////////////////////////////////////
@@ -59,9 +59,9 @@ Please don't edit anything from Undefine section and onwards.
 #define DENOISE_QUALITY 40 //[8 16 24 32 40 48 56 64 72 80 88 96 104 112 120 128]
 #define DENOISE_STRENGTH 80 //[8 16 24 32 40 48 56 64 72 80 88 96 104 112 120 128]
 #define BOUNCES 1 //[1 2 3 4]
-#define ILLUMINATION_STRENGTH 18.0 //[3.0 6.0 9.0 12.0 15.0 18.0 21.0 24.0]
+#define ILLUMINATION_STRENGTH 24.0 //[3.0 6.0 9.0 12.0 15.0 18.0 21.0 24.0]
 #define STRIDE 100 //[10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 200]
-  #define EMISSIVE_CONCRETE
+//#define EMISSIVE_CONCRETE
 
 #define FOG_ALTITUDE 100.0 //[60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0]
 
@@ -91,7 +91,7 @@ Please don't edit anything from Undefine section and onwards.
 #define VCLOUDS_HEIGHT 180 //[10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 200 210 220 230 240 250 260 270 280 290 300 310 320 330 340 350 360 370 380 390 400]
 #define VCLOUDS_VERTICAL_THICKNESS 16 //[2 4 6 8 10 12 14 16]
 #define VCLOUDS_SPEED 0.25 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
-#define VCLOUDS_RANGE 10.0 //[4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0 20.0 22.0 24.0]
+#define VCLOUDS_RANGE 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75]
 #define VCLOUDS_AMOUNT 1.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
 #define VCLOUDS_HORIZONTAL_THICKNESS 2.50 //[2.00 2.10 2.20 2.30 2.40 2.50 2.60 2.70 2.80 2.90 3.00]
 #define VCLOUDS_FREQUENCY 0.4 //[0.1 0.2 0.3 0.4 0.5]
@@ -104,14 +104,12 @@ Please don't edit anything from Undefine section and onwards.
 #define SMOKE_FREQUENCY 1.5 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define SMOKE_AMOUNT 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
 
-#define BLUR_FILTERING
-
 #define SHADOWS
 
 //#define SKY_BLUR
 #define OVERWORLD_NEBULA_BRIGHTNESS 0.6 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define END_NEBULA
-  #define OVERWORLD_NEBULA
+#define OVERWORLD_NEBULA
 
 #define NEBULA_DISTORTION 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
 #define NEBULA_STRETCHING 0.75 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
@@ -150,7 +148,7 @@ const float shadowDistance = 512.0; //[128.0 256.0 512.0 1024.0]
 const float sunPathRotation = -10.0; //[-85.0 -80.0 -75.0 -70.0 -65.0 -60.0 -55.0 -50.0 -45.0 -40.0 -35.0 -30.0 -25.0 -20.0 -15.0 -10.0 -5.0 0.0 5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 55.0 60.0 65.0 70.0 75.0 80.0 85.0]
 const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 
-#define SHADOW_BLUR_STRENGTH 1.0 //[1.0 2.0 3.0 4.0]
+#define SHADOW_BLUR_STRENGTH 2.0 //[1.0 2.0 3.0 4.0]
 #define SHADOW_COLOR
 #define SHADOW_FILTER
 #define SHADOW_PIXEL 0 //[0 16 32 64 128]
