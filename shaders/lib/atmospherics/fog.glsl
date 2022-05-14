@@ -5,7 +5,7 @@ vec3 GetFogColor(vec3 viewPos) {
     float VoU = -(clamp(dot(nViewPos, upVec), -1.0, 1.0) * 0.5 + 0.5);
 	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
     
-    float exposure = exp2(timeBrightness * 0.75 - 1.00);
+    float exposure = exp2(-0.25);
     float nightExposure = exp2(-3.5);
 
 	float baseGradient = exp(VoU / 0.4125);
@@ -14,7 +14,7 @@ vec3 GetFogColor(vec3 viewPos) {
 	vec3 skyColor = GetSkyColor(viewPos, false) * (1.0 + VoL);
 	vec3 fog = skyColor * (4.0 - timeBrightness) * baseGradient / SKY_I;
 
-    fog = fog * exposure * sunVisibility * SKY_I;
+    fog = fog * exposure * SKY_I;
 
 	float nightGradient = exp(VoU * 0.5 / 0.6125);
     vec3 nightFog = lightNight * lightNight * 8.0 * nightGradient * nightExposure;
@@ -117,7 +117,7 @@ void DenseFog(inout vec3 color, vec3 viewPos) {
 	vec3 denseFogColor0 = denseFogColor[isEyeInWater - 2];
 
 	#ifdef OVERWORLD
-	denseFogColor0 *- clamp(timeBrightness, 0.01, 1.0);
+	denseFogColor0 *- clamp(timeBrightness, 0.01, 0.9);
 	#endif
 
 	color = mix(color, denseFogColor0, fog);

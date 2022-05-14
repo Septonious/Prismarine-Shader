@@ -18,15 +18,15 @@ vec4 GetWorldSpace(float depth, vec2 texCoord) {
 
 #if defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
 float getTextureNoise(vec3 pos){
-	pos *= 0.30;
-	pos.xz *= 0.20;
+	pos *= 0.25;
+	pos.xz *= 0.25;
 
 	vec3 u = floor(pos);
 	vec3 v = fract(pos);
 
 	vec2 uv = u.xz + v.xz + u.y * 16.0;
 
-	vec2 coord = uv / 64.0;
+	vec2 coord = uv * 0.015625;
 	float a = texture2D(noisetex, coord).r;
 	float b = texture2D(noisetex, coord + 0.25).r;
 		
@@ -45,12 +45,11 @@ float getFBM(vec3 pos, vec3 wind){
 }
 
 float getFogSample(vec3 pos, float height, float verticalThickness, float thicknessMult) {
-	float sampleHeight = pow(abs(height - pos.y) / verticalThickness, 2.0);
 	vec3 wind = vec3(frametime * SMOKE_SPEED, 0.0, 0.0);
 
-	pos *= 0.25;
-
-	float noise = getFBM(pos, wind);
+	float sampleHeight = abs(height - pos.y) / verticalThickness;
+	
+	float noise = getFBM(pos * 0.25, wind);
 	noise *= thicknessMult;
 	noise = clamp(noise * 0.6 - (1.0 + sampleHeight), 0.0, 1.0);
 

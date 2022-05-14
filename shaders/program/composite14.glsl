@@ -35,6 +35,10 @@ uniform sampler2D depthtex0, colortex6;
 const bool colortex1MipmapEnabled = true;
 #endif
 
+#ifdef VOLUMETRIC_CLOUDS
+const bool colortex8MipmapEnabled = true;
+#endif
+
 //Includes//
 #include "/lib/antialiasing/taa.glsl"
 

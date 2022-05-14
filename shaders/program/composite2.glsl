@@ -101,7 +101,13 @@ void main() {
     vec4 cloud4 = texture2D(colortex8, texCoord.xy + vec2(-2.0 / viewHeight,  0.0));
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
-	color.rgb = mix(color.rgb, cloud.rgb, pow4(cloud.a) * (1.0 - sunVisibility * 0.25));
+	float VoU = dot(normalize(viewPos.xyz), upVec);
+	float fadeFactor = clamp(1.0 - exp(-20.0 * VoU + 0.5), 0.0, 1.0);
+
+	cloud.a = pow4(cloud.a);
+	cloud.a = mix(cloud.a * (1.0 - sunVisibility * 0.5) * (1.0 - rainStrength * 0.5) * fadeFactor, cloud.a, clamp(eyeAltitude * 0.0025, 0.0, 1.0));
+
+	color.rgb = mix(color.rgb, cloud.rgb, cloud.a);
 	#endif
 
 	/* DRAWBUFFERS:0 */

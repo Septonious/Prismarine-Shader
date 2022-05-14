@@ -54,6 +54,8 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, vec2 texCoord, float d
 			vec4 cloudsColor = vec4(mix(lightCol, ambientCol, heightFactor), noise);
 				 cloudsColor.rgb *= cloudsColor.a;
 
+			cloudsColor.rgb = mix(cloudsColor.rgb, cloudsColor.rgb * translucent.rgb * 0.5, float(depth0 < minDist));
+
 			finalColor += cloudsColor * (1.0 - finalColor.a);
 		}
 	}

@@ -22,6 +22,10 @@ uniform sampler2D colortex1;
 const bool colortex1MipmapEnabled = true;
 #endif
 
+#ifdef VOLUMETRIC_CLOUDS
+const bool colortex8MipmapEnabled = true;
+#endif
+
 //Common Functions//
 float GetLuminance(vec3 color) {
 	return dot(color, vec3(0.299, 0.587, 0.114));
