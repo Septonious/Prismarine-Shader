@@ -64,8 +64,8 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
-    vec3 sceneLighting = mix(ambientCol * max(0.1, pow4(lightmap.y)), lightCol, fullShadow * shadowMult);
-    sceneLighting *= pow(lightmap.y, 8.0 - 7.0 * eBS) * (1.0 + scattering * shadow);
+    vec3 sceneLighting = mix(ambientCol * 0.75 * max(0.1, pow4(lightmap.y)), lightCol, fullShadow * shadowMult);
+    sceneLighting *= mix(pow(lightmap.y, 8.0 - 7.0 * eBS), 1.0, eBS) * (1.0 + scattering * shadow);
     #endif
 
     #ifdef END

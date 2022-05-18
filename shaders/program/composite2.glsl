@@ -18,8 +18,6 @@ varying vec3 sunVec, upVec;
 
 //Uniforms//
 #ifdef LIGHT_SHAFT
-uniform int isEyeInWater;
-
 uniform float rainStrength;
 uniform float blindFactor;
 uniform float shadowFade;
@@ -28,7 +26,7 @@ uniform float timeAngle, timeBrightness;
 
 uniform sampler2D colortex0;
 
-#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS
+#if defined LIGHT_SHAFT || defined VOLUMETRIC_CLOUDS || defined NETHER_SMOKE || defined END_SMOKE
 uniform float viewWidth, viewHeight;
 uniform sampler2D depthtex0;
 uniform mat4 gbufferProjectionInverse;
@@ -52,7 +50,6 @@ vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.
 
 //Includes//
 #ifdef LIGHT_SHAFT
-#include "/lib/color/waterColor.glsl"
 #include "/lib/color/lightColor.glsl"
 #endif
 
@@ -77,35 +74,30 @@ void main() {
 
 	#ifdef LIGHT_SHAFT
 	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
-	float scattering = 1.0 + pow4(VoL);
+	float visibilityFactor = (1.0 + pow4(VoL)) * LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor);
 
-	if (isEyeInWater != 1){
-		#if defined FOG_PERBIOME && defined WEATHER_PERBIOME
-		lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.75 * timeBrightness);
-		#endif
+	#if defined FOG_PERBIOME && defined WEATHER_PERBIOME
+	lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.5 * timeBrightness);
+	#endif
 
-		vl.rgb *= lightCol * 0.5;
-	} else {
-		vl.rgb *= waterColor.rgb * 0.25;
-	}
-    vl.rgb *= LIGHT_SHAFT_STRENGTH * (0.2 + isEyeInWater * 0.8) * shadowFade * (1.0 - blindFactor) * scattering;
+    vl.rgb *= lightCol * visibilityFactor * 0.1;
 	#endif
 
 	color += vl;
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
-    vec4 cloud1 = texture2D(colortex8, texCoord.xy + vec2( 0.0,  2.0 / viewHeight));
-    vec4 cloud2 = texture2D(colortex8, texCoord.xy + vec2( 0.0, -2.0 / viewHeight));
-    vec4 cloud3 = texture2D(colortex8, texCoord.xy + vec2( 2.0 / viewHeight,  0.0));
-    vec4 cloud4 = texture2D(colortex8, texCoord.xy + vec2(-2.0 / viewHeight,  0.0));
+    vec4 cloud1 = texture2D(colortex8, newTexCoord + vec2( 0.0,  2.0 / viewHeight));
+    vec4 cloud2 = texture2D(colortex8, newTexCoord + vec2( 0.0, -2.0 / viewHeight));
+    vec4 cloud3 = texture2D(colortex8, newTexCoord + vec2( 2.0 / viewHeight,  0.0));
+    vec4 cloud4 = texture2D(colortex8, newTexCoord + vec2(-2.0 / viewHeight,  0.0));
     vec4 cloud = (cloud1 + cloud2 + cloud3 + cloud4) * 0.25;
 
 	float VoU = dot(normalize(viewPos.xyz), upVec);
-	float fadeFactor = clamp(1.0 - exp(-20.0 * VoU + 0.5), 0.0, 1.0);
+	float fadeFactor = clamp(1.0 - exp(-16.0 * VoU + 0.5), 0.0, 1.0);
 
 	cloud.a = pow4(cloud.a);
-	cloud.a = mix(cloud.a * (1.0 - sunVisibility * 0.5) * (1.0 - rainStrength * 0.5) * fadeFactor, cloud.a, clamp(eyeAltitude * 0.005, 0.0, 1.0));
+	cloud.a = mix(cloud.a * (1.0 - sunVisibility * 0.6) * (1.0 - rainStrength * 0.6) * fadeFactor, cloud.a, clamp(eyeAltitude * 0.004, 0.0, 1.0));
 
 	color.rgb = mix(color.rgb, cloud.rgb, cloud.a);
 	#endif

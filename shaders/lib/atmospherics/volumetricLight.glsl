@@ -26,12 +26,12 @@ vec3 GetLightShafts(vec3 viewPos, float z0, float z1, vec2 scaledCoord, vec3 col
 	dither = fract(dither + 0.6180339887498967 * (frameCounter & 127));
 	#endif
 
-	float visibility = (1.0 - pow2(timeBrightness) * 0.5) * (1.0 - float(cameraPosition.y < 50.0) * (1.0 - eBS)) + float(isEyeInWater == 1);
+	float visibility = (1.0 - pow2(timeBrightness) * 0.75) * (1.0 - float(cameraPosition.y < 50.0) * (1.0 - eBS));
 	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
 	visibility *= ug;
 
 	if (visibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {
-		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE * (1.0 - isEyeInWater * 0.5);
+		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE * (1.0 - isEyeInWater * 0.4);
 		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 
 		float depth0 = GetLinearDepth2(z0);
@@ -73,7 +73,7 @@ vec3 GetLightShafts(vec3 viewPos, float z0, float z1, vec2 scaledCoord, vec3 col
 
 				if (depth0 < minDist) shadow *= color;
 				if (isEyeInWater == 1.0) {
-					shadow *= watercol * 4.0 * (0.1 + sunVisibility * 0.9);
+					shadow.rgb *= watercol.rgb * (1.0 + 16.0 * float(depth0 > minDist));
 				} else {
 					vec3 fogPosition = worldposition.xyz + cameraPosition.xyz;
 					float worldHeightFactor = 1.0 - clamp(sqrt(fogPosition.y * 0.001 * LIGHTSHAFT_HEIGHT), 0.0, 1.0);

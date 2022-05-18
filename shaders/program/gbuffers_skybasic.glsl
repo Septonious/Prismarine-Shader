@@ -105,10 +105,8 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol, float cloud) {
 
 #if defined OVERWORLD && defined OVERWORLD_NEBULA
 void GetNebula(in vec3 viewPos, inout vec3 albedo, inout float nebulaFactor) {
-	float VoL = dot(normalize(viewPos.xyz), -sunVec);
 	float VoU = clamp(dot(normalize(viewPos.xyz), upVec), 0.0, 1.0);
 
-	float halfVoL = VoL * shadowFade * 0.5 + 0.5;
 	float visibility = (1.0 - rainStrength) * (1.0 - sunVisibility) * VoU * eBS;
 
 	vec3 wpos = mat3(gbufferModelViewInverse) * viewPos;

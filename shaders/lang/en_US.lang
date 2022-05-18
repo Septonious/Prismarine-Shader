@@ -302,7 +302,6 @@ option.NEBULA_STRETCHING=Stretching
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
 
-option.SMOKE_AMOUNT=Amount
 option.SMOKE_FREQUENCY=Frequency
 option.SMOKE_FREQUENCY.comment=Increases smoke noise frequency.
 option.SMOKE_BRIGHTNESS=Brightness

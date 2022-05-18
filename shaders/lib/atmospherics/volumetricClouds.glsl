@@ -17,7 +17,7 @@ float getCloudSample(vec3 pos){
 	return clamp(noise * amount - (10.0 + 5.0 * sampleHeight), 0.0, 1.0);
 }
 
-vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, vec2 texCoord, float dither, vec4 translucent){
+vec4 getVolumetricCloud(vec3 viewPos, float z0, float z1, vec2 scaledCoord, float dither, vec4 translucent){
 	vec4 wpos = vec4(0.0);
 	vec4 finalColor = vec4(0.0);
 
@@ -31,7 +31,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, vec2 texCoord, float d
 	float depth0 = GetLinearDepth2(z0);
 	float depth1 = GetLinearDepth2(z1);
 
-	if (eBS > 0.1 && ug != 0 && isEyeInWater == 0.0){
+	if (eBS > 0.1 && ug != 0 && isEyeInWater == 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord){
 		for (int i = 0; i < VCLOUDS_SAMPLES; i++) {
 			float minDist = (i + dither) * minDistFactor;
 		
@@ -39,7 +39,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z1, float z0, vec2 texCoord, float d
 				break;
 			}
 			
-			wpos = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord);
+			wpos = GetWorldSpace(GetLogarithmicDepth(minDist), scaledCoord);
 
 			#ifdef WORLD_CURVATURE
 			if (length(wpos.xz) < WORLD_CURVATURE_SIZE) wpos.y += length(wpos.xz) * length(wpos.xyz) / WORLD_CURVATURE_SIZE;

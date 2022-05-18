@@ -126,8 +126,8 @@ void main() {
 	float z0Scaled = texture2D(depthtex0, scaledCoord).r;
 	float z1Scaled = texture2D(depthtex1, scaledCoord).r;
 
-	vec4 screenPosScaled = vec4(texCoord, z0Scaled, 1.0);
-	vec4 viewPosScaled = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+	vec4 screenPosScaled = vec4(scaledCoord, z0, 1.0);
+	vec4 viewPosScaled = gbufferProjectionInverse * (screenPosScaled * 2.0 - 1.0);
 	viewPosScaled /= viewPosScaled.w;
 	#endif
 
@@ -147,11 +147,7 @@ void main() {
 	vec4 cloud = vec4(0.0);
 
 	#ifdef VOLUMETRIC_CLOUDS
-    vec4 translucent = texture2D(colortex1, texCoord);
-
-	float z1 = texture2D(depthtex1, texCoord).r;
-
-	cloud = getVolumetricCloud(viewPos.xyz, z1, z0, texCoord, dither, translucent);
+	cloud = getVolumetricCloud(viewPosScaled.xyz, z0Scaled, z1Scaled, scaledCoord, dither, scaledTranslucent);
 	#endif
 
 	#if ALPHA_BLEND == 0
