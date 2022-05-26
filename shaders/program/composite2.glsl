@@ -74,7 +74,7 @@ void main() {
 
 	#ifdef LIGHT_SHAFT
 	float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
-	float visibilityFactor = (1.0 + pow4(VoL)) * LIGHT_SHAFT_STRENGTH * shadowFade * (1.0 - blindFactor);
+	float visibilityFactor = (1.0 + pow4(VoL)) * LIGHT_SHAFT_STRENGTH  * (1.0 - blindFactor);
 
 	#if defined FOG_PERBIOME && defined WEATHER_PERBIOME
 	lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.5 * timeBrightness);
