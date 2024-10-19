@@ -38,7 +38,7 @@ const float shadowDistanceRenderMul = 1.0;
 const int noiseTextureResolution = 512;
 
 const float drynessHalflife = 5.0;
-const float wetnessHalflife = 30.0;
+const float wetnessHalflife = 300.0;
 
 //Common Functions//
 #ifdef TAA

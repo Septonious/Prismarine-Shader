@@ -294,7 +294,7 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	vec3 wpos = vec3(gbufferModelViewInverse * vec4(viewPos * 100.0, 1.0));
 	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
 	vec2 wind = vec2(frametime, 0.0);
-	vec2 coord = planeCoord.xz * 0.4 + cameraPosition.xz * 0.0001 + wind * 0.00125;
+	vec2 coord = planeCoord.xz * 0.4 + cameraPosition.xz * 0.00001 + wind * 0.00125;
 	coord = floor(coord * 1024.0) / 1024.0;
 	
 	float VoU = clamp(dot(normalize(viewPos), upVec), 0.0, 1.0);

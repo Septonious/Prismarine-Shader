@@ -1,13 +1,13 @@
 #ifdef OVERWORLD
 vec3 GetFogColor(vec3 viewPos) {
 	vec3 nViewPos = normalize(viewPos);
-	float lViewPos = length(viewPos) / 64.0;
-	lViewPos = 1.0 - exp(-lViewPos * lViewPos);
+	float lViewPos = length(viewPos) / 128.0;
+	lViewPos = 1.0 - exp(-pow3(lViewPos) * 2.0);
 
     float VoU = clamp(dot(nViewPos,  upVec), -1.0, 1.0);
     float VoL = clamp(dot(nViewPos, sunVec), -1.0, 1.0);
 
-	float density = 0.4;
+	float density = 0.5;
     float nightDensity = 1.0;
     float weatherDensity = 1.5;
     float groundDensity = 0.08 * (4.0 - 3.0 * sunVisibility) *
@@ -79,7 +79,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	
 	#ifdef OVERWORLD
-	float fog = viewLength * fogDensity / 1024.0;
+	float fog = pow(viewLength, 1.5) * fogDensity / 4096.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 
 	#ifdef DISTANT_HORIZONS
@@ -162,9 +162,6 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	fog = 1.0 - exp(-fog);
 
 	vec3 fogColor = endCol.rgb * 0.003;
-	#ifndef LIGHT_SHAFT
-	fogColor *= 4.0;
-	#endif
 	#endif
 
 	color = mix(color, fogColor, fog);

@@ -3,8 +3,8 @@ uniform vec3 fogColor;
 #endif
 
 vec4 GetWaterFog(vec3 viewPos) {
-    float fog = length(viewPos) / waterFogRange;
-    fog = 1.0 - exp(-2.0 * fog);
+    float fog = length(viewPos) / waterFogRange * 0.25;
+    fog = 1.0 - exp(-3.0 * fog);
     
     #if WATER_MODE == 0 || WATER_MODE == 2
     vec3 waterFogColor = waterColor.rgb * waterColor.a;
