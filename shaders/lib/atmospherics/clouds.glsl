@@ -227,7 +227,7 @@ vec4 DrawCloudVolumetric(vec3 viewPos, vec3 cameraPos, float z, float dither, ve
 
 	float fade = 1.0;
 	float fadeStart = 32.0 / max(fogDensity, 0.5);
-	float fadeEnd = (fadeFaster ? 120.0 : 520.0) / max(fogDensity, 0.5);
+	float fadeEnd = (fadeFaster ? 120.0 : 320.0) / max(fogDensity, 0.5);
 
 	for (int i = 0; i < samples; i++) {
 		if (cloud > 0.99) break;

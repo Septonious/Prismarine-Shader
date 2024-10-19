@@ -284,6 +284,14 @@ void main() {
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
 
+	#ifdef OVERWORLD
+	vec3 atmosphere = GetSkyColor(viewPos.xyz, false);
+	#endif
+	
+	#ifdef DISTANT_HORIZONS
+	vec3 dhAtmosphere = GetDHAmbientOcclusion(dhZ);
+	#endif
+
 	#ifdef OUTLINE_ENABLED
 	vec4 outerOutline = vec4(0.0), innerOutline = vec4(0.0);
 	Outline(color.rgb, false, outerOutline, innerOutline);
@@ -309,7 +317,8 @@ void main() {
 			if (reflection.a < 1.0) {
 				#ifdef OVERWORLD
 				vec3 skyRefPos = reflect(normalize(viewPos.xyz), normal);
-				skyReflection = GetSkyColor(skyRefPos, true);
+				vec3 reflectedAtmosphere = GetSkyColor(skyRefPos, true);
+				skyReflection = reflectedAtmosphere;
 				
 				#ifdef REFLECTION_ROUGH
 				float cloudMixRate = smoothness * smoothness * (3.0 - 2.0 * smoothness);
@@ -328,7 +337,7 @@ void main() {
 				vec3 cameraPos = GetReflectedCameraPos(worldPos.xyz, normal);
 				float cloudViewLength = 0.0;
 
-				vec4 cloud = DrawCloudVolumetric(skyRefPos * 8192.0, cameraPos, 1.0, dither, lightCol, ambientCol, cloudViewLength, true);
+				vec4 cloud = DrawCloudVolumetric(skyRefPos * 8192.0, cameraPos, 1.0, dither, mix(lightCol, reflectedAtmosphere * 2.0, 0.3), mix(ambientCol, reflectedAtmosphere * 2.0, 0.4), cloudViewLength, true);
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a * cloudMixRate);
 				#endif
 
@@ -380,7 +389,7 @@ void main() {
 	#endif
 	} else {
 		#if defined OVERWORLD && defined SKY_DEFERRED
-		color.rgb += GetSkyColor(viewPos.xyz, false);
+		color.rgb += atmosphere;
 	
 		#ifdef ROUND_SUN_MOON
 		vec3 lightMA = mix(lightMorning, lightEvening, mefade);
@@ -451,7 +460,7 @@ void main() {
 	cloudViewPos /= cloudViewPos.w;
 	#endif
 
-	cloud = DrawCloudVolumetric(cloudViewPos.xyz, cameraPosition, cloudSampleZ, cloudDither, lightCol, ambientCol, cloudViewLength, false);
+	cloud = DrawCloudVolumetric(cloudViewPos.xyz, cameraPosition, cloudSampleZ, cloudDither, mix(lightCol, atmosphere * 2.0, 0.3), mix(ambientCol, atmosphere * 2.0, 0.4), cloudViewLength, false);
 	#endif
 
 	if (isEyeInWater > 1) cloud.a = 0.0;

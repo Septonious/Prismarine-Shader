@@ -14,7 +14,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     float gradientCurve = mix(SKY_HORIZON_F, SKY_HORIZON_N, VoL);
     float baseGradient = exp(-(1.0 - pow(1.0 - max(VoU, 0.0), gradientCurve)) /
-                             SKY_DENSITY_D);
+                             SKY_DENSITY_D * (1.5 - timeBrightness * 0.5));
 
     #if SKY_GROUND > 0
     float groundVoU = clamp(-VoU * 1.015 - 0.015, 0.0, 1.0);

@@ -459,7 +459,8 @@ void main() {
 			if (reflection.a < 1.0) {
 				#ifdef OVERWORLD
 				vec3 skyRefPos = reflect(normalize(viewPos), newNormal);
-				skyReflection = GetSkyColor(skyRefPos, true);
+				vec3 reflectedAtmosphere = GetSkyColor(skyRefPos, true);
+				skyReflection = reflectedAtmosphere;
 				
 				#ifdef AURORA
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
@@ -469,7 +470,7 @@ void main() {
 				vec3 cameraPos = GetReflectedCameraPos(worldPos, newNormal);
 				float cloudViewLength = 0.0;
 
-				vec4 cloud = DrawCloudVolumetric(skyRefPos * 8192.0, cameraPos, 1.0, dither, lightCol, ambientCol, cloudViewLength, true);
+				vec4 cloud = DrawCloudVolumetric(skyRefPos * 8192.0, cameraPos, 1.0, dither, mix(lightCol, reflectedAtmosphere * 2.0, 0.3), mix(ambientCol, reflectedAtmosphere * 2.0, 0.4), cloudViewLength, true);
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
 				#endif
 
@@ -553,7 +554,8 @@ void main() {
 				if (reflection.a < 1.0) {
 					#ifdef OVERWORLD
 					vec3 skyRefPos = reflect(normalize(viewPos.xyz), newNormal);
-					skyReflection = GetSkyColor(skyRefPos, true);
+					vec3 reflectedAtmosphere = GetSkyColor(skyRefPos, true);
+					skyReflection = reflectedAtmosphere;
 					
 					#ifdef AURORA
 					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
@@ -563,7 +565,7 @@ void main() {
 					vec3 cameraPos = GetReflectedCameraPos(worldPos, newNormal);
 					float cloudViewLength = 0.0;
 
-					vec4 cloud = DrawCloudVolumetric(skyRefPos * 8192.0, cameraPos, 1.0, dither, lightCol, ambientCol, cloudViewLength, true);
+					vec4 cloud = DrawCloudVolumetric(skyRefPos * 8192.0, cameraPos, 1.0, dither, mix(lightCol, reflectedAtmosphere * 2.0, 0.3), mix(ambientCol, reflectedAtmosphere * 2.0, 0.4), cloudViewLength, true);
 					skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
 					#endif
 
