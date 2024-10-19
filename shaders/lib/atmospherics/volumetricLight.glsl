@@ -23,14 +23,32 @@ vec3 GetLightShafts(vec3 viewPos, float z0, float z1, vec2 scaledCoord, vec3 col
 	vec3 vl = vec3(0.0);
 
 	#ifdef TAA
-	dither = fract(dither + 0.6180339887498967 * (frameCounter & 127));
+	dither = fract(dither + 1.61803398875 * mod(float(frameCounter), 3600.0));
 	#endif
 
-	float visibility = (1.0 - pow2(timeBrightness) * 0.75) * (1.0 - float(cameraPosition.y < 50.0) * (1.0 - eBS));
-	float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
-	visibility *= ug;
+	//Positions
+    vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
+	vec3 nViewPos = normalize(viewPos);
 
-	if (visibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {
+    //Total Visibility
+    float indoorFactor = (1.0 - eBS * eBS) * float(isEyeInWater == 0 && cameraPosition.y < 1000.0);
+	float VoU = clamp(dot(nViewPos, upVec), 0.0, 1.0);
+		  VoU = 1.0 - pow(VoU, 1.5);
+		  VoU = mix(VoU, 1.0, min(indoorFactor + timeBrightness, 1.0) * 0.75);
+	float VoL = clamp(dot(nViewPos, lightVec), 0.0, 1.0);
+
+	float vlVisibility = int(z0 > 0.56) * shadowFade;
+	#ifdef OVERWORLD
+	float waterFactor = 1.0 - float(isEyeInWater == 1) * 0.5;
+		  vlVisibility *= pow(VoU, 4.0 * waterFactor);
+		  vlVisibility *= mix(0.2 + pow(VoL, 1.5) * 0.4, pow(VoL, 1.5) * 0.5, timeBrightness);
+		  vlVisibility = mix(vlVisibility * (3.0 - sunVisibility * 2.0), 1.0, indoorFactor) * waterFactor;
+		  vlVisibility *= caveFactor;
+	#else
+		  vlVisibility = exp(pow6(VoL)) * 0.05;
+	#endif
+
+	if (vlVisibility > 0.0 && clamp(texCoord, vec2(0.0), vec2(VOLUMETRICS_RENDER_RESOLUTION + 1e-3)) == texCoord) {
 		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE * (1.0 - isEyeInWater * 0.4);
 		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 
@@ -95,7 +113,7 @@ vec3 GetLightShafts(vec3 viewPos, float z0, float z1, vec2 scaledCoord, vec3 col
 			}
 		}
 
-		vl = sqrt(vl * visibility);
+		vl = sqrt(vl * vlVisibility);
 	}
 	
 	return vl;

@@ -80,7 +80,7 @@ void main() {
 	lightCol = mix(lightCol, getBiomeFog(lightCol.rgb), 0.5 * timeBrightness);
 	#endif
 
-    vl.rgb *= lightCol * visibilityFactor * 0.1;
+    vl.rgb *= lightCol * visibilityFactor * 0.2;
 	#endif
 
 	color += vl;
@@ -97,7 +97,7 @@ void main() {
 	float fadeFactor = clamp(1.0 - exp(-16.0 * VoU + 0.5), 0.0, 1.0);
 
 	cloud.a = pow4(cloud.a);
-	cloud.a = mix(cloud.a * (1.0 - sunVisibility * 0.6) * (1.0 - rainStrength * 0.6) * fadeFactor, cloud.a, clamp(eyeAltitude * 0.004, 0.0, 1.0));
+	cloud.a = mix(cloud.a * (1.0 - sunVisibility * 0.4) * (1.0 - rainStrength * 0.4) * fadeFactor, cloud.a, clamp(eyeAltitude * 0.004, 0.0, 1.0));
 
 	color.rgb = mix(color.rgb, cloud.rgb, cloud.a);
 	#endif

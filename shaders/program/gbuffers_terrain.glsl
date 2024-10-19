@@ -162,198 +162,196 @@ void main() {
 	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 	float emission = 0.0; float lava = 0.0;
 
-	if (albedo.a > 0.001) {
-		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
-		#ifdef TAA
-		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
-		#else
-		vec3 viewPos = ToNDC(screenPos);
-		#endif
-		vec3 worldPos = ToWorld(viewPos);
+	vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
+	#ifdef TAA
+	vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
+	#else
+	vec3 viewPos = ToNDC(screenPos);
+	#endif
+	vec3 worldPos = ToWorld(viewPos);
 
-		float emissive = float(mat > 2.98 && mat < 3.02) * 0.5;
-		float foliage  = float(mat > 0.98 && mat < 1.02);
-		float leaves   = float(mat > 1.98 && mat < 2.02);
-		float candle   = float(mat > 4.98 && mat < 5.02);
-		lava     = float(mat > 3.98 && mat < 4.02);
+	float emissive = float(mat > 2.98 && mat < 3.02) * 0.5;
+	float foliage  = float(mat > 0.98 && mat < 1.02);
+	float leaves   = float(mat > 1.98 && mat < 2.02);
+	float candle   = float(mat > 4.98 && mat < 5.02);
+	lava     = float(mat > 3.98 && mat < 4.02);
 
-		#if defined SSPT && defined EMISSIVE_CONCRETE
-		emissive += isConcrete * 1.5;
-		albedo.rgb *= 1.0 + isConcrete * 0.5;
-		#endif
+	#if defined SSPT && defined EMISSIVE_CONCRETE
+	emissive += isConcrete * 1.5;
+	albedo.rgb *= 1.0 + isConcrete * 0.5;
+	#endif
 
-		#ifdef INTEGRATED_EMISSION
-		getIntegratedEmission(emissive, lightmap, albedo, worldPos, viewPos.xyz);
-		#endif
+	#ifdef INTEGRATED_EMISSION
+	getIntegratedEmission(emissive, lightmap, albedo, worldPos, viewPos.xyz);
+	#endif
 
-		float metalness      = 0.0;
-			  emission       = emissive + candle + lava;
-		float subsurface     = (foliage + candle) * 0.5 + leaves;
-		vec3 baseReflectance = vec3(0.04);
+	float metalness      = 0.0;
+			emission       = emissive + candle + lava;
+	float subsurface     = (foliage + candle) * 0.5 + leaves;
+	vec3 baseReflectance = vec3(0.04);
 
-		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
+	emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 
-		#ifdef ADVANCED_MATERIALS
-		float f0 = 0.0, porosity = 0.5, ao = 1.0;
-		vec3 normalMap = vec3(0.0, 0.0, 1.0);
-		GetMaterials(smoothness, metalness, f0, emission, subsurface, porosity, ao, normalMap,
-					 newCoord, dcdx, dcdy);
+	#ifdef ADVANCED_MATERIALS
+	float f0 = 0.0, porosity = 0.5, ao = 1.0;
+	vec3 normalMap = vec3(0.0, 0.0, 1.0);
+	GetMaterials(smoothness, metalness, f0, emission, subsurface, porosity, ao, normalMap,
+					newCoord, dcdx, dcdy);
+	
+	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
+							tangent.y, binormal.y, normal.y,
+							tangent.z, binormal.z, normal.z);
+
+	if (normalMap.x > -0.999 && normalMap.y > -0.999)
+		newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
+	#endif
+	
+	#ifdef DYNAMIC_HANDLIGHT
+	float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
+	float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
+	lightmap.x = max(lightmap.x, handlight);
+	#endif
+
+	albedo.rgb = pow(albedo.rgb, vec3(2.2));
+
+	#ifdef WHITE_WORLD
+	albedo.rgb = vec3(0.35);
+	#endif
+	
+	vec3 outNormal = newNormal;
+	#ifdef NORMAL_PLANTS
+	if (foliage > 0.5){
+		newNormal = upVec;
 		
+		#ifdef ADVANCED_MATERIALS
+		newNormal = normalize(mix(outNormal, newNormal, normalMap.z * normalMap.z));
+		#endif
+	}
+	#endif
+	
+	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
+	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
+	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
+	float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
+			vanillaDiffuse *= vanillaDiffuse;
+
+	#ifndef NORMAL_PLANTS
+	if (foliage > 0.5) vanillaDiffuse *= 1.8;
+	#endif
+
+	float parallaxShadow = 1.0;
+	#ifdef ADVANCED_MATERIALS
+	vec3 rawAlbedo = albedo.rgb * 0.999 + 0.001;
+	albedo.rgb *= ao * ao;
+
+	#ifdef REFLECTION_SPECULAR
+	albedo.rgb *= 1.0 - metalness * smoothness;
+	#endif
+
+	float doParallax = 0.0;
+	#ifdef SELF_SHADOW
+	float pNoL = dot(outNormal, lightVec);
+
+	#ifdef OVERWORLD
+	doParallax = float(lightmap.y > 0.0 && pNoL > 0.0);
+	#endif
+	
+	#ifdef END
+	doParallax = float(pNoL > 0.0);
+	#endif
+	
+	if (doParallax > 0.5 && skipAdvMat < 0.5) {
+		parallaxShadow = GetParallaxShadow(surfaceDepth, parallaxFade, newCoord, lightVec,
+											tbnMatrix);
+	}
+	#endif
+
+	#ifdef DIRECTIONAL_LIGHTMAP
+	mat3 lightmapTBN = GetLightmapTBN(viewPos);
+	lightmap.x = DirectionalLightmap(lightmap.x, lmCoord.x, outNormal, lightmapTBN);
+	lightmap.y = DirectionalLightmap(lightmap.y, lmCoord.y, outNormal, lightmapTBN);
+	#endif
+	#endif
+	
+	GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, color.a, NoL, vanillaDiffuse,
+				parallaxShadow, emission, subsurface);
+				
+	#ifdef ADVANCED_MATERIALS
+	float puddles = 0.0;
+
+	#ifdef REFLECTION_RAIN
+	float pNoU = dot(outNormal, upVec);
+	if (wetness > 0.001) {
+		puddles = GetPuddles(worldPos, newCoord, wetness) * clamp(pNoU, 0.0, 1.0);
+	}
+	
+	#ifdef WEATHER_PERBIOME
+	float weatherweight = isCold + isDesert + isMesa + isSavanna;
+	puddles *= 1.0 - weatherweight;
+	#endif
+	
+	puddles *= clamp(lightmap.y * 32.0 - 31.0, 0.0, 1.0) * (1.0 - lava);
+
+	float ps = sqrt(1.0 - 0.75 * porosity);
+	float pd = (0.5 * porosity + 0.15);	
+	
+	smoothness = mix(smoothness, 1.0, puddles * ps);
+	f0 = max(f0, puddles * 0.02);
+
+	albedo.rgb *= 1.0 - (puddles * pd);
+
+	if (puddles > 0.001 && rainStrength > 0.001) {
 		mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
-							  tangent.y, binormal.y, normal.y,
-							  tangent.z, binormal.z, normal.z);
+							tangent.y, binormal.y, normal.y,
+							tangent.z, binormal.z, normal.z);
 
-		if (normalMap.x > -0.999 && normalMap.y > -0.999)
-			newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
-		#endif
-		
-		#ifdef DYNAMIC_HANDLIGHT
-		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
-		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
-		lightmap.x = max(lightmap.x, handlight);
-		#endif
+		vec3 puddleNormal = GetPuddleNormal(worldPos, viewPos, tbnMatrix);
+		outNormal = normalize(
+			mix(outNormal, puddleNormal, puddles * sqrt(1.0 - porosity) * rainStrength)
+		);
+	}
+	#endif
 
-    	albedo.rgb = pow(albedo.rgb, vec3(2.2));
+	skyOcclusion = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
+	
+	baseReflectance = mix(vec3(f0), rawAlbedo, metalness);
+	float fresnel = pow(clamp(1.0 + dot(outNormal, normalize(viewPos.xyz)), 0.0, 1.0), 5.0);
 
-		#ifdef WHITE_WORLD
-		albedo.rgb = vec3(0.35);
+	fresnel3 = mix(baseReflectance, vec3(1.0), fresnel);
+	#if MATERIAL_FORMAT == 1
+	if (f0 >= 0.9 && f0 < 1.0) {
+		baseReflectance = GetMetalCol(f0);
+		fresnel3 = ComplexFresnel(pow(fresnel, 0.2), f0);
+		#ifdef ALBEDO_METAL
+		fresnel3 *= rawAlbedo;
 		#endif
-		
-		vec3 outNormal = newNormal;
-		#ifdef NORMAL_PLANTS
-		if (foliage > 0.5){
-			newNormal = upVec;
-			
-			#ifdef ADVANCED_MATERIALS
-			newNormal = normalize(mix(outNormal, newNormal, normalMap.z * normalMap.z));
-			#endif
-		}
-		#endif
-		
-		float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
-		float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
-		float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
-		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
-			  vanillaDiffuse *= vanillaDiffuse;
+	}
+	#endif
+	
+	float aoSquared = ao * ao;
+	shadow *= aoSquared; fresnel3 *= aoSquared;
+	albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
+	#endif
 
-		#ifndef NORMAL_PLANTS
-		if (foliage > 0.5) vanillaDiffuse *= 1.8;
-		#endif
+	#if (defined OVERWORLD || defined END) && (defined ADVANCED_MATERIALS || defined SPECULAR_HIGHLIGHT_ROUGH)
+	vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
+	
+	albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
+										specularColor, shadow * vanillaDiffuse, color.a);
+	#endif
+	
+	#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
+	newNormal = outNormal;
+	if (normalMap.x > -0.999 && normalMap.y > -0.999) {
+		normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
+		newNormal = mix(normalMap * tbnMatrix, newNormal, 1.0 - pow(1.0 - puddles, 4.0));
+		newNormal = clamp(normalize(newNormal), vec3(-1.0), vec3(1.0));
+	}
+	#endif
 
-		float parallaxShadow = 1.0;
-		#ifdef ADVANCED_MATERIALS
-		vec3 rawAlbedo = albedo.rgb * 0.999 + 0.001;
-		albedo.rgb *= ao * ao;
-
-		#ifdef REFLECTION_SPECULAR
-		albedo.rgb *= 1.0 - metalness * smoothness;
-		#endif
-
-		float doParallax = 0.0;
-		#ifdef SELF_SHADOW
-		float pNoL = dot(outNormal, lightVec);
-
-		#ifdef OVERWORLD
-		doParallax = float(lightmap.y > 0.0 && pNoL > 0.0);
-		#endif
-		
-		#ifdef END
-		doParallax = float(pNoL > 0.0);
-		#endif
-		
-		if (doParallax > 0.5 && skipAdvMat < 0.5) {
-			parallaxShadow = GetParallaxShadow(surfaceDepth, parallaxFade, newCoord, lightVec,
-											   tbnMatrix);
-		}
-		#endif
-
-		#ifdef DIRECTIONAL_LIGHTMAP
-		mat3 lightmapTBN = GetLightmapTBN(viewPos);
-		lightmap.x = DirectionalLightmap(lightmap.x, lmCoord.x, outNormal, lightmapTBN);
-		lightmap.y = DirectionalLightmap(lightmap.y, lmCoord.y, outNormal, lightmapTBN);
-		#endif
-		#endif
-		
-		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, color.a, NoL, vanillaDiffuse,
-					parallaxShadow, emission, subsurface);
-					
-		#ifdef ADVANCED_MATERIALS
-		float puddles = 0.0;
-
-		#ifdef REFLECTION_RAIN
-		float pNoU = dot(outNormal, upVec);
-		if (wetness > 0.001) {
-			puddles = GetPuddles(worldPos, newCoord, wetness) * clamp(pNoU, 0.0, 1.0);
-		}
-		
-		#ifdef WEATHER_PERBIOME
-		float weatherweight = isCold + isDesert + isMesa + isSavanna;
-		puddles *= 1.0 - weatherweight;
-		#endif
-		
-		puddles *= clamp(lightmap.y * 32.0 - 31.0, 0.0, 1.0) * (1.0 - lava);
-
-		float ps = sqrt(1.0 - 0.75 * porosity);
-		float pd = (0.5 * porosity + 0.15);	
-		
-		smoothness = mix(smoothness, 1.0, puddles * ps);
-		f0 = max(f0, puddles * 0.02);
-
-		albedo.rgb *= 1.0 - (puddles * pd);
-
-		if (puddles > 0.001 && rainStrength > 0.001) {
-			mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
-							  tangent.y, binormal.y, normal.y,
-							  tangent.z, binormal.z, normal.z);
-
-			vec3 puddleNormal = GetPuddleNormal(worldPos, viewPos, tbnMatrix);
-			outNormal = normalize(
-				mix(outNormal, puddleNormal, puddles * sqrt(1.0 - porosity) * rainStrength)
-			);
-		}
-		#endif
-
-		skyOcclusion = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
-		
-		baseReflectance = mix(vec3(f0), rawAlbedo, metalness);
-		float fresnel = pow(clamp(1.0 + dot(outNormal, normalize(viewPos.xyz)), 0.0, 1.0), 5.0);
-
-		fresnel3 = mix(baseReflectance, vec3(1.0), fresnel);
-		#if MATERIAL_FORMAT == 1
-		if (f0 >= 0.9 && f0 < 1.0) {
-			baseReflectance = GetMetalCol(f0);
-			fresnel3 = ComplexFresnel(pow(fresnel, 0.2), f0);
-			#ifdef ALBEDO_METAL
-			fresnel3 *= rawAlbedo;
-			#endif
-		}
-		#endif
-		
-		float aoSquared = ao * ao;
-		shadow *= aoSquared; fresnel3 *= aoSquared;
-		albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
-		#endif
-
-		#if (defined OVERWORLD || defined END) && (defined ADVANCED_MATERIALS || defined SPECULAR_HIGHLIGHT_ROUGH)
-		vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
-		
-		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
-										   specularColor, shadow * vanillaDiffuse, color.a);
-		#endif
-		
-		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
-		newNormal = outNormal;
-		if (normalMap.x > -0.999 && normalMap.y > -0.999) {
-			normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
-			newNormal = mix(normalMap * tbnMatrix, newNormal, 1.0 - pow(1.0 - puddles, 4.0));
-			newNormal = clamp(normalize(newNormal), vec3(-1.0), vec3(1.0));
-		}
-		#endif
-
-		#if ALPHA_BLEND == 0
-		albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
-		#endif
-	} else albedo.a = 0.0;
+	#if ALPHA_BLEND == 0
+	albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
+	#endif
 
 	#ifdef TEST
 	albedo.a = clamp(albedo.a - float(mat > 195870.9 && mat < 195871.1), 0.0, 1.0);

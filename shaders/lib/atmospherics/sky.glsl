@@ -43,7 +43,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     float horizonMix = pow(1.0 - abs(VoU), 2.5) * 0.3 * (1.0 - timeBrightness * 0.5);
     float lightMix = (1.0 - (1.0 - sunMix) * (1.0 - horizonMix));
 
-    vec3 lightSky = pow(lightSun, vec3(3.0 - sunVisibility)) * baseGradient;
+    vec3 lightSky = pow(lightSun, vec3(3.0 )) * baseGradient;
     lightSky = lightSky / (1.0 + lightSky * rainStrength);
 
     sky = mix(

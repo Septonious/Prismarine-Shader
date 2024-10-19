@@ -1,25 +1,24 @@
-#if (WATER_MODE == 1 || WATER_MODE == 3) && (!defined NETHER || !defined NETHER_VANILLA)
-uniform vec3 fogColor;
-#endif
-
 vec4 GetWaterFog(vec3 viewPos) {
-    float fog = pow2(length(viewPos) / waterFogRange);
-    fog = 1.0 - exp(-3.0 * fog);
+    float fog = length(viewPos) / waterFogRange;
+    fog = 1.0 - exp(-4.0 * fog);
 
     #ifdef OVERWORLD
-    float VoL = clamp(dot(normalize(viewPos.xyz), lightVec), 0.0, 1.0);
-	float scattering = 1.0 + pow3(VoL) * 3.0 * eBS;
+    vec3 waterFogColor = mix(waterColor.rgb, weatherCol.rgb * 0.25, rainStrength * 0.25);
+    #else
+    vec3 waterFogColor = waterColor.rgb;
     #endif
-
-    vec3 waterFogColor  = waterColor.rgb * waterColor.rgb * 0.75;
          #ifdef OVERWORLD
-         waterFogColor  = mix(waterFogColor, sqrt(waterFogColor) * weatherCol.rgb * 0.25, rainStrength);
-         waterFogColor *= scattering * 0.75;
-         #else
-         waterFogColor * 0.25;
+         waterFogColor *= 0.15 + timeBrightness * 0.35;
+
+         if (isEyeInWater == 1) {
+            vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
+
+            float VoL = dot(normalize(viewPos), lightVec) * shadowFade;
+            float glare = clamp(VoL * 0.5 + 0.5, 0.0, 1.0);
+                  glare = 0.01 / (1.0 - 0.99 * glare) - 0.01;
+            waterFogColor *= 1.0 + glare * 24.0 * eBS * mix(0.25, 1.0, timeBrightness);
+         }
          #endif
-         waterFogColor *= clamp(eBS, 0.25, 1.0);
-         waterFogColor *= 1.0 - blindFactor;
 
     #ifdef OVERWORLD
     vec3 waterFogTint = lightCol * max(0.25, shadowFade);

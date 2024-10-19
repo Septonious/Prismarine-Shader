@@ -48,9 +48,7 @@ uniform mat4 gbufferModelViewInverse;
 uniform sampler2D colortex1;
 #endif
 
-#if defined LIGHTSHAFT_CLOUDY_NOISE || defined NETHER_SMOKE || defined END_SMOKE || defined VOLUMETRIC_CLOUDS
 uniform sampler2D noisetex;
-#endif
 
 #ifdef LIGHT_SHAFT
 uniform mat4 shadowModelView;
@@ -66,7 +64,7 @@ const bool colortex5Clear = false;
 
 //Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;
-
+float caveFactor = mix(clamp((cameraPosition.y - 56.0) / 16.0, float(sign(isEyeInWater)), 1.0), 1.0, eBS);
 #if defined OVERWORLD || defined END
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 float moonVisibility = clamp(dot(-sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
@@ -122,7 +120,7 @@ void main() {
     vec2 scaledCoord = texCoord * (1.0 / VOLUMETRICS_RENDER_RESOLUTION);
     vec4 scaledTranslucent = texture2D(colortex1, scaledCoord);
 
-	float dither = BlueNoise(gl_FragCoord.xy);
+	float dither = texture2D(noisetex, gl_FragCoord.xy / 512.0).b;
 	float z0Scaled = texture2D(depthtex0, scaledCoord).r;
 	float z1Scaled = texture2D(depthtex1, scaledCoord).r;
 

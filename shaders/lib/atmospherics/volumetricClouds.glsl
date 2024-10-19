@@ -22,7 +22,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z0, float z1, vec2 scaledCoord, floa
 	vec4 finalColor = vec4(0.0);
 
 	#ifdef TAA
-	dither = fract(dither + 0.6180339887498967 * (frameCounter & 127));
+	dither = fract(dither + 1.61803398875 * mod(float(frameCounter), 3600.0));
 	#endif
 
 	float ug = mix(clamp((cameraPosition.y - 64.0) / 16.0, 0.0, 1.0), 1.0, eBS);
@@ -51,7 +51,7 @@ vec4 getVolumetricCloud(vec3 viewPos, float z0, float z1, vec2 scaledCoord, floa
 			float noise = getCloudSample(wpos.xyz);
 			float heightFactor = smoothstep(VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y);
 
-			vec4 cloudsColor = vec4(mix(lightCol, ambientCol, heightFactor), noise);
+			vec4 cloudsColor = vec4(mix(lightCol, ambientCol, min(1.0, heightFactor * 0.5 + noise * 0.7)), noise);
 				 cloudsColor.rgb *= cloudsColor.a;
 
 			cloudsColor.rgb = mix(cloudsColor.rgb, cloudsColor.rgb * translucent.rgb * 0.5, float(depth0 < minDist));
