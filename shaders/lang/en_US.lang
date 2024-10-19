@@ -81,9 +81,9 @@ screen.EXTRAS=Extras
 screen.ANIMATION=Animations
 
 #Settings
-option.ABOUT=BSL v8.3 Original
-option.ABOUT.comment=by Capt Tatsu. bitslablab.com
-value.ABOUT.0=by Capt Tatsu
+option.ABOUT=Prismarine Shader
+option.ABOUT.comment=by Septonious. Based on BSL V8.3
+value.ABOUT.0=by Septonious
 
 #Lighting
 option.SHADOW=Realtime Shadows

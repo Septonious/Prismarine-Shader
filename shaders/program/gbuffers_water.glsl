@@ -465,10 +465,6 @@ void main() {
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
 				#endif
 
-				#if CLOUDS == 1
-				vec4 cloud = DrawCloudSkybox(skyRefPos * 100.0, 1.0, dither, lightCol, ambientCol, true);
-				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
-				#endif
 				#if CLOUDS == 2
 				vec3 cameraPos = GetReflectedCameraPos(worldPos, newNormal);
 				float cloudViewLength = 0.0;
@@ -562,11 +558,7 @@ void main() {
 					#ifdef AURORA
 					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
 					#endif
-					
-					#if CLOUDS == 1
-					vec4 cloud = DrawCloudSkybox(skyRefPos * 100.0, 1.0, dither, lightCol, ambientCol, false);
-					skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
-					#endif
+
 					#if CLOUDS == 2
 					vec3 cameraPos = GetReflectedCameraPos(worldPos, newNormal);
 					float cloudViewLength = 0.0;

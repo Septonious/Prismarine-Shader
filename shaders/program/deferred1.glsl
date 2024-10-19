@@ -321,10 +321,6 @@ void main() {
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12) * cloudMixRate;
 				#endif
 
-				#if CLOUDS == 1
-				vec4 cloud = DrawCloudSkybox(skyRefPos * 100.0, 1.0, dither, lightCol, ambientCol, false);
-				skyReflection = mix(skyReflection, cloud.rgb, cloud.a * cloudMixRate);
-				#endif
 				#if CLOUDS == 2
 				vec4 worldPos = gbufferModelViewInverse * vec4(viewPos.xyz, 1.0);
 				worldPos.xyz /= worldPos.w;
@@ -447,10 +443,6 @@ void main() {
 	#endif
 
 	#ifdef OVERWORLD
-	#if CLOUDS == 1
-	cloud = DrawCloudSkybox(viewPos.xyz, cloudSampleZ, cloudDither, lightCol, ambientCol, false);
-	#endif
-
 	#if CLOUDS == 2
 	vec4 cloudViewPos = viewPos;
 

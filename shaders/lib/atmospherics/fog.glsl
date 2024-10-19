@@ -31,7 +31,7 @@ vec3 GetFogColor(vec3 viewPos) {
 	float sunMix = (VoL * 0.5 + 0.5) * pow(clamp(1.0 - VoU, 0.0, 1.0), 2.0 - sunVisibility) *
                    pow(1.0 - timeBrightness * 0.6, 3.0);
     float horizonMix = pow(1.0 - abs(VoU), 2.5) * 0.125;
-    float lightMix = (1.0 - (1.0 - sunMix) * (1.0 - horizonMix)) * lViewPos;
+    float lightMix = (1.0 - (1.0 - sunMix) * (1.0 - horizonMix)) * lViewPos * 0.5;
 
 	vec3 lightFog = pow(lightSun, vec3(4.0 - sunVisibility)) * baseGradient;
 	lightFog = lightFog / (1.0 + lightFog * rainStrength);

@@ -137,99 +137,6 @@ float InvLerp(float v, float l, float h) {
 	return clamp((v - l) / (h - l), 0.0, 1.0);
 }
 
-vec4 DrawCloudSkybox(vec3 viewPos, float z, float dither, vec3 lightCol, vec3 ambientCol, bool fadeFaster) {
-	if (z < 1.0) return vec4(0.0);
-
-	#ifdef TAA
-	#if TAA_MODE == 0
-	dither = fract(dither + frameCounter * 0.618);
-	#else
-	dither = fract(dither + frameCounter * 0.5);
-	#endif
-	#endif
-
-	int samples = CLOUD_THICKNESS * 2;
-	
-	float cloud = 0.0, cloudLighting = 0.0;
-
-	float sampleStep = 1.0 / samples;
-	float currentStep = dither * sampleStep;
-	
-	vec3 nViewPos = normalize(viewPos);
-	float VoU = dot(nViewPos, upVec);
-	float VoL = dot(nViewPos, lightVec);
-	
-	float sunCoverage = mix(abs(VoL), max(VoL, 0.0), shadowFade);
-	sunCoverage = pow(clamp(sunCoverage * 2.0 - 1.0, 0.0, 1.0), 12.0) * (1.0 - rainStrength);
-
-	vec2 wind = vec2(
-		frametime * CLOUD_SPEED * 0.0005,
-		sin(frametime * CLOUD_SPEED * 0.001) * 0.005
-	) * CLOUD_HEIGHT / 15.0;
-
-	vec3 cloudColor = vec3(0.0);
-
-	if (VoU > 0.025) {
-		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
-
-		float halfVoL = mix(abs(VoL) * 0.8, VoL, shadowFade) * 0.5 + 0.5;
-		float halfVoLSqr = halfVoL * halfVoL;
-		float scattering = pow(halfVoL, 6.0);
-		float noiseLightFactor = (2.0 - 1.5 * VoL * shadowFade) * CLOUD_DENSITY * 0.5;
-
-		for(int i = 0; i < samples; i++) {
-			if (cloud > 0.99) break;
-
-			#if CLOUD_BASE == 2
-			float planeY = CLOUD_HEIGHT + currentStep * CLOUD_THICKNESS * 0.5;
-			#else 
-			float planeY = CLOUD_HEIGHT + currentStep * CLOUD_THICKNESS;
-			#endif
-
-			vec3 planeCoord = wpos * (planeY / wpos.y);
-			vec2 cloudCoord = cameraPosition.xz * 0.0625 * 16.0 / CLOUD_VOLUMETRIC_SCALE + planeCoord.xz;
-
-			float noise = CloudSample(cloudCoord, wind, currentStep, sunCoverage, dither);
-
-			float sampleLighting = pow(currentStep, 1.125 * halfVoLSqr + 0.875) * 0.8 + 0.2;
-			sampleLighting *= 1.0 - pow(noise, noiseLightFactor);
-
-			cloudLighting = mix(cloudLighting, sampleLighting, noise * (1.0 - cloud * cloud));
-			cloud = mix(cloud, 1.0, noise);
-
-			currentStep += sampleStep;
-		}
-		cloudLighting = mix(cloudLighting, 1.0, (1.0 - cloud * cloud) * scattering * 0.5);
-		cloudLighting *= (1.0 - 0.9 * rainStrength);
-
-		cloudColor = mix(
-			ambientCol * (0.3 * sunVisibility + 0.5),
-			lightCol * (0.85 + 1.15 * scattering),
-			cloudLighting
-		);
-		cloudColor *= 1.0 - 0.4 * rainStrength;
-
-		cloud *= clamp(1.0 - exp(-16.0 / max(fogDensity, 0.5) * VoU + 0.5), 0.0, 1.0);
-
-		if (fadeFaster) {
-			cloud *= 1.0 - pow(1.0 - VoU, 4.0);
-		}
-	}
-	cloudColor *= CLOUD_BRIGHTNESS * (0.5 - 0.25 * (1.0 - sunVisibility) * (1.0 - rainStrength));
-	
-	#if MC_VERSION >= 11800
-	cloudColor *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
-	#else
-	cloudColor *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
-	#endif
-	
-	#ifdef UNDERGROUND_SKY
-	cloud *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
-	#endif
-	
-	return vec4(cloudColor, cloud * cloud * CLOUD_OPACITY);
-}
-
 vec3 GetReflectedCameraPos(vec3 worldPos, vec3 normal) {
 	vec4 worldNormal = gbufferModelViewInverse * vec4(normal, 1.0);
 	worldNormal.xyz /= worldNormal.w;
@@ -259,7 +166,7 @@ vec4 DrawCloudVolumetric(vec3 viewPos, vec3 cameraPos, float z, float dither, ve
 	// float cloudHeight = 63;
 	float cloudThickness = CLOUD_THICKNESS;
 
-	int maxSamples = 32;
+	int maxSamples = 24;
 
 	#if CLOUD_BASE == 2
 	cloudThickness *= 0.5;
@@ -320,7 +227,7 @@ vec4 DrawCloudVolumetric(vec3 viewPos, vec3 cameraPos, float z, float dither, ve
 
 	float fade = 1.0;
 	float fadeStart = 32.0 / max(fogDensity, 0.5);
-	float fadeEnd = (fadeFaster ? 80.0 : 240.0) / max(fogDensity, 0.5);
+	float fadeEnd = (fadeFaster ? 120.0 : 520.0) / max(fogDensity, 0.5);
 
 	for (int i = 0; i < samples; i++) {
 		if (cloud > 0.99) break;
@@ -330,7 +237,7 @@ vec4 DrawCloudVolumetric(vec3 viewPos, vec3 cameraPos, float z, float dither, ve
 		float xzNormalizedDistance = length(samplePos.xz - cameraPos.xz) / CLOUD_VOLUMETRIC_SCALE;
 		vec2 cloudCoord = samplePos.xz / CLOUD_VOLUMETRIC_SCALE;
 
-		float noise = CloudSample(cloudCoord, wind, cloudGradient, sunCoverage, dither);
+		float noise = CloudSample(cloudCoord * 0.75, wind, cloudGradient, sunCoverage, dither);
 		noise *= step(lowerY, samplePos.y) * step(samplePos.y, upperY);
 
 		float sampleLighting = pow(cloudGradient, 1.125 * halfVoLSqr + 0.875) * 0.8 + 0.2;

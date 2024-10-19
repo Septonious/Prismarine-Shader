@@ -77,7 +77,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	visibility *= 0.14285 * float(pixeldepth0 > 0.56);
 
 	if (visibility > 0.0) {
-		float maxDist = 128.0;
+		float maxDist = 196.0;
 		
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
@@ -89,7 +89,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 							pow(waterAlpha, 0.25));
 		
 		for(int i = 0; i < 7; i++) {
-			float minDist = exp2(i + dither) - 0.95;
+			float minDist = (i + dither) * 12.0;
 			if (minDist >= maxDist) break;
 
 			if (depth1 < minDist || (depth0 < minDist && color == vec3(0.0))) {
