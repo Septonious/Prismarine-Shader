@@ -19,6 +19,7 @@ varying vec4 color;
 //Uniforms//
 uniform int renderStage;
 
+uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
 uniform float timeAngle, timeBrightness;
@@ -31,6 +32,7 @@ uniform vec3 cameraPosition;
 uniform mat4 gbufferProjectionInverse;
 
 uniform sampler2D texture;
+uniform sampler2D gaux1;
 
 #ifndef MC_RENDER_STAGE_SUN
 #define MC_RENDER_STAGE_SUN 1
@@ -40,19 +42,8 @@ uniform sampler2D texture;
 #define MC_RENDER_STAGE_MOON 1
 #endif
 
-#if defined END_NEBULA || defined END_STARS
-uniform sampler2D noisetex;
-
-uniform mat4 gbufferModelViewInverse;
-
-uniform int worldTime;
-uniform float frameTimeCounter;
-
-#ifdef WORLD_TIME_ANIMATION
-float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
-#else
-float frametime = frameTimeCounter * ANIMATION_SPEED;
-#endif
+#ifndef MC_RENDER_STAGE_CUSTOM_SKY
+#define MC_RENDER_STAGE_CUSTOM_SKY 1
 #endif
 
 //Common Variables//
@@ -67,36 +58,7 @@ float GetLuminance(vec3 color) {
 
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
-
-#ifdef END_NEBULA
 #include "/lib/util/dither.glsl"
-#include "/lib/atmospherics/clouds.glsl"
-#endif
-
-#ifdef END_STARS
-float GetNoise2(vec2 pos) {
-	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
-}
-
-void DrawStars2(inout vec3 color, vec3 viewPos, float size, float amount, float brightness) {
-	vec3 wpos = vec3(gbufferModelViewInverse * vec4(viewPos, 1.0));
-	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
-
-	vec2 wind = vec2(frametime, 0.0);
-	vec2 coord = planeCoord.xz * size + cameraPosition.xz * 0.0001 + wind * 0.001;
-		 coord = floor(coord * 1024.0) / 1024.0;
-
-	float multiplier = 16.0 * (1.0 - rainStrength) * (1.0 - sunVisibility * 0.5);
-	
-	float star = GetNoise2(coord.xy);
-		  star*= GetNoise2(coord.xy + 0.10);
-		  star*= GetNoise2(coord.xy + 0.23);
-	star *= amount;
-	star = clamp(star - 0.75, 0.0, 1.0) * multiplier;
-
-	color += star * vec3(0.5, 0.75, 1.00) * brightness;
-}
-#endif
 
 //Program//
 void main() {
@@ -104,16 +66,41 @@ void main() {
 
 	#ifdef OVERWORLD
 	albedo *= color;
-	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * SKYBOX_BRIGHTNESS * albedo.a;
+	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * albedo.a;
 
-	#ifdef ROUND_SUN_MOON
+	#if MC_VERSION >= 11605
+	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
+	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
+	viewPos /= viewPos.w;
+	
+	float VoU = dot(normalize(viewPos.xyz), upVec);
+
+	float sunFade = smoothstep(0.0, 1.0, 1.0 - pow(1.0 - max(VoU * 0.975 + 0.025, 0.0), 8.0));
+	sunFade *= sunFade;
+
+	if (renderStage == MC_RENDER_STAGE_CUSTOM_SKY) {
+		albedo.rgb *= SKYBOX_INTENSITY * SKYBOX_INTENSITY;
+		albedo.a *= SKYBOX_OPACITY;
+	}
+	if (renderStage == MC_RENDER_STAGE_SUN) {
+		albedo.rgb *= SUN_INTENSITY * SUN_INTENSITY * sunFade;
+	}
+	if (renderStage == MC_RENDER_STAGE_MOON) {
+		albedo.rgb *= MOON_INTENSITY * MOON_INTENSITY * sunFade;
+	}
+	#else 
+	albedo.rgb *= SKYBOX_INTENSITY * SKYBOX_INTENSITY;
+	albedo.a *= SKYBOX_OPACITY;
+	#endif
+	
+	#ifdef SHADER_SUN_MOON
 	if (renderStage == MC_RENDER_STAGE_SUN || renderStage == MC_RENDER_STAGE_MOON) {
 		albedo *= 0.0;
 	}
 	#endif
 	
 	#ifdef SKY_DESATURATION
-    vec3 desat = GetLuminance(albedo.rgb) * pow(lightNight,vec3(1.6)) * 4.0;
+    vec3 desat = GetLuminance(albedo.rgb) * pow(lightNight, vec3(1.6)) * 4.0;
 	albedo.rgb = mix(desat, albedo.rgb, sunVisibility);
 	#endif
 
@@ -123,25 +110,13 @@ void main() {
 	#endif
 
 	#ifdef END
-	albedo.rgb = endCol.rgb * 0.01;
+	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 
 	#ifdef SKY_DESATURATION
 	albedo.rgb = GetLuminance(albedo.rgb) * endCol.rgb;
 	#endif
 
-	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
-	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
-	viewPos /= viewPos.w;
-
-	#ifdef END_STARS
-	DrawStars2(albedo.rgb, viewPos.xyz, 0.45, 0.9, 8.0);
-	#endif
-
-	#ifdef END_NEBULA
-	albedo.rgb += DrawNebula(viewPos.xyz);
-	#endif
-
-	albedo.rgb *= SKYBOX_BRIGHTNESS * 0.02;
+	albedo.rgb *= SKYBOX_INTENSITY * 0.02 * 16.0 / 16.0;
 	#endif
 
 	#if ALPHA_BLEND == 0
@@ -150,16 +125,6 @@ void main() {
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;
-
-	#if defined END && (defined END_STARS || defined END_NEBULA)
-	/* DRAWBUFFERS:09 */
-	gl_FragData[1] = albedo;
-	#endif
-
-	#ifdef SSPT
-	/* DRAWBUFFERS:096 */
-	gl_FragData[2] = vec4(0.0);
-	#endif
 }
 
 #endif

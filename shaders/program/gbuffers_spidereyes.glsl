@@ -12,13 +12,15 @@ https://bitslablab.com
 //Varyings//
 varying vec2 texCoord;
 
+varying vec4 color;
+
 //Uniforms//
 uniform sampler2D texture;
 
 //Program//
 void main() {
-    vec4 albedo = texture2D(texture, texCoord);
-    albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 4.0;
+    vec4 albedo = texture2D(texture, texCoord) * color;
+    albedo.rgb = pow(albedo.rgb,vec3(2.2)) * 4.0;
 	
     #ifdef WHITE_WORLD
 	albedo.rgb = vec3(2.0);
@@ -31,7 +33,7 @@ void main() {
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;
 
-	#if defined ADVANCED_MATERIALS || defined SSPT
+	#ifdef ADVANCED_MATERIALS
 	/* DRAWBUFFERS:0367 */
 	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[2] = vec4(0.0, 0.0, 0.0, 1.0);
@@ -46,6 +48,8 @@ void main() {
 
 //Varyings//
 varying vec2 texCoord;
+
+varying vec4 color;
 
 //Uniforms//
 #ifdef TAA
@@ -70,6 +74,8 @@ uniform mat4 gbufferModelViewInverse;
 void main() {
 	texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 
+	color = gl_Color;
+
 	#ifdef WORLD_CURVATURE
 	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
 	position.y -= WorldCurvature(position.xz);
@@ -78,7 +84,7 @@ void main() {
 	gl_Position = ftransform();
 	#endif
 	
-	#ifdef TAA
+	#if defined TAA && !defined TAA_SELECTIVE
 	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
 	#endif
 }

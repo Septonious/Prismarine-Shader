@@ -17,14 +17,21 @@ varying vec4 color;
 //Uniforms//
 uniform sampler2D texture;
 
-#ifdef CUSTOM_BEACON_BEAM
-uniform sampler2D noisetex;
-#endif
+//Includes//
+#include "/lib/color/blocklightColor.glsl"
 
 //Program//
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
-	albedo.rgb = pow(albedo.rgb, vec3(2.2));
+	
+	#ifdef EMISSIVE_RECOLOR
+	if (dot(color.rgb, vec3(1.0)) > 2.66) {
+		float ec = length(albedo.rgb);
+		albedo.rgb = blocklightCol * (ec * 0.63 / BLOCKLIGHT_I) + ec * 0.07;
+	}
+	#endif
+    
+	albedo.rgb = pow(albedo.rgb,vec3(2.2)) * 4.0;
 	
 	#ifdef WHITE_WORLD
 	albedo.rgb = vec3(2.0);
@@ -32,16 +39,7 @@ void main() {
 
 	#if ALPHA_BLEND == 0
 	albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
-	#endif
-
-	#ifdef CUSTOM_BEACON_BEAM
-	float noise = texture2D(noisetex, texCoord * 0.03).r * 0.3;
-		  noise+= texture2D(noisetex, texCoord * 0.02).r * 0.4;
-		  noise+= texture2D(noisetex, texCoord * 0.01).r * 0.5;
-		
-	noise = clamp(noise, 0.0, 1.0);
-
-	albedo.rgb *= 1.4 + noise;
+	albedo.a = sqrt(albedo.a);
 	#endif
     
     /* DRAWBUFFERS:0 */
@@ -52,12 +50,6 @@ void main() {
 	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
 	gl_FragData[2] = vec4(0.0, 0.0, float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
-	#endif
-
-	#if defined SSPT && !defined ADVANCED_MATERIALS
-	/* RENDERTARGETS:0,9,10*/
-	gl_FragData[1] = vec4(0.25);
-	gl_FragData[2] = albedo;
 	#endif
 }
 

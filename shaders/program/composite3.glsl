@@ -13,77 +13,124 @@ https://bitslablab.com
 varying vec2 texCoord;
 
 //Uniforms//
-#ifdef MOTION_BLUR
-uniform float viewWidth, viewHeight;
+uniform float viewWidth, viewHeight, aspectRatio;
+uniform float centerDepthSmooth;
 
-uniform vec3 cameraPosition, previousCameraPosition;
-
-uniform mat4 gbufferPreviousProjection, gbufferProjectionInverse;
-uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
-
-uniform sampler2D depthtex1;
-#endif
+uniform mat4 gbufferProjection;
 
 uniform sampler2D colortex0;
+uniform sampler2D depthtex1;
 
-#ifdef MOTION_BLUR
+//Optifine Constants//
+const bool colortex0MipmapEnabled = true;
+
+//Common Variables//
+vec2 dofOffsets[60] = vec2[60](
+	vec2( 0.0    ,  0.25  ),
+	vec2(-0.2165 ,  0.125 ),
+	vec2(-0.2165 , -0.125 ),
+	vec2( 0      , -0.25  ),
+	vec2( 0.2165 , -0.125 ),
+	vec2( 0.2165 ,  0.125 ),
+	vec2( 0      ,  0.5   ),
+	vec2(-0.25   ,  0.433 ),
+	vec2(-0.433  ,  0.25  ),
+	vec2(-0.5    ,  0     ),
+	vec2(-0.433  , -0.25  ),
+	vec2(-0.25   , -0.433 ),
+	vec2( 0      , -0.5   ),
+	vec2( 0.25   , -0.433 ),
+	vec2( 0.433  , -0.2   ),
+	vec2( 0.5    ,  0     ),
+	vec2( 0.433  ,  0.25  ),
+	vec2( 0.25   ,  0.433 ),
+	vec2( 0      ,  0.75  ),
+	vec2(-0.2565 ,  0.7048),
+	vec2(-0.4821 ,  0.5745),
+	vec2(-0.51295,  0.375 ),
+	vec2(-0.7386 ,  0.1302),
+	vec2(-0.7386 , -0.1302),
+	vec2(-0.51295, -0.375 ),
+	vec2(-0.4821 , -0.5745),
+	vec2(-0.2565 , -0.7048),
+	vec2(-0      , -0.75  ),
+	vec2( 0.2565 , -0.7048),
+	vec2( 0.4821 , -0.5745),
+	vec2( 0.51295, -0.375 ),
+	vec2( 0.7386 , -0.1302),
+	vec2( 0.7386 ,  0.1302),
+	vec2( 0.51295,  0.375 ),
+	vec2( 0.4821 ,  0.5745),
+	vec2( 0.2565 ,  0.7048),
+	vec2( 0      ,  1     ),
+	vec2(-0.2588 ,  0.9659),
+	vec2(-0.5    ,  0.866 ),
+	vec2(-0.7071 ,  0.7071),
+	vec2(-0.866  ,  0.5   ),
+	vec2(-0.9659 ,  0.2588),
+	vec2(-1      ,  0     ),
+	vec2(-0.9659 , -0.2588),
+	vec2(-0.866  , -0.5   ),
+	vec2(-0.7071 , -0.7071),
+	vec2(-0.5    , -0.866 ),
+	vec2(-0.2588 , -0.9659),
+	vec2(-0      , -1     ),
+	vec2( 0.2588 , -0.9659),
+	vec2( 0.5    , -0.866 ),
+	vec2( 0.7071 , -0.7071),
+	vec2( 0.866  , -0.5   ),
+	vec2( 0.9659 , -0.2588),
+	vec2( 1      ,  0     ),
+	vec2( 0.9659 ,  0.2588),
+	vec2( 0.866  ,  0.5   ),
+	vec2( 0.7071 ,  0.7071),
+	vec2( 0.5    ,  0.8660),
+	vec2( 0.2588 ,  0.9659)
+);
+
 //Common Functions//
-vec3 MotionBlur(vec3 color, float z, float dither) {
-	
+vec3 DepthOfField(vec3 color, float z) {
+	vec3 dof = vec3(0.0);
 	float hand = float(z < 0.56);
-
-	if (hand < 0.5) {
-		float mbwg = 0.0;
-		vec2 doublePixel = 2.0 / vec2(viewWidth, viewHeight);
-		vec3 mblur = vec3(0.0);
-		
-		vec4 currentPosition = vec4(texCoord, z, 1.0) * 2.0 - 1.0;
-		
-		vec4 viewPos = gbufferProjectionInverse * currentPosition;
-		viewPos = gbufferModelViewInverse * viewPos;
-		viewPos /= viewPos.w;
-		
-		vec3 cameraOffset = cameraPosition - previousCameraPosition;
-		
-		vec4 previousPosition = viewPos + vec4(cameraOffset, 0.0);
-		previousPosition = gbufferPreviousModelView * previousPosition;
-		previousPosition = gbufferPreviousProjection * previousPosition;
-		previousPosition /= previousPosition.w;
-
-		vec2 velocity = (currentPosition - previousPosition).xy;
-		velocity = velocity / (1.0 + length(velocity)) * MOTION_BLUR_STRENGTH * 0.02;
-		
-		vec2 coord = texCoord.st - velocity * (1.5 + dither);
-		for(int i = 0; i < 4; i++, coord += velocity) {
-			vec2 sampleCoord = clamp(coord, doublePixel, 1.0 - doublePixel);
-			float mask = float(texture2D(depthtex1, sampleCoord).r > 0.56);
-			mblur += texture2D(colortex0, sampleCoord).rgb * mask;
-			mbwg += mask;
+	
+	float fovScale = gbufferProjection[1][1] / 1.37;
+	float coc = max(abs(z - centerDepthSmooth) * DOF_STRENGTH - 0.01, 0.0);
+	coc = coc / sqrt(coc * coc + 0.1);
+	
+	if (coc > 0.0 && hand < 0.5) {
+		for(int i = 0; i < 60; i++) {
+			vec2 offset = dofOffsets[i] * coc * 0.015 * fovScale * vec2(1.0 / aspectRatio, 1.0);
+			float lod = log2(viewHeight * aspectRatio * coc * fovScale / 320.0);
+			dof += texture2DLod(colortex0, texCoord + offset, lod).rgb;
 		}
-		mblur /= max(mbwg, 1.0);
-
-		return mblur;
+		dof /= 60.0;
 	}
-	else return color;
+	else dof = color;
+	return dof;
 }
 
 //Includes//
-#include "/lib/util/dither.glsl"
+#ifdef OUTLINE_OUTER
+#include "/lib/util/outlineOffset.glsl"
+#include "/lib/util/outlineDepth.glsl"
 #endif
 
 //Program//
 void main() {
-    vec3 color = texture2D(colortex0, texCoord).rgb;
+	vec3 color = texture2DLod(colortex0, texCoord, 0.0).rgb;
 	
-	#ifdef MOTION_BLUR
+	#ifdef DOF
 	float z = texture2D(depthtex1, texCoord.st).x;
-	float dither = Bayer64(gl_FragCoord.xy);
 
-	color = MotionBlur(color, z, dither);
+	#ifdef OUTLINE_OUTER
+	DepthOutline(z, depthtex1);
 	#endif
 
-	/*DRAWBUFFERS:0*/
-	gl_FragData[0] = vec4(color, 1.0);
+	color = DepthOfField(color, z);
+	#endif
+	
+    /*DRAWBUFFERS:0*/
+	gl_FragData[0] = vec4(color,1.0);
 }
 
 #endif

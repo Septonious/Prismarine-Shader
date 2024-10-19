@@ -22,21 +22,19 @@ uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
 
-uniform float blindFactor, nightVision;
+uniform float blindFactor, darknessFactor, nightVision;
 uniform float far, near;
 uniform float frameTimeCounter;
 uniform float rainStrength;
-uniform float shadowFade, voidFade;
+uniform float screenBrightness; 
+uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
 
 uniform ivec2 eyeBrightnessSmooth;
 
-#ifdef INTEGRATED_EMISSION
-uniform ivec2 atlasSize;
-#endif
-
 uniform vec3 cameraPosition;
+uniform vec3 relativeEyePosition;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
@@ -44,6 +42,7 @@ uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
 uniform sampler2D texture;
+uniform sampler2D noisetex;
 
 #ifdef SOFT_PARTICLES
 uniform sampler2D depthtex0;
@@ -52,6 +51,18 @@ uniform sampler2D depthtex0;
 #ifdef DYNAMIC_HANDLIGHT
 uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
+#endif
+
+#ifdef MULTICOLORED_BLOCKLIGHT
+uniform mat4 gbufferPreviousModelView;
+uniform mat4 gbufferPreviousProjection;
+uniform vec3 previousCameraPosition;
+
+uniform sampler2D colortex9;
+#endif
+
+#ifdef DISTANT_HORIZONS
+uniform float dhFarPlane;
 #endif
 
 //Common Variables//
@@ -84,26 +95,44 @@ float GetLinearDepth(float depth) {
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
+#include "/lib/atmospherics/weatherDensity.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 
+#ifdef TAA
+#include "/lib/util/jitter.glsl"
+#endif
+
+#ifdef MULTICOLORED_BLOCKLIGHT
+#include "/lib/lighting/coloredBlocklight.glsl"
+#endif
+
 //Program//
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * color;
-	float emission = 0.0;
-	
+
 	if (albedo.a > 0.001) {
-		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
-		vec3 viewPos = ToNDC(screenPos);
-		vec3 worldPos = ToWorld(viewPos);
-	
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+
+		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
+		#if defined TAA && !defined TAA_SELECTIVE
+		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
+		#else
+		vec3 viewPos = ToNDC(screenPos);
+		#endif
+		vec3 worldPos = ToWorld(viewPos);
 		
 		#ifdef DYNAMIC_HANDLIGHT
 		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
-		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
-		lightmap.x = max(lightmap.x, handlight);
+		vec3 heldLightPos = worldPos + relativeEyePosition + vec3(0.0, 0.5, 0.0);
+		float handlight = clamp((heldLightValue - 2.0 * length(heldLightPos)) / 15.0, 0.0, 0.9333);
+		lightmap.x = log2(exp2(lightmap.x * 8.0) + exp2(handlight * 8.0)) / 8.0;
+		#endif
+
+		#ifdef TOON_LIGHTMAP
+		lightmap = floor(lightmap * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
 		#endif
 
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
@@ -113,25 +142,20 @@ void main() {
 		#endif
 
 		float NoL = 1.0;
+		//NoL = clamp(dot(normal, lightVec) * 1.01 - 0.01, 0.0, 1.0);
+
 		float NoU = clamp(dot(normal, upVec), -1.0, 1.0);
 		float NoE = clamp(dot(normal, eastVec), -1.0, 1.0);
 		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
 			  vanillaDiffuse*= vanillaDiffuse;
-		
-		#ifdef INTEGRATED_EMISSION // almost entirely stolen from complementary, blame me now
-			if (atlasSize.x < 900.0) { // We don't want to detect particles from the block atlas
-				float lengthAlbedo = length(albedo.rgb);
 
-				if (albedo.r > 0.1 && albedo.b > 0.1 && albedo.g < 0.1) // Ender Particle, Crying Obsidian Drop, Nether Portal Particle
-					emission = 0.5;
-				if (lengthAlbedo > 0.25 && albedo.r > 0.5 && albedo.g < 0.1) // Redstone Particle
-					emission = 1.0;
-			}
+		#ifdef MULTICOLORED_BLOCKLIGHT
+		blocklightCol = ApplyMultiColoredBlocklight(blocklightCol, screenPos);
 		#endif
-
+		
 		vec3 shadow = vec3(0.0);
-		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, 1.0, NoL, 1.0,
-				    1.0, emission, 0.0);
+		GetLighting(albedo.rgb, shadow, viewPos, worldPos, normal, lightmap, 1.0, NoL, 
+					1.0, 1.0, 0.0, 0.0, 0.0);
 
 		#if defined FOG && MC_VERSION >= 11500
 		Fog(albedo.rgb, viewPos);
@@ -150,7 +174,7 @@ void main() {
 	float difference = clamp(linearBackZ - linearZ, 0.0, 1.0);
 	difference = difference * difference * (3.0 - 2.0 * difference);
 
-	float opaqueThreshold = fract(Bayer64(gl_FragCoord.xy) + frameTimeCounter * 8.0);
+	float opaqueThreshold = fract(Bayer8(gl_FragCoord.xy) + frameTimeCounter * 8.0);
 
 	if (albedo.a > 0.999) albedo.a *= float(difference > opaqueThreshold);
 	else albedo.a *= difference;
@@ -159,9 +183,33 @@ void main() {
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
 
-	#if defined SSPT && !defined ADVANCED_MATERIALS && !defined REFLECTION_SPECULAR
-	/* RENDERTARGETS:0,10 */
-	gl_FragData[1] = vec4(albedo.rgb, emission);
+	#ifdef MULTICOLORED_BLOCKLIGHT
+		/* DRAWBUFFERS:08 */
+		gl_FragData[1] = vec4(0.0,0.0,0.0,1.0);
+		
+		#if defined TAA_SELECTIVE && !defined ADVANCED_MATERIALS
+		/* DRAWBUFFERS:083 */
+		gl_FragData[2] = vec4(0.0, 0.0, 0.25, 1.0);
+		#endif
+
+		#ifdef ADVANCED_MATERIALS
+		/* DRAWBUFFERS:08367 */
+		gl_FragData[2] = vec4(0.0, 0.0, 0.25, 1.0);
+		gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+		gl_FragData[4] = vec4(0.0, 0.0, 0.0, 1.0);
+		#endif
+	#else
+		#if defined TAA_SELECTIVE && !defined ADVANCED_MATERIALS
+		/* DRAWBUFFERS:03 */
+		gl_FragData[1] = vec4(0.0, 0.0, 0.25, 1.0);
+		#endif
+
+		#ifdef ADVANCED_MATERIALS
+		/* DRAWBUFFERS:0367 */
+		gl_FragData[1] = vec4(0.0, 0.0, 0.25, 1.0);
+		gl_FragData[2] = vec4(0.0, 0.0, 0.0, 1.0);
+		gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+		#endif
 	#endif
 }
 
@@ -187,6 +235,12 @@ uniform float timeAngle;
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferModelView, gbufferModelViewInverse;
+
+#ifdef TAA
+uniform int frameCounter;
+
+uniform float viewWidth, viewHeight;
+#endif
 
 #ifdef SOFT_PARTICLES
 uniform float far, near;
@@ -215,6 +269,10 @@ float GetLogarithmicDepth(float depth) {
 #endif
 
 //Includes//
+#ifdef TAA
+#include "/lib/util/jitter.glsl"
+#endif
+
 #ifdef WORLD_CURVATURE
 #include "/lib/vertex/worldCurvature.glsl"
 #endif
@@ -250,6 +308,10 @@ void main() {
 	gl_Position.z = GetLinearDepth(gl_Position.z / gl_Position.w) * (far - near);
 	gl_Position.z -= 0.25;
 	gl_Position.z = GetLogarithmicDepth(gl_Position.z / (far - near)) * gl_Position.w;
+	#endif
+	
+	#if defined TAA && !defined TAA_SELECTIVE
+	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
 	#endif
 }
 

@@ -25,6 +25,7 @@ uniform int worldTime;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
+uniform float screenBrightness; 
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
@@ -32,15 +33,26 @@ uniform float viewWidth, viewHeight;
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
+uniform vec3 relativeEyePosition;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
+uniform sampler2D noisetex;
+
 #ifdef DYNAMIC_HANDLIGHT
 uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
+#endif
+
+#ifdef MULTICOLORED_BLOCKLIGHT
+uniform mat4 gbufferPreviousModelView;
+uniform mat4 gbufferPreviousProjection;
+uniform vec3 previousCameraPosition;
+
+uniform sampler2D colortex9;
 #endif
 
 //Common Variables//
@@ -64,12 +76,15 @@ float GetLuminance(vec3 color) {
 //Includes//
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
-#include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
+#endif
+
+#ifdef MULTICOLORED_BLOCKLIGHT
+#include "/lib/lighting/coloredBlocklight.glsl"
 #endif
 
 //Program//
@@ -89,8 +104,14 @@ void main() {
 		
 		#ifdef DYNAMIC_HANDLIGHT
 		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
-		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
-		lightmap.x = max(lightmap.x, handlight);
+		vec3 heldLightPos = worldPos + relativeEyePosition + vec3(0.0, 0.5, 0.0);
+		float handlight = clamp((heldLightValue - 2.0 * length(heldLightPos)) / 15.0, 0.0, 0.9333);
+		lightmap.x = log2(exp2(lightmap.x * 8.0) + exp2(handlight * 8.0)) / 8.0;
+		#endif
+
+		#ifdef TOON_LIGHTMAP
+		lightmap = floor(lightmap * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
 		#endif
 
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
@@ -106,10 +127,14 @@ void main() {
 		float NoE = clamp(dot(normal, eastVec), -1.0, 1.0);
 		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
 			  vanillaDiffuse*= vanillaDiffuse;
+
+		#ifdef MULTICOLORED_BLOCKLIGHT
+		blocklightCol = ApplyMultiColoredBlocklight(blocklightCol, screenPos);
+		#endif
 		
 		vec3 shadow = vec3(0.0);
-		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, 1.0, NoL, vanillaDiffuse,
-				    1.0, 0.0, 0.0);
+		GetLighting(albedo.rgb, shadow, viewPos, worldPos, normal, lightmap, 1.0, NoL, 
+					vanillaDiffuse, 1.0, 0.0, 0.0, 0.0);
 
 		#if ALPHA_BLEND == 0
 		albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
@@ -119,11 +144,23 @@ void main() {
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
 
-	#ifdef ADVANCED_MATERIALS
-	/* DRAWBUFFERS:0367 */
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
-	gl_FragData[2] = vec4(0.0, 0.0, float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+	#ifdef MULTICOLORED_BLOCKLIGHT
+	    /* DRAWBUFFERS:08 */
+		gl_FragData[1] = vec4(0.0,0.0,0.0,1.0);
+
+		#ifdef ADVANCED_MATERIALS
+		/* DRAWBUFFERS:08367 */
+		gl_FragData[2] = vec4(0.0, 0.0, 0.0, 1.0);
+		gl_FragData[3] = vec4(0.0, 0.0, float(gl_FragCoord.z < 1.0), 1.0);
+		gl_FragData[4] = vec4(0.0, 0.0, 0.0, 1.0);
+		#endif
+	#else
+		#ifdef ADVANCED_MATERIALS
+		/* DRAWBUFFERS:0367 */
+		gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
+		gl_FragData[2] = vec4(0.0, 0.0, float(gl_FragCoord.z < 1.0), 1.0);
+		gl_FragData[3] = vec4(0.0, 0.0, 0.0, 1.0);
+		#endif
 	#endif
 }
 
@@ -149,6 +186,7 @@ uniform float timeAngle;
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferModelView, gbufferModelViewInverse;
+uniform mat4 gbufferProjectionInverse;
 
 #ifdef TAA
 uniform int frameCounter;
@@ -196,7 +234,7 @@ void main() {
 	eastVec = normalize(gbufferModelView[0].xyz);
 
     #ifdef WORLD_CURVATURE
-	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
+	vec4 position = gbufferModelViewInverse * gbufferProjectionInverse * ftransform();
 	position.y -= WorldCurvature(position.xz);
 	gl_Position = gl_ProjectionMatrix * gbufferModelView * position;
 	#else

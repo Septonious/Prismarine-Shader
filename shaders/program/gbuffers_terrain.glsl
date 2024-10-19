@@ -12,14 +12,6 @@ https://bitslablab.com
 //Varyings//
 varying float mat, recolor;
 
-#ifdef INTEGRATED_EMISSION
-varying float isPlant;
-#endif
-
-#ifdef SSPT
-varying float isConcrete;
-#endif
-
 varying vec2 texCoord, lmCoord;
 
 varying vec3 normal;
@@ -52,15 +44,16 @@ uniform float viewWidth, viewHeight;
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
+uniform vec3 relativeEyePosition;
 
 uniform mat4 gbufferProjectionInverse;
-uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferModelView, gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
 uniform sampler2D texture;
 
-uniform sampler2D depthtex1;
+uniform sampler2D noisetex;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;
@@ -70,14 +63,20 @@ uniform sampler2D normals;
 
 #ifdef REFLECTION_RAIN
 uniform float wetness;
-
-uniform mat4 gbufferModelView;
 #endif
 #endif
 
 #ifdef DYNAMIC_HANDLIGHT
 uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
+#endif
+
+#ifdef MULTICOLORED_BLOCKLIGHT
+uniform mat4 gbufferPreviousModelView;
+uniform mat4 gbufferPreviousProjection;
+uniform vec3 previousCameraPosition;
+
+uniform sampler2D colortex9;
 #endif
 
 //Common Variables//
@@ -107,24 +106,17 @@ float GetLuminance(vec3 color) {
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
-#include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
-
-#ifdef INTEGRATED_EMISSION
-#include "/lib/surface/integratedEmissionTerrain.glsl"
-#endif
+#include "/lib/surface/hardcodedEmission.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
 #endif
 
-#if defined ADVANCED_MATERIALS || defined SSPT
-#include "/lib/util/encode.glsl"
-#endif
-
 #ifdef ADVANCED_MATERIALS
+#include "/lib/util/encode.glsl"
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/directionalLightmap.glsl"
 #include "/lib/surface/materialGbuffers.glsl"
@@ -135,12 +127,16 @@ float GetLuminance(vec3 color) {
 #endif
 #endif
 
+#ifdef MULTICOLORED_BLOCKLIGHT
+#include "/lib/lighting/coloredBlocklight.glsl"
+#endif
+
 //Program//
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * vec4(color.rgb, 1.0);
 	vec3 newNormal = normal;
-	vec3 shadow = vec3(0.0);
 	float smoothness = 0.0;
+	vec3 lightAlbedo = vec3(0.0);
 
 	#ifdef ADVANCED_MATERIALS
 	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
@@ -150,7 +146,7 @@ void main() {
 	
 	#ifdef PARALLAX
 	if(skipAdvMat < 0.5) {
-		newCoord = GetParallaxCoord(parallaxFade, surfaceDepth);
+		newCoord = GetParallaxCoord(texCoord, parallaxFade, surfaceDepth);
 		albedo = texture2DGradARB(texture, newCoord, dcdx, dcdy) * vec4(color.rgb, 1.0);
 	}
 	#endif
@@ -159,226 +155,240 @@ void main() {
 	vec3 fresnel3 = vec3(0.0);
 	#endif
 
-	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-	float emission = 0.0; float lava = 0.0;
+	if (albedo.a > 0.001) {
+		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+		
+		float foliage  = float(mat > 0.98 && mat < 1.02);
+		float leaves   = float(mat > 1.98 && mat < 2.02);
+		float emissive = float(mat > 2.98 && mat < 3.02);
+		float lava     = float(mat > 3.98 && mat < 4.02);
+		float candle   = float(mat > 4.98 && mat < 5.02);
 
-	vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
-	#ifdef TAA
-	vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
-	#else
-	vec3 viewPos = ToNDC(screenPos);
-	#endif
-	vec3 worldPos = ToWorld(viewPos);
+		float metalness       = 0.0;
+		float emission        = (emissive + candle + lava);
+		float subsurface      = 0.0;
+		float basicSubsurface = (foliage + candle) * 0.5 + leaves;
+		vec3 baseReflectance  = vec3(0.04);
+		
+		emission *= GetHardcodedEmission(albedo.rgb);
+		
+		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
+		#ifdef TAA
+		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
+		#else
+		vec3 viewPos = ToNDC(screenPos);
+		#endif
+		vec3 worldPos = ToWorld(viewPos);
 
-	float emissive = float(mat > 2.98 && mat < 3.02) * 0.5;
-	float foliage  = float(mat > 0.98 && mat < 1.02);
-	float leaves   = float(mat > 1.98 && mat < 2.02);
-	float candle   = float(mat > 4.98 && mat < 5.02);
-	lava     = float(mat > 3.98 && mat < 4.02);
+		#ifdef ADVANCED_MATERIALS
+		float f0 = 0.0, porosity = 0.5, ao = 1.0;
+		vec3 normalMap = vec3(0.0, 0.0, 1.0);
+		GetMaterials(smoothness, metalness, f0, emission, subsurface, porosity, ao, normalMap,
+					 newCoord, dcdx, dcdy);
+					 
+		mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
+							  tangent.y, binormal.y, normal.y,
+							  tangent.z, binormal.z, normal.z);
 
-	#if defined SSPT && defined EMISSIVE_CONCRETE
-	emissive += isConcrete * 1.5;
-	albedo.rgb *= 1.0 + isConcrete * 0.5;
-	#endif
+		if ((normalMap.x > -0.999 || normalMap.y > -0.999) && viewVector == viewVector)
+			newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
+		#endif
+		
+		#ifdef DYNAMIC_HANDLIGHT
+		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
+		vec3 heldLightPos = worldPos + relativeEyePosition + vec3(0.0, 0.5, 0.0);
+		float handlight = clamp((heldLightValue - 2.0 * length(heldLightPos)) / 15.0, 0.0, 0.9333);
+		lightmap.x = log2(exp2(lightmap.x * 8.0) + exp2(handlight * 8.0)) / 8.0;
+		#endif
 
-	#ifdef INTEGRATED_EMISSION
-	getIntegratedEmission(emissive, lightmap, albedo, worldPos, viewPos.xyz);
-	#endif
+		#ifdef TOON_LIGHTMAP
+		lightmap = floor(lightmap * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
+		#endif
+		
+    	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 
-	float metalness      = 0.0;
-			emission       = emissive + candle + lava;
-	float subsurface     = (foliage + candle) * 0.5 + leaves;
-	vec3 baseReflectance = vec3(0.04);
+		#ifdef EMISSIVE_RECOLOR
+		float ec = GetLuminance(albedo.rgb) * 1.7;
+		if (recolor > 0.5) {
+			albedo.rgb = blocklightCol * pow(ec, 1.5) / (BLOCKLIGHT_I * BLOCKLIGHT_I);
+			albedo.rgb /= 0.7 * albedo.rgb + 0.7;
+		}
+		if (lava > 0.5) {
+			albedo.rgb = pow(blocklightCol * ec / BLOCKLIGHT_I, vec3(2.0));
+			albedo.rgb /= 0.5 * albedo.rgb + 0.5;
+		}
+		#endif
 
-	emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
+		#ifdef MULTICOLORED_BLOCKLIGHT
+		lightAlbedo = albedo.rgb + 0.00001;
+		if (lava > 0.5) {
+			#ifndef MCBL_LEGACY_COLOR
+			lightAlbedo = pow(lightAlbedo, vec3(0.25));
+			#else
+			lightAlbedo = sqrt(lightAlbedo) * 0.98 + 0.02;
+			#endif
+		}
+		lightAlbedo = sqrt(normalize(lightAlbedo) * emission);
+		#endif
 
-	#ifdef ADVANCED_MATERIALS
-	float f0 = 0.0, porosity = 0.5, ao = 1.0;
-	vec3 normalMap = vec3(0.0, 0.0, 1.0);
-	GetMaterials(smoothness, metalness, f0, emission, subsurface, porosity, ao, normalMap,
-					newCoord, dcdx, dcdy);
-	
-	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
-							tangent.y, binormal.y, normal.y,
-							tangent.z, binormal.z, normal.z);
+		#ifdef WHITE_WORLD
+		albedo.rgb = vec3(0.35);
+		#endif
+		
+		vec3 outNormal = newNormal;
+		#ifdef NORMAL_PLANTS
+		if (foliage > 0.5){
+			newNormal = upVec;
+			
+			#ifdef ADVANCED_MATERIALS
+			newNormal = normalize(mix(outNormal, newNormal, normalMap.z * normalMap.z));
+			#endif
+		}
+		#endif
+		
+		#ifndef HALF_LAMBERT
+		float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
+		#else
+		float NoL = clamp(dot(newNormal, lightVec) * 0.5 + 0.5, 0.0, 1.0);
+		NoL *= NoL;
+		#endif
 
-	if (normalMap.x > -0.999 && normalMap.y > -0.999)
-		newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
-	#endif
-	
-	#ifdef DYNAMIC_HANDLIGHT
-	float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
-	float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
-	lightmap.x = max(lightmap.x, handlight);
-	#endif
+		float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
+		float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
+		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
+			  vanillaDiffuse*= vanillaDiffuse;
+		
+		#ifndef NORMAL_PLANTS
+		if (foliage > 0.5) vanillaDiffuse *= 1.8;
+		#endif
 
-	albedo.rgb = pow(albedo.rgb, vec3(2.2));
+		float parallaxShadow = 1.0;
+		#ifdef ADVANCED_MATERIALS
+		vec3 rawAlbedo = albedo.rgb * 0.999 + 0.001;
+		albedo.rgb *= ao * ao;
 
-	#ifdef WHITE_WORLD
-	albedo.rgb = vec3(0.35);
-	#endif
-	
-	vec3 outNormal = newNormal;
-	#ifdef NORMAL_PLANTS
-	if (foliage > 0.5){
-		newNormal = upVec;
+		#ifdef REFLECTION_SPECULAR
+		albedo.rgb *= 1.0 - metalness * smoothness;
+		#endif
+
+		float doParallax = 0.0;
+		#ifdef SELF_SHADOW
+		float parallaxNoL = dot(outNormal, lightVec);
+		#ifdef OVERWORLD
+		doParallax = float(lightmap.y > 0.0 && parallaxNoL > 0.0);
+		#endif
+		#ifdef END
+		doParallax = float(parallaxNoL > 0.0);
+		#endif
+		
+		if (doParallax > 0.5 && skipAdvMat < 0.5) {
+			parallaxShadow = GetParallaxShadow(surfaceDepth, parallaxFade, newCoord, lightVec,
+											   tbnMatrix);
+		}
+		#endif
+
+		#ifdef DIRECTIONAL_LIGHTMAP
+		mat3 lightmapTBN = GetLightmapTBN(viewPos);
+		lightmap.x = DirectionalLightmap(lightmap.x, lmCoord.x, outNormal, lightmapTBN);
+		lightmap.y = DirectionalLightmap(lightmap.y, lmCoord.y, outNormal, lightmapTBN);
+		#endif
+		#endif
+
+		#ifdef MULTICOLORED_BLOCKLIGHT
+		blocklightCol = ApplyMultiColoredBlocklight(blocklightCol, screenPos);
+		#endif
+		
+		vec3 shadow = vec3(0.0);
+		GetLighting(albedo.rgb, shadow, viewPos, worldPos, normal, lightmap, color.a, NoL, 
+					vanillaDiffuse, parallaxShadow, emission, subsurface, basicSubsurface);
 		
 		#ifdef ADVANCED_MATERIALS
-		newNormal = normalize(mix(outNormal, newNormal, normalMap.z * normalMap.z));
+		float puddles = 0.0;
+		#ifdef REFLECTION_RAIN
+		float puddlesNoU = dot(outNormal, upVec);
+
+		puddles = GetPuddles(worldPos, newCoord, lightmap.y, puddlesNoU, wetness);
+		puddles *= 1.0 - lava;
+
+		ApplyPuddleToMaterial(puddles, albedo, smoothness, f0, porosity);
+
+		if (puddles > 0.001 && rainStrength > 0.001) {
+			mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
+							  tangent.y, binormal.y, normal.y,
+							  tangent.z, binormal.z, normal.z);
+
+			vec3 puddleNormal = GetPuddleNormal(worldPos, viewPos, tbnMatrix);
+			outNormal = normalize(
+				mix(outNormal, puddleNormal, puddles * sqrt(1.0 - porosity) * rainStrength)
+			);
+		}
 		#endif
-	}
-	#endif
-	
-	float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
-	float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
-	float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
-	float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
-			vanillaDiffuse *= vanillaDiffuse;
 
-	#ifndef NORMAL_PLANTS
-	if (foliage > 0.5) vanillaDiffuse *= 1.8;
-	#endif
+		skyOcclusion = lightmap.y;
+		
+		baseReflectance = mix(vec3(f0), rawAlbedo, metalness);
+		float fresnel = pow(clamp(1.0 + dot(outNormal, normalize(viewPos.xyz)), 0.0, 1.0), 5.0);
 
-	float parallaxShadow = 1.0;
-	#ifdef ADVANCED_MATERIALS
-	vec3 rawAlbedo = albedo.rgb * 0.999 + 0.001;
-	albedo.rgb *= ao * ao;
-
-	#ifdef REFLECTION_SPECULAR
-	albedo.rgb *= 1.0 - metalness * smoothness;
-	#endif
-
-	float doParallax = 0.0;
-	#ifdef SELF_SHADOW
-	float pNoL = dot(outNormal, lightVec);
-
-	#ifdef OVERWORLD
-	doParallax = float(lightmap.y > 0.0 && pNoL > 0.0);
-	#endif
-	
-	#ifdef END
-	doParallax = float(pNoL > 0.0);
-	#endif
-	
-	if (doParallax > 0.5 && skipAdvMat < 0.5) {
-		parallaxShadow = GetParallaxShadow(surfaceDepth, parallaxFade, newCoord, lightVec,
-											tbnMatrix);
-	}
-	#endif
-
-	#ifdef DIRECTIONAL_LIGHTMAP
-	mat3 lightmapTBN = GetLightmapTBN(viewPos);
-	lightmap.x = DirectionalLightmap(lightmap.x, lmCoord.x, outNormal, lightmapTBN);
-	lightmap.y = DirectionalLightmap(lightmap.y, lmCoord.y, outNormal, lightmapTBN);
-	#endif
-	#endif
-	
-	GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, color.a, NoL, vanillaDiffuse,
-				parallaxShadow, emission, subsurface);
-				
-	#ifdef ADVANCED_MATERIALS
-	float puddles = 0.0;
-
-	#ifdef REFLECTION_RAIN
-	float pNoU = dot(outNormal, upVec);
-	if (wetness > 0.001) {
-		puddles = GetPuddles(worldPos, newCoord, wetness) * clamp(pNoU, 0.0, 1.0);
-	}
-	
-	#ifdef WEATHER_PERBIOME
-	float weatherweight = isCold + isDesert + isMesa + isSavanna;
-	puddles *= 1.0 - weatherweight;
-	#endif
-	
-	puddles *= clamp(lightmap.y * 32.0 - 31.0, 0.0, 1.0) * (1.0 - lava);
-
-	float ps = sqrt(1.0 - 0.75 * porosity);
-	float pd = (0.5 * porosity + 0.15);	
-	
-	smoothness = mix(smoothness, 1.0, puddles * ps);
-	f0 = max(f0, puddles * 0.02);
-
-	albedo.rgb *= 1.0 - (puddles * pd);
-
-	if (puddles > 0.001 && rainStrength > 0.001) {
-		mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
-							tangent.y, binormal.y, normal.y,
-							tangent.z, binormal.z, normal.z);
-
-		vec3 puddleNormal = GetPuddleNormal(worldPos, viewPos, tbnMatrix);
-		outNormal = normalize(
-			mix(outNormal, puddleNormal, puddles * sqrt(1.0 - porosity) * rainStrength)
-		);
-	}
-	#endif
-
-	skyOcclusion = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
-	
-	baseReflectance = mix(vec3(f0), rawAlbedo, metalness);
-	float fresnel = pow(clamp(1.0 + dot(outNormal, normalize(viewPos.xyz)), 0.0, 1.0), 5.0);
-
-	fresnel3 = mix(baseReflectance, vec3(1.0), fresnel);
-	#if MATERIAL_FORMAT == 1
-	if (f0 >= 0.9 && f0 < 1.0) {
-		baseReflectance = GetMetalCol(f0);
-		fresnel3 = ComplexFresnel(pow(fresnel, 0.2), f0);
-		#ifdef ALBEDO_METAL
-		fresnel3 *= rawAlbedo;
+		fresnel3 = mix(baseReflectance, vec3(1.0), fresnel);
+		#if MATERIAL_FORMAT == 1
+		if (f0 >= 0.9 && f0 < 1.0) {
+			baseReflectance = GetMetalCol(f0);
+			fresnel3 = ComplexFresnel(pow(fresnel, 0.2), f0);
+			#ifdef ALBEDO_METAL
+			fresnel3 *= rawAlbedo;
+			#endif
+		}
 		#endif
-	}
-	#endif
-	
-	float aoSquared = ao * ao;
-	shadow *= aoSquared; fresnel3 *= aoSquared;
-	albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
-	#endif
+		
+		float aoSquared = ao * ao;
+		shadow *= aoSquared; fresnel3 *= aoSquared;
+		albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
+		#endif
 
-	#if (defined OVERWORLD || defined END) && (defined ADVANCED_MATERIALS || defined SPECULAR_HIGHLIGHT_ROUGH)
-	vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
-	
-	albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
-										specularColor, shadow * vanillaDiffuse, color.a);
-	#endif
-	
-	#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
-	newNormal = outNormal;
-	if (normalMap.x > -0.999 && normalMap.y > -0.999) {
-		normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
-		newNormal = mix(normalMap * tbnMatrix, newNormal, 1.0 - pow(1.0 - puddles, 4.0));
-		newNormal = clamp(normalize(newNormal), vec3(-1.0), vec3(1.0));
-	}
-	#endif
+		#if (defined OVERWORLD || defined END) && defined ADVANCED_MATERIALS && SPECULAR_HIGHLIGHT > 0
+		vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
+		
+		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
+										   specularColor, shadow * vanillaDiffuse, color.a);
+		#endif
+		
+		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
+		newNormal = outNormal;
+		if ((normalMap.x > -0.999 || normalMap.y > -0.999) && viewVector == viewVector) {
+			normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
+			newNormal = mix(normalMap * tbnMatrix, newNormal, 1.0 - pow(1.0 - puddles, 4.0));
+			newNormal = clamp(normalize(newNormal), vec3(-1.0), vec3(1.0));
+		}
+		#endif
 
-	#if ALPHA_BLEND == 0
-	albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
-	#endif
-
-	#ifdef TEST
-	albedo.a = clamp(albedo.a - float(mat > 195870.9 && mat < 195871.1), 0.0, 1.0);
-	#endif
+		#if ALPHA_BLEND == 0
+		albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
+		#endif
+	} else {
+		albedo = vec4(0.0);
+	} 
 
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
 
-	#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
-	/* DRAWBUFFERS:0367 */
-	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
-	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
-	gl_FragData[3] = vec4(fresnel3, 1.0);
-	#endif
+	#ifdef MULTICOLORED_BLOCKLIGHT
+		/* DRAWBUFFERS:08 */
+		gl_FragData[1] = vec4(lightAlbedo, 1.0);
 
-	#if defined SSPT && (!defined ADVANCED_MATERIALS || !defined REFLECTION_SPECULAR)
-	/* RENDERTARGETS:0,6,10 */
-	gl_FragData[1] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[2] = vec4(albedo.rgb, emission);
-	#endif
-
-	#if defined SSPT && (defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
-	/* RENDERTARGETS:0,3,6,7,10 */
-	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
-	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
-	gl_FragData[3] = vec4(fresnel3, 0.0);
-	gl_FragData[4] = vec4(albedo.rgb, emission);
+		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+		/* DRAWBUFFERS:08367 */
+		gl_FragData[2] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
+		gl_FragData[3] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+		gl_FragData[4] = vec4(fresnel3, 1.0);
+		#endif
+	#else
+		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+		/* DRAWBUFFERS:0367 */
+		gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
+		gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+		gl_FragData[3] = vec4(fresnel3, 1.0);
+		#endif
 	#endif
 }
 
@@ -389,14 +399,6 @@ void main() {
 
 //Varyings//
 varying float mat, recolor;
-
-#ifdef INTEGRATED_EMISSION
-varying float isPlant;
-#endif
-
-#ifdef SSPT
-varying float isConcrete;
-#endif
 
 varying vec2 texCoord, lmCoord;
 
@@ -456,16 +458,14 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #include "/lib/vertex/worldCurvature.glsl"
 #endif
 
-#ifdef INTEGRATED_EMISSION
-#include "/lib/surface/integratedEmissionTerrain.glsl"
-#endif
-
 //Program//
 void main() {
 	texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
     
 	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
+
+	int blockID = int(mod(max(mc_Entity.x - 10000, 0), 10000));
 
 	normal = normalize(gl_NormalMatrix * gl_Normal);
 
@@ -478,13 +478,16 @@ void main() {
 						  tangent.z, binormal.z, normal.z);
 								  
 	viewVector = tbnMatrix * (gl_ModelViewMatrix * gl_Vertex).xyz;
+
+	if (mc_Entity.x == 0)
+		viewVector /= 0.0;
 	
 	dist = length(gl_ModelViewMatrix * gl_Vertex);
 
 	vec2 midCoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;
 	vec2 texMinMidCoord = texCoord - midCoord;
 
-	vTexCoordAM.pq  = abs(texMinMidCoord) * 2.0;
+	vTexCoordAM.pq  = abs(texMinMidCoord) * 2;
 	vTexCoordAM.st  = min(texCoord, midCoord - texMinMidCoord);
 	
 	vTexCoord.xy    = sign(texMinMidCoord) * 0.5 + 0.5;
@@ -494,47 +497,29 @@ void main() {
 	
 	mat = 0.0; recolor = 0.0;
 
-	#ifdef SSPT
-	isConcrete = 0.0;
-	#endif
-
-	if (mc_Entity.x >= 10100 && mc_Entity.x < 10200)
+	if (blockID >= 100 && blockID < 200)
 		mat = 1.0;
-	if (mc_Entity.x == 10105 || mc_Entity.x == 10106){
+	if (blockID == 105 || blockID == 106){
 		mat = 2.0;
 		color.rgb *= 1.225;
 	}
-	if (mc_Entity.x >= 10200 && mc_Entity.x < 10300)
+	if (blockID >= 200 && blockID < 300)
 		mat = 3.0;
-	if (mc_Entity.x == 10203)
+	if (blockID == 203){
 		mat = 4.0;
-	if (mc_Entity.x == 10208)
+		lmCoord.x += 0.0667;
+	}
+	if (blockID == 208)
 		mat = 5.0;
 
-	if (mc_Entity.x == 10201 || mc_Entity.x == 10205 || mc_Entity.x == 10206)
+	if (blockID == 201 || blockID == 205 || blockID == 206)
 		recolor = 1.0;
 
-	if (mc_Entity.x == 10202)
+	if (blockID == 202)
 		lmCoord.x -= 0.0667;
 
-	if (mc_Entity.x == 10203)
-		lmCoord.x += 0.0667;
-
-	if (mc_Entity.x == 10400)
+	if (color.a < 0.1)
 		color.a = 1.0;
-
-	#ifdef TEST
-	if (mc_Entity.x == 0) mat = 195871.0;
-	#endif
-
-	#if defined SSPT && defined EMISSIVE_CONCRETE
-	if (mc_Entity.x == 29999) isConcrete = 1.0;
-	#endif
-
-	#ifdef INTEGRATED_EMISSION
-	isPlant = 0.0;
-	getIntegratedEmissionMaterials(mat, isPlant);
-	#endif
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);
@@ -547,7 +532,7 @@ void main() {
 	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
 	
 	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
-	position.xyz = WavingBlocks(position.xyz, istopv, lmCoord);
+	position.xyz = WavingBlocks(position.xyz, blockID, istopv);
 
     #ifdef WORLD_CURVATURE
 	position.y -= WorldCurvature(position.xz);

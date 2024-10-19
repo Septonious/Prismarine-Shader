@@ -9,51 +9,58 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
-#ifdef SSPT
 //Varyings//
 varying vec2 texCoord;
 
 //Uniforms//
 uniform int frameCounter;
+uniform float viewWidth, viewHeight, aspectRatio;
 
-uniform float viewWidth, viewHeight;
+uniform vec3 cameraPosition, previousCameraPosition;
 
-uniform ivec2 eyeBrightnessSmooth;
+uniform mat4 gbufferPreviousProjection, gbufferProjectionInverse;
+uniform mat4 gbufferPreviousModelView, gbufferModelViewInverse;
 
-uniform mat4 gbufferProjection;
-uniform mat4 gbufferProjectionInverse;
+uniform sampler2D colortex1;
+uniform sampler2D colortex2;
+uniform sampler2D depthtex1;
 
-uniform sampler2D colortex6, colortex10;
-uniform sampler2D depthtex0, depthtex1;
+#ifdef TAA_SELECTIVE
+uniform sampler2D colortex3;
+#endif
 
-//Common Variables//
-float eBS = eyeBrightnessSmooth.y / 240.0;
+//Optifine Constants//
+#ifdef LIGHT_SHAFT
+const bool colortex1MipmapEnabled = true;
+#endif
+
+//Common Functions//
+float GetLuminance(vec3 color) {
+	return dot(color, vec3(0.299, 0.587, 0.114));
+}
 
 //Includes//
-#include "/lib/util/encode.glsl"
-#include "/lib/util/blueNoise.glsl"
-#include "/lib/lighting/ssgi.glsl"
+#include "/lib/antialiasing/taa.glsl"
 
 //Program//
 void main() {
-    float z0 = texture2D(depthtex0, texCoord.xy).x;
+	vec2 newTexCoord = texCoord;
+	#if defined TAA && TAA_MODE == 1
+	vec2 offset = frameCounter % 2 == 0 ? vec2(0.5, 0.0) : vec2(0.0, 0.5);
+	newTexCoord += offset / vec2(viewWidth, viewHeight);
+	#endif
 
-	vec3 screenPos = vec3(texCoord, z0);
-    vec3 normal = normalize(DecodeNormal(texture2D(colortex6, texCoord.xy).xy));
+	vec3 color = texture2DLod(colortex1, newTexCoord, 0.0).rgb;
+    vec4 prev = vec4(texture2DLod(colortex2, texCoord, 0).r, 0.0, 0.0, 0.0);
+	
+	#ifdef TAA
+	prev = TemporalAA(color, prev.r);
+	#endif
 
-    vec3 gi = computeGI(screenPos, normal, float(z0 < 0.56));
-
-    /* RENDERTARGETS:11 */
-    gl_FragData[0] = vec4(gi, 1.0);
+    /*DRAWBUFFERS:12*/
+	gl_FragData[0] = vec4(color, 1.0);
+	gl_FragData[1] = vec4(prev);
 }
-
-#else
-
-void main(){
-    discard;
-}
-
-#endif
 
 #endif
 
@@ -65,7 +72,7 @@ varying vec2 texCoord;
 
 //Program//
 void main() {
-    texCoord = gl_MultiTexCoord0.xy;
+	texCoord = gl_MultiTexCoord0.xy;
 	
 	gl_Position = ftransform();
 }

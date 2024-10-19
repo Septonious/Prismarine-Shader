@@ -37,6 +37,7 @@ uniform int worldTime;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
+uniform float screenBrightness; 
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
@@ -46,11 +47,12 @@ uniform ivec2 eyeBrightnessSmooth;
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferProjectionInverse;
-uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferModelView, gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
 uniform sampler2D texture;
+uniform sampler2D noisetex;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;
@@ -59,9 +61,15 @@ uniform sampler2D specular;
 uniform sampler2D normals;
 #endif
 
-#ifdef DYNAMIC_HANDLIGHT
 uniform int heldBlockLightValue;
 uniform int heldBlockLightValue2;
+
+#ifdef MULTICOLORED_BLOCKLIGHT
+uniform mat4 gbufferPreviousModelView;
+uniform mat4 gbufferPreviousProjection;
+uniform vec3 previousCameraPosition;
+
+uniform sampler2D colortex9;
 #endif
 
 //Common Variables//
@@ -95,10 +103,10 @@ float GetHandItem(int id) {
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
-#include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
+#include "/lib/surface/hardcodedEmission.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
@@ -111,6 +119,10 @@ float GetHandItem(int id) {
 #include "/lib/surface/parallax.glsl"
 #endif
 
+#ifdef MULTICOLORED_BLOCKLIGHT
+#include "/lib/lighting/coloredBlocklight.glsl"
+#endif
+
 #ifdef NORMAL_SKIP
 #undef PARALLAX
 #undef SELF_SHADOW
@@ -121,6 +133,7 @@ void main() {
     vec4 albedo = texture2D(texture, texCoord) * color;
 	vec3 newNormal = normal;
 	float smoothness = 0.0;
+	vec3 lightAlbedo = vec3(0.0);
 
 	#ifdef ADVANCED_MATERIALS
 	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
@@ -129,7 +142,7 @@ void main() {
 	
 	#ifdef PARALLAX
 	if (skipAdvMat < 0.5) {
-		newCoord = GetParallaxCoord(0.0, surfaceDepth);
+		newCoord = GetParallaxCoord(texCoord, 0.0, surfaceDepth);
 		albedo = texture2DGradARB(texture, newCoord, dcdx, dcdy) * color;
 	}
 	#endif
@@ -139,20 +152,25 @@ void main() {
 	#endif
 
 	if (albedo.a > 0.001) {
+		#ifdef TOON_LIGHTMAP
+		vec2 lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
+		#else
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+		#endif
 		lightmap.x = max(lightmap.x, GetHandItem(213));
 
 		float emissive = (GetHandItem(50) + GetHandItem(89) + GetHandItem(213));
 		
 		float metalness      = 0.0;
-		float emission       = emissive * 0.25;
+		float emission       = emissive;
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
 		
-		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
+		emission *= GetHardcodedEmission(albedo.rgb) * 0.5;
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z + 0.38);
-		#ifdef TAA
+		#if defined TAA && !defined TAA_SELECTIVE
 		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
 		#else
 		vec3 viewPos = ToNDC(screenPos);
@@ -174,23 +192,46 @@ void main() {
 							  tangent.y, binormal.y, normal.y,
 							  tangent.z, binormal.z, normal.z);
 
-		if (normalMap.x > -0.999 && normalMap.y > -0.999)
+		if ((normalMap.x > -0.999 || normalMap.y > -0.999) && viewVector == viewVector)
 			newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
 		#endif
 		
-		#ifdef DYNAMIC_HANDLIGHT
-		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
+		float heldLightValue = max(heldBlockLightValue, heldBlockLightValue2);
 		float handlight = clamp(heldLightValue / 15.0, 0.0, 0.9333);
-		lightmap.x = max(lightmap.x, handlight);
+		lightmap.x = log2(exp2(lightmap.x * 8.0) + exp2(handlight * 8.0)) / 8.0;
+
+		#ifdef TOON_LIGHTMAP
+		lightmap = floor(lightmap * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
 		#endif
 
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 
+		float doRecolor = GetHandItem(89) + GetHandItem(213);
+
+		float ec = GetLuminance(albedo.rgb) * 1.7;
+		#ifdef EMISSIVE_RECOLOR
+		if (doRecolor > 0.5) {
+			albedo.rgb = blocklightCol * pow(ec, 1.5) / (BLOCKLIGHT_I * BLOCKLIGHT_I);
+			albedo.rgb /= 0.7 * albedo.rgb + 0.7;
+		}
+		#endif
+		
+		#ifdef MULTICOLORED_BLOCKLIGHT
+		lightAlbedo = albedo.rgb + 0.00001;
+		lightAlbedo = sqrt(normalize(lightAlbedo) * emission * emissive);
+		#endif
+
 		#ifdef WHITE_WORLD
 		albedo.rgb = vec3(0.35);
 		#endif
-
+		
+		#ifndef HALF_LAMBERT
 		float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
+		#else
+		float NoL = clamp(dot(newNormal, lightVec) * 0.5 + 0.5, 0.0, 1.0);
+		NoL *= NoL;
+		#endif
 
 		float NoU = clamp(dot(newNormal, upVec), -1.0, 1.0);
 		float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
@@ -220,13 +261,17 @@ void main() {
 		}
 		#endif
 		#endif
+
+		#ifdef MULTICOLORED_BLOCKLIGHT
+		blocklightCol = ApplyMultiColoredBlocklight(blocklightCol, screenPos);
+		#endif
 		
 		vec3 shadow = vec3(0.0);
-		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, 1.0, NoL, vanillaDiffuse,
-				    parallaxShadow, emission, subsurface);
+		GetLighting(albedo.rgb, shadow, viewPos, worldPos, vec3(0.0), lightmap, 1.0, NoL, 
+					vanillaDiffuse, parallaxShadow, emission, subsurface, 0.0);
 
 		#ifdef ADVANCED_MATERIALS
-		skyOcclusion = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
+		skyOcclusion = lightmap.y;
 
 		baseReflectance = mix(vec3(f0), rawAlbedo, metalness);
 		float fresnel = pow(clamp(1.0 + dot(newNormal, normalize(viewPos.xyz)), 0.0, 1.0), 5.0);
@@ -247,7 +292,7 @@ void main() {
 		albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
 		#endif
 
-		#if (defined OVERWORLD || defined END) && (defined ADVANCED_MATERIALS || defined SPECULAR_HIGHLIGHT_ROUGH)
+		#if (defined OVERWORLD || defined END) && defined ADVANCED_MATERIALS && SPECULAR_HIGHLIGHT > 0
 		vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
 		
 		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
@@ -266,17 +311,33 @@ void main() {
 
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
+	#ifdef MULTICOLORED_BLOCKLIGHT
+		/* DRAWBUFFERS:08 */
+		gl_FragData[1] = vec4(lightAlbedo,1.0);
+		
+		#if defined TAA_SELECTIVE && !(defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
+		/* DRAWBUFFERS:083 */
+		gl_FragData[2] = vec4(0.0, 0.0, 0.25, 1.0);
+		#endif
 
-	#if defined SSPT && !defined ADVANCED_MATERIALS && !defined REFLECTION_SPECULAR
-	/* DRAWBUFFERS:06 */
-	gl_FragData[1] = vec4(0.0);
-	#endif
+		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+		/* DRAWBUFFERS:08367 */
+		gl_FragData[2] = vec4(smoothness, skyOcclusion, 0.25, 1.0);
+		gl_FragData[3] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+		gl_FragData[4] = vec4(fresnel3, 1.0);
+		#endif
+	#else
+		#if defined TAA_SELECTIVE && !(defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR)
+		/* DRAWBUFFERS:03 */
+		gl_FragData[1] = vec4(0.0, 0.0, 0.25, 1.0);
+		#endif
 
-	#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
-	/* DRAWBUFFERS:0367 */
-	gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
-	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 0.0);
-	gl_FragData[3] = vec4(fresnel3, 1.0);
+		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+		/* DRAWBUFFERS:0367 */
+		gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.25, 1.0);
+		gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
+		gl_FragData[3] = vec4(fresnel3, 1.0);
+		#endif
 	#endif
 }
 
@@ -396,7 +457,7 @@ void main() {
 	gl_Position = ftransform();
 	#endif
 	
-	#ifdef TAA
+	#if defined TAA && !defined TAA_SELECTIVE
 	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
 	#endif
 	

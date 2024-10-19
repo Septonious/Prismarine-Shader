@@ -17,10 +17,11 @@ uniform sampler2D texture;
 
 //Program//
 void main() {
+	//Texture
 	vec4 albedo = texture2D(texture, texCoord);
 
 	#if ALPHA_BLEND == 1
-	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 2.25;
+	albedo.rgb = pow(albedo.rgb,vec3(2.2)) * 2.25;
 	#endif
 	
 	#ifdef WHITE_WORLD
@@ -29,11 +30,6 @@ void main() {
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;
-
-	#ifdef SSPT
-	/* DRAWBUFFERS:6 */
-	gl_FragData[1] = vec4(0.0);
-	#endif
 }
 
 #endif

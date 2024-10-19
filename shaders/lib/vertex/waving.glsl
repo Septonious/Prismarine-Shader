@@ -24,14 +24,13 @@ float Noise2D(vec2 pos) {
 vec3 CalcMove(vec3 pos, float density, float speed, vec2 mult) {
     pos = pos * density + frametime * speed;
     vec3 wave = vec3(Noise2D(pos.yz), Noise2D(pos.xz + 0.333), Noise2D(pos.xy + 0.667));
-    return wave * vec3(mult, mult.x) * WAVING_AMPLITUDE;
+    return wave * vec3(mult, mult.x);
 }
 
 float CalcLilypadMove(vec3 worldpos) {
-    worldpos.z -= 0.125;
     float wave = sin(2 * pi * (frametime * 0.7 + worldpos.x * 0.14 + worldpos.z * 0.07)) +
                  sin(2 * pi * (frametime * 0.5 + worldpos.x * 0.10 + worldpos.z * 0.20));
-    return wave * 0.0125 * WAVING_AMPLITUDE;
+    return wave * 0.0125;
 }
 
 float CalcLavaMove(vec3 worldpos) {
@@ -40,7 +39,7 @@ float CalcLavaMove(vec3 worldpos) {
     if (fy > 0.01) {
     float wave = sin(pi * (frametime * 0.7 + worldpos.x * 0.14 + worldpos.z * 0.07)) +
                  sin(pi * (frametime * 0.5 + worldpos.x * 0.10 + worldpos.z * 0.20));
-    return wave * 0.0125 * WAVING_AMPLITUDE;
+    return wave * 0.0125;
     } else return 0.0;
 }
 
@@ -74,45 +73,61 @@ vec3 CalcLanternMove(vec3 position) {
     return flr + frc - position;
 }
 
-vec3 WavingBlocks(vec3 position, float istopv, vec2 lmCoord) {
+vec3 WavingBlocks(vec3 position, int blockID, float istopv) {
     vec3 wave = vec3(0.0);
     vec3 worldpos = position + cameraPosition;
 
+    #ifdef WAVING_GRASS
+    if (blockID == 100 && istopv > 0.9)
+        wave += CalcMove(worldpos, 0.35, 1.0, vec2(0.25, 0.06));
+    #endif
+
+    #ifdef WAVING_CROP
+    if (blockID == 104 && (istopv > 0.9 || fract(worldpos.y + 0.0675) > 0.01))
+        wave += CalcMove(worldpos, 0.35, 1.0, vec2(0.15, 0.06));
+    #endif
+
     #ifdef WAVING_PLANT
-    if (mc_Entity.x == 10100 && istopv > 0.9)
-        wave += CalcMove(worldpos, 0.35, 0.75, vec2(0.25, 0.06));
-    if (mc_Entity.x == 10101 && (istopv > 0.9|| fract(worldpos.y + 0.005) > 0.01))
-        wave += CalcMove(worldpos, 0.7, 1.35, vec2(0.12, 0.06));
-    if (mc_Entity.x == 10102 && (istopv > 0.9 || fract(worldpos.y + 0.005) > 0.01) ||
-        mc_Entity.x == 10103)
-        wave += CalcMove(worldpos, 0.35, 1.15, vec2(0.15, 0.06));
-    if (mc_Entity.x == 10104 && (istopv > 0.9 || fract(worldpos.y + 0.0675) > 0.01))
-        wave += CalcMove(worldpos, 0.35, 0.75, vec2(0.15, 0.06));
-    if (mc_Entity.x == 10106)
-        wave += CalcMove(worldpos, 0.35, 1.25, vec2(0.06, 0.06));        
-    if (mc_Entity.x == 10107 || mc_Entity.x == 10207)
+    if (blockID == 101 && (istopv > 0.9 || fract(worldpos.y + 0.005) > 0.01))
+        wave += CalcMove(worldpos, 0.7, 1.35, vec2(0.12, 0.00));
+    if (blockID == 107 || blockID == 207)
         wave += CalcMove(worldpos, 0.5, 1.25, vec2(0.06, 0.00));
-    if (mc_Entity.x == 10108)
+    if (blockID == 108)
         wave.y += CalcLilypadMove(worldpos);
     #endif
-    #ifdef WAVING_LEAF
-    if (mc_Entity.x == 10105)
-        wave += CalcMove(worldpos, 0.25, 0.5, vec2(0.08, 0.08));
+
+    #ifdef WAVING_TALL_PLANT
+    if (blockID == 102 && (istopv > 0.9 || fract(worldpos.y + 0.005) > 0.01) ||
+        blockID == 103)
+        wave += CalcMove(worldpos, 0.35, 1.15, vec2(0.15, 0.06));
     #endif
-    #ifdef WAVING_LIQUID
-    if (mc_Entity.x == 10203)
+
+    #ifdef WAVING_LEAF
+    if (blockID == 105)
+        wave += CalcMove(worldpos, 0.25, 1.0, vec2(0.08, 0.08));
+    #endif
+
+    #ifdef WAVING_VINE
+    if (blockID == 106)
+        wave += CalcMove(worldpos, 0.35, 1.25, vec2(0.06, 0.06));     
+    #endif
+    
+    #ifdef WAVING_LAVA
+    if (blockID == 203)
         wave.y += CalcLavaMove(worldpos);
     #endif
-    #ifdef WAVING_EXTRA
-    if (mc_Entity.x == 10204 && istopv > 0.9)
+
+    #ifdef WAVING_FIRE
+    if (blockID == 204 && istopv > 0.9)
         wave += CalcMove(worldpos, 1.0, 1.5, vec2(0.0, 0.37));
-    if (mc_Entity.x == 10206)
+    #endif
+
+    #ifdef WAVING_LANTERN
+    if (blockID == 206)
 		wave += CalcLanternMove(worldpos);
     #endif
 
-    vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-
-    position += wave * lightmap.y;
+    position += wave;
 
     return position;
 }

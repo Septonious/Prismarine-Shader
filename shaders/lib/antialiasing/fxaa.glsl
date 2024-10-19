@@ -1,10 +1,18 @@
 //FXAA 3.11 from http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html
 float quality[12] = float[12] (1.0, 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0);
 
+#if FXAA_EDGE_SENSITIVITY == 0
+float edgeThreshold = 0.25;
+float edgeThresholdMin = 0.0625;
+#elif FXAA_EDGE_SENSITIVITY == 1
+float edgeThreshold = 0.125;
+float edgeThresholdMin = 0.0312;
+#elif FXAA_EDGE_SENSITIVITY == 2
+float edgeThreshold = 0.063;
+float edgeThresholdMin = 0.0156;
+#endif
+
 vec3 FXAA311(vec3 color) {
-	float edgeThresholdMin = 0.03125;
-	float edgeThresholdMax = 0.125;
-	float subpixelQuality = 0.75;
 	int iterations = 12;
 	
 	vec2 view = 1.0 / vec2(viewWidth, viewHeight);
@@ -20,7 +28,7 @@ vec3 FXAA311(vec3 color) {
 	
 	float lumaRange = lumaMax - lumaMin;
 	
-	if (lumaRange > max(edgeThresholdMin, lumaMax * edgeThresholdMax)) {
+	if (lumaRange > max(edgeThresholdMin, lumaMax * edgeThreshold)) {
 		float lumaDownLeft  = GetLuminance(texture2DLod(colortex1, texCoord + vec2(-1.0, -1.0) * view, 0.0).rgb);
 		float lumaUpRight   = GetLuminance(texture2DLod(colortex1, texCoord + vec2( 1.0,  1.0) * view, 0.0).rgb);
 		float lumaUpLeft    = GetLuminance(texture2DLod(colortex1, texCoord + vec2(-1.0,  1.0) * view, 0.0).rgb);
@@ -58,14 +66,16 @@ vec3 FXAA311(vec3 color) {
 		if (is1Steepest) {
 			stepLength = - stepLength;
 			lumaLocalAverage = 0.5 * (luma1 + lumaCenter);
-		} else
+		} else {
 			lumaLocalAverage = 0.5 * (luma2 + lumaCenter);
+		}
 		
 		vec2 currentUv = texCoord;
-		if (isHorizontal)
+		if (isHorizontal) {
 			currentUv.y += stepLength * 0.5;
-		else
+		} else {
 			currentUv.x += stepLength * 0.5;
+		}
 		
 		vec2 offset = isHorizontal ? vec2(view.x, 0.0) : vec2(0.0, view.y);
 		
@@ -81,11 +91,12 @@ vec3 FXAA311(vec3 color) {
 		bool reached2 = abs(lumaEnd2) >= gradientScaled;
 		bool reachedBoth = reached1 && reached2;
 		
-		if (!reached1)
+		if (!reached1) {
 			uv1 -= offset;
-
-		if (!reached2)
+		}
+		if (!reached2) {
 			uv2 += offset;
+		}
 		
 		if (!reachedBoth) {
 			for(int i = 2; i < iterations; i++) {
@@ -102,11 +113,12 @@ vec3 FXAA311(vec3 color) {
 				reached2 = abs(lumaEnd2) >= gradientScaled;
 				reachedBoth = reached1 && reached2;
 
-				if (!reached1)
+				if (!reached1) {
 					uv1 -= offset * quality[i];
-					
-				if (!reached2)
+				}
+				if (!reached2) {
 					uv2 += offset * quality[i];
+				}
 				
 				if (reachedBoth) break;
 			}
@@ -131,17 +143,21 @@ vec3 FXAA311(vec3 color) {
 		float lumaAverage = (1.0 / 12.0) * (2.0 * (lumaDownUp + lumaLeftRight) + lumaLeftCorners + lumaRightCorners);
 		float subPixelOffset1 = clamp(abs(lumaAverage - lumaCenter) / lumaRange, 0.0, 1.0);
 		float subPixelOffset2 = (-2.0 * subPixelOffset1 + 3.0) * subPixelOffset1 * subPixelOffset1;
-		float subPixelOffsetFinal = subPixelOffset2 * subPixelOffset2 * subpixelQuality;
+		float subPixelOffsetFinal = subPixelOffset2 * subPixelOffset2 * FXAA_SUBPIXEL;
+
+		#ifdef TAA
+		subPixelOffsetFinal *= 0.5;
+		#endif
 
 		finalOffset = max(finalOffset, subPixelOffsetFinal);
 		
-		
 		// Compute the final UV coordinates.
 		vec2 finalUv = texCoord;
-		if (isHorizontal)
+		if (isHorizontal) {
 			finalUv.y += finalOffset * stepLength;
-		else
+		} else {
 			finalUv.x += finalOffset * stepLength;
+		}
 
 		color = texture2DLod(colortex1, finalUv, 0.0).rgb;
 	}

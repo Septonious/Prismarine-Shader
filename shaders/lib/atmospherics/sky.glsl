@@ -18,7 +18,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     #if SKY_GROUND > 0
     float groundVoU = clamp(-VoU * 1.015 - 0.015, 0.0, 1.0);
-    float ground = 1.0 - exp(-groundDensity * max(FOG_DENSITY, 0.125) / groundVoU);
+    float ground = 1.0 - exp(-groundDensity * max(fogDensity, 0.125) / groundVoU);
     #if SKY_GROUND == 1
     if (!isReflection) ground = 1.0;
     #endif
@@ -26,44 +26,51 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     float ground = 1.0;
     #endif
 
-    vec3 newSkyColor = skyCol;
-
-	#if defined FOG_PERBIOME && defined WEATHER_PERBIOME
-	newSkyColor = getBiomeFog(newSkyColor);
-	#endif
-
-    vec3 sky = newSkyColor * baseGradient / (SKY_I * SKY_I);
+    vec3 sky = skyCol;
     #ifdef SKY_VANILLA
-    sky = mix(sky, fogCol * baseGradient, pow(1.0 - max(VoU, 0.0), 4.0));
+    sky = mix(sky, fogCol, pow(1.0 - max(VoU, 0.0), 4.0) * SKY_VANILLA_SKY_BLEND);
     #endif
+    sky *= baseGradient / (SKY_I * SKY_I);
     sky = sky / sqrt(sky * sky + 1.0) * exposure * sunVisibility * (SKY_I * SKY_I);
 
     float sunMix = (VoL * 0.5 + 0.5) * pow(clamp(1.0 - VoU, 0.0, 1.0), 2.0 - sunVisibility) *
-                   pow(1.0 - timeBrightness * 0.5, 3.0) * 0.5;
-    float horizonMix = pow(1.0 - abs(VoU), 2.5) * 0.3 * (1.0 - timeBrightness * 0.5);
+                   pow(1.0 - timeBrightness * 0.6, 3.0);
+    float horizonMix = pow(1.0 - abs(VoU), 2.5) * 0.125;
     float lightMix = (1.0 - (1.0 - sunMix) * (1.0 - horizonMix));
 
-    vec3 lightSky = pow(lightSun, vec3(3.0 )) * baseGradient;
+    vec3 lightSky = pow(lightSun, vec3(4.0 - sunVisibility)) * baseGradient;
     lightSky = lightSky / (1.0 + lightSky * rainStrength);
 
     sky = mix(
         sqrt(sky * (1.0 - lightMix)), 
-        lightSky, 
+        sqrt(lightSky), 
         lightMix
     );
     sky *= sky;
 
     float nightGradient = exp(-max(VoU, 0.0) / SKY_DENSITY_N);
-    vec3 nightSky = lightNight * lightNight * 4.0 * nightGradient * nightExposure;
+    vec3 nightSky = lightNight * lightNight * nightGradient * nightExposure;
     sky = mix(nightSky, sky, sunVisibility * sunVisibility);
 
     float rainGradient = exp(-max(VoU, 0.0) / SKY_DENSITY_W);
-    vec3 weatherSky = weatherCol.rgb * weatherExposure;
-    weatherSky *= GetLuminance(ambientCol / (weatherSky)) * 1.5;
+    vec3 weatherSky = weatherCol.rgb * weatherCol.rgb * weatherExposure;
+    weatherSky *= GetLuminance(ambientCol / (weatherSky)) * (0.2 * sunVisibility + 0.2);
     sky = mix(sky, weatherSky * rainGradient, rainStrength);
 
     sky *= ground;
 
+    #ifdef UNDERGROUND_SKY
+    float ug = mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+    sky = mix(minLightCol * 0.125, sky, ug);
+    #endif
+
+	#if MC_VERSION >= 11800
+	sky *= clamp((cameraPosition.y + 70.0) / 8.0, 0.0, 1.0);
+	#else
+	sky *= clamp((cameraPosition.y + 6.0) / 8.0, 0.0, 1.0);
+	#endif
+
     return sky;
 }
+
 #endif

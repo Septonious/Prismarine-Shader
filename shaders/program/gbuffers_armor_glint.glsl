@@ -15,12 +15,18 @@ varying vec2 texCoord;
 varying vec4 color;
 
 //Uniforms//
+uniform ivec2 eyeBrightnessSmooth;
+
 uniform sampler2D texture;
+
+//Common Variables//
+float eBS = eyeBrightnessSmooth.y / 240.0;
 
 //Program//
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
-	albedo.rgb = pow(albedo.rgb, vec3(2.2)) * 0.5;
+	albedo.rgb *= albedo.a;
+	albedo.rgb = pow(albedo.rgb,vec3(2.2)) / (4.0 - 3.0 * eBS);
 
 	#if ALPHA_BLEND == 0
 	albedo.rgb = sqrt(max(albedo.rgb, vec3(0.0)));
@@ -73,7 +79,7 @@ void main() {
 	gl_Position = ftransform();
 	#endif
 	
-	#ifdef TAA
+	#if defined TAA && !defined TAA_SELECTIVE
 	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
 	#endif
 }
