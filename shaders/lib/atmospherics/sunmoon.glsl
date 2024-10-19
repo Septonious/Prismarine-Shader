@@ -90,8 +90,8 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	#endif
 
 	#ifdef LIGHT_SHAFT
-	if (isEyeInWater == 1) color += 0.25 * lightCol * visibility;
+	if (isEyeInWater == 1) color += 0.125 * lightCol * visibility;
 	#else
-	color += 0.25 * lightCol * visibility * (1.0 + 0.25 * isEyeInWater);
+	color += 0.125 * lightCol * visibility * (1.0 + 0.25 * isEyeInWater);
 	#endif
 }
