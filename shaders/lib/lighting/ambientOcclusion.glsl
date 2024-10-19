@@ -26,9 +26,9 @@ float AmbientOcclusion(float dither) {
 
 		for(int i = 0; i < 2; i++){
 			float sampleDepth = GetLinearDepth(texture2D(depthtex0, texCoord + offset).r);
-			float sample = (depth - sampleDepth) * mult;
-			angle += clamp(0.5 - sample, 0.0, 1.0);
-			dist += clamp(0.25 * sample - 1.0, 0.0, 1.0);
+			float sample0 = (depth - sampleDepth) * mult;
+			angle += clamp(0.5 - sample0, 0.0, 1.0);
+			dist += clamp(0.25 * sample0 - 1.0, 0.0, 1.0);
 			offset = -offset;
 		}
 		
