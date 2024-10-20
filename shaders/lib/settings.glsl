@@ -119,7 +119,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define CLOUDS 2 //[0 1 2 3]
 #define CLOUD_BASE 1 //[0 1 2]
 #define CLOUD_DENSITY 8 //[1 2 4 6 8]
-#define CLOUD_AMOUNT 11.0 //[12.0 11.0 10.0 9.0 8.0]
+#define CLOUD_AMOUNT 12.0 //[12.0 11.0 10.0 9.0 8.0]
 #define CLOUD_HEIGHT 12.5 //[5.0 7.5 10.0 12.5 15.0]
 #define CLOUD_VOLUMETRIC_SCALE 16 //[6.0 12.4 16.0]
 #define CLOUD_STRETCH 1.0 //[2.0 1.4 1.0 0.7 0.5]
