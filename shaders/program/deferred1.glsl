@@ -44,7 +44,7 @@ uniform sampler2D noisetex;
 uniform sampler2D colortex4;
 #endif
 
-#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR) && defined REFLECTION_SPECULAR
 uniform vec3 previousCameraPosition;
 
 uniform sampler2D colortex5;
@@ -67,7 +67,7 @@ uniform sampler2D dhDepthTex0;
 #endif
 
 //Optifine Constants//
-#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR) && defined REFLECTION_SPECULAR
 const bool colortex0MipmapEnabled = true;
 const bool colortex5MipmapEnabled = true;
 const bool colortex6MipmapEnabled = true;
@@ -227,7 +227,7 @@ void GlowOutline(inout vec3 color){
 #include "/lib/post/outline.glsl"
 #endif
 
-#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR) && defined REFLECTION_SPECULAR
 #include "/lib/util/encode.glsl"
 #include "/lib/reflections/raytrace.glsl"
 #include "/lib/reflections/complexFresnel.glsl"
@@ -300,7 +300,7 @@ void main() {
 	#endif
 
 	if (z < 1.0) {
-		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+		#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR) && defined REFLECTION_SPECULAR
 		float smoothness = 0.0, skyOcclusion = 0.0;
 		vec3 normal = vec3(0.0), fresnel3 = vec3(0.0);
 

@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying float mat, recolor;
+flat in int mat;
 
 varying vec2 texCoord, lmCoord;
 
@@ -19,9 +19,10 @@ varying vec3 sunVec, upVec, eastVec;
 
 varying vec4 color;
 
-#ifdef ADVANCED_MATERIALS
+#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 varying float dist;
-
+flat in vec2 absMidCoordPos;
+in vec2 signMidCoordPos;
 varying vec3 binormal, tangent;
 varying vec3 viewVector;
 
@@ -55,7 +56,7 @@ uniform sampler2D texture;
 
 uniform sampler2D noisetex;
 
-#ifdef ADVANCED_MATERIALS
+#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 uniform ivec2 atlasSize;
 
 uniform sampler2D specular;
@@ -90,7 +91,7 @@ float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
 float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
-#ifdef ADVANCED_MATERIALS
+#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 vec2 dcdx = dFdx(texCoord);
 vec2 dcdy = dFdy(texCoord);
 #endif
@@ -115,7 +116,7 @@ float GetLuminance(vec3 color) {
 #include "/lib/util/jitter.glsl"
 #endif
 
-#ifdef ADVANCED_MATERIALS
+#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 #include "/lib/util/encode.glsl"
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/directionalLightmap.glsl"
@@ -131,6 +132,14 @@ float GetLuminance(vec3 color) {
 #include "/lib/lighting/coloredBlocklight.glsl"
 #endif
 
+#if defined GENERATED_EMISSION || defined GENERATED_SPECULAR
+#include "/lib/pbr/generatedPBR.glsl"
+#endif
+
+#ifdef GENERATED_NORMALS
+#include "/lib/pbr/generatedNormals.glsl"
+#endif
+
 //Program//
 void main() {
     vec4 albedo = texture2D(texture, texCoord) * vec4(color.rgb, 1.0);
@@ -138,7 +147,7 @@ void main() {
 	float smoothness = 0.0;
 	vec3 lightAlbedo = vec3(0.0);
 
-	#ifdef ADVANCED_MATERIALS
+	#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
 	float surfaceDepth = 1.0;
 	float parallaxFade = clamp((dist - PARALLAX_DISTANCE) / 32.0, 0.0, 1.0);
@@ -158,8 +167,9 @@ void main() {
 	if (albedo.a > 0.001) {
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 		
-		float foliage  = float(mat > 0.98 && mat < 1.02);
-		float leaves   = float(mat > 1.98 && mat < 2.02);
+		float leaves = float(mat == 10314);
+		float foliage2 = float(mat == 10317);
+		float foliage = float(mat >= 10304 && mat <= 10319 || mat >= 35 && mat <= 40) * (1.0 - leaves) * (1.0 - foliage2);
 		float emissive = float(mat > 2.98 && mat < 3.02);
 		float lava     = float(mat > 3.98 && mat < 4.02);
 		float candle   = float(mat > 4.98 && mat < 5.02);
@@ -167,7 +177,7 @@ void main() {
 		float metalness       = 0.0;
 		float emission        = (emissive + candle + lava);
 		float subsurface      = 0.0;
-		float basicSubsurface = (foliage + candle) * 0.5 + leaves;
+		float basicSubsurface = (foliage + candle + foliage2) * 0.5 + leaves;
 		vec3 baseReflectance  = vec3(0.04);
 		
 		emission *= GetHardcodedEmission(albedo.rgb);
@@ -180,7 +190,7 @@ void main() {
 		#endif
 		vec3 worldPos = ToWorld(viewPos);
 
-		#ifdef ADVANCED_MATERIALS
+		#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 		float f0 = 0.0, porosity = 0.5, ao = 1.0;
 		vec3 normalMap = vec3(0.0, 0.0, 1.0);
 		GetMaterials(smoothness, metalness, f0, emission, subsurface, porosity, ao, normalMap,
@@ -194,6 +204,10 @@ void main() {
 			newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
 		#endif
 		
+		#ifdef GENERATED_NORMALS
+		generateNormals(newNormal, albedo.rgb, viewPos, mat);
+		#endif
+
 		#ifdef DYNAMIC_HANDLIGHT
 		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
 		vec3 heldLightPos = worldPos + relativeEyePosition + vec3(0.0, 0.5, 0.0);
@@ -207,18 +221,6 @@ void main() {
 		#endif
 		
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
-
-		#ifdef EMISSIVE_RECOLOR
-		float ec = GetLuminance(albedo.rgb) * 1.7;
-		if (recolor > 0.5) {
-			albedo.rgb = blocklightCol * pow(ec, 1.5) / (BLOCKLIGHT_I * BLOCKLIGHT_I);
-			albedo.rgb /= 0.7 * albedo.rgb + 0.7;
-		}
-		if (lava > 0.5) {
-			albedo.rgb = pow(blocklightCol * ec / BLOCKLIGHT_I, vec3(2.0));
-			albedo.rgb /= 0.5 * albedo.rgb + 0.5;
-		}
-		#endif
 
 		#ifdef MULTICOLORED_BLOCKLIGHT
 		lightAlbedo = albedo.rgb + 0.00001;
@@ -241,7 +243,7 @@ void main() {
 		if (foliage > 0.5){
 			newNormal = upVec;
 			
-			#ifdef ADVANCED_MATERIALS
+			#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 			newNormal = normalize(mix(outNormal, newNormal, normalMap.z * normalMap.z));
 			#endif
 		}
@@ -264,7 +266,7 @@ void main() {
 		#endif
 
 		float parallaxShadow = 1.0;
-		#ifdef ADVANCED_MATERIALS
+		#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 		vec3 rawAlbedo = albedo.rgb * 0.999 + 0.001;
 		albedo.rgb *= ao * ao;
 
@@ -299,11 +301,15 @@ void main() {
 		blocklightCol = ApplyMultiColoredBlocklight(blocklightCol, screenPos);
 		#endif
 		
+		#if defined GENERATED_EMISSION || defined GENERATED_SPECULAR
+		generateIPBR(albedo, worldPos, viewPos, lightmap, emission, smoothness, metalness, subsurface);
+		#endif
+
 		vec3 shadow = vec3(0.0);
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, normal, lightmap, color.a, NoL, 
 					vanillaDiffuse, parallaxShadow, emission, subsurface, basicSubsurface);
 		
-		#ifdef ADVANCED_MATERIALS
+		#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 		float puddles = 0.0;
 		#ifdef REFLECTION_RAIN
 		float puddlesNoU = dot(outNormal, upVec);
@@ -346,14 +352,14 @@ void main() {
 		albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
 		#endif
 
-		#if (defined OVERWORLD || defined END) && defined ADVANCED_MATERIALS && SPECULAR_HIGHLIGHT > 0
+		#if (defined OVERWORLD || defined END) && (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR) && SPECULAR_HIGHLIGHT > 0
 		vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
 		
 		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
 										   specularColor, shadow * vanillaDiffuse, color.a);
 		#endif
 		
-		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
+		#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR) && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
 		newNormal = outNormal;
 		if ((normalMap.x > -0.999 || normalMap.y > -0.999) && viewVector == viewVector) {
 			normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
@@ -376,14 +382,14 @@ void main() {
 		/* DRAWBUFFERS:08 */
 		gl_FragData[1] = vec4(lightAlbedo, 1.0);
 
-		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+		#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR) && defined REFLECTION_SPECULAR
 		/* DRAWBUFFERS:08367 */
 		gl_FragData[2] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
 		gl_FragData[3] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 		gl_FragData[4] = vec4(fresnel3, 1.0);
 		#endif
 	#else
-		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
+		#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR) && defined REFLECTION_SPECULAR
 		/* DRAWBUFFERS:0367 */
 		gl_FragData[1] = vec4(smoothness, skyOcclusion, 0.0, 1.0);
 		gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
@@ -398,7 +404,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying float mat, recolor;
+flat out int mat;
 
 varying vec2 texCoord, lmCoord;
 
@@ -407,9 +413,10 @@ varying vec3 sunVec, upVec, eastVec;
 
 varying vec4 color;
 
-#ifdef ADVANCED_MATERIALS
+#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 varying float dist;
-
+flat out vec2 absMidCoordPos;
+out vec2 signMidCoordPos;
 varying vec3 binormal, tangent;
 varying vec3 viewVector;
 
@@ -436,7 +443,7 @@ uniform float viewWidth, viewHeight;
 attribute vec4 mc_Entity;
 attribute vec4 mc_midTexCoord;
 
-#ifdef ADVANCED_MATERIALS
+#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 attribute vec4 at_tangent;
 #endif
 
@@ -469,7 +476,7 @@ void main() {
 
 	normal = normalize(gl_NormalMatrix * gl_Normal);
 
-	#ifdef ADVANCED_MATERIALS
+	#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
 	binormal = normalize(gl_NormalMatrix * cross(at_tangent.xyz, gl_Normal.xyz) * at_tangent.w);
 	tangent  = normalize(gl_NormalMatrix * at_tangent.xyz);
 	
@@ -478,15 +485,13 @@ void main() {
 						  tangent.z, binormal.z, normal.z);
 								  
 	viewVector = tbnMatrix * (gl_ModelViewMatrix * gl_Vertex).xyz;
-
-	if (mc_Entity.x == 0)
-		viewVector /= 0.0;
 	
 	dist = length(gl_ModelViewMatrix * gl_Vertex);
 
 	vec2 midCoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;
 	vec2 texMinMidCoord = texCoord - midCoord;
-
+	signMidCoordPos = sign(texMinMidCoord);
+	absMidCoordPos = abs(texMinMidCoord);
 	vTexCoordAM.pq  = abs(texMinMidCoord) * 2;
 	vTexCoordAM.st  = min(texCoord, midCoord - texMinMidCoord);
 	
@@ -494,29 +499,9 @@ void main() {
 	#endif
     
 	color = gl_Color;
-	
-	mat = 0.0; recolor = 0.0;
 
-	if (blockID >= 100 && blockID < 200)
-		mat = 1.0;
-	if (blockID == 105 || blockID == 106){
-		mat = 2.0;
-		color.rgb *= 1.225;
-	}
-	if (blockID >= 200 && blockID < 300)
-		mat = 3.0;
-	if (blockID == 203){
-		mat = 4.0;
-		lmCoord.x += 0.0667;
-	}
-	if (blockID == 208)
-		mat = 5.0;
-
-	if (blockID == 201 || blockID == 205 || blockID == 206)
-		recolor = 1.0;
-
-	if (blockID == 202)
-		lmCoord.x -= 0.0667;
+	//Materials
+	mat = int(mc_Entity.x + 0.5);
 
 	if (color.a < 0.1)
 		color.a = 1.0;
@@ -532,7 +517,7 @@ void main() {
 	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
 	
 	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
-	position.xyz = WavingBlocks(position.xyz, blockID, istopv);
+	position.xyz = getWavingBlocks(position.xyz, istopv, lmCoord.y);
 
     #ifdef WORLD_CURVATURE
 	position.y -= WorldCurvature(position.xz);

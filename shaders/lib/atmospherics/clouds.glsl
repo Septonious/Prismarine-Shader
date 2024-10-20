@@ -75,11 +75,11 @@ float CloudApplyDensity(float noise) {
 	return noise;
 }
 
-float CloudCombineDefault(float noiseBase, float noiseDetail, float noiseCoverage, float sunCoverage) {
+float CloudCombineDefault(float noiseBase, float noiseDetail, float noiseCoverage) {
 	float noise = mix(noiseBase, noiseDetail, 0.0476 * CLOUD_DETAIL) * 21.0;
 
 	noise = mix(noise - noiseCoverage, 21.0 - noiseCoverage * 2.5, 0.33 * rainStrength);
-	noise = max(noise - (sunCoverage * 3.0 + CLOUD_AMOUNT), 0.0);
+	noise = max(noise - CLOUD_AMOUNT, 0.0);
 
 	noise = CloudApplyDensity(noise);
 
@@ -96,7 +96,7 @@ float CloudCombineBlocky(float noiseBase, float noiseCoverage) {
 	return noise;
 }
 
-float CloudSample(vec2 coord, vec2 wind, float cloudGradient, float sunCoverage, float dither) {
+float CloudSample(vec2 coord, vec2 wind, float cloudGradient, float dither) {
 	coord *= 0.004 * CLOUD_STRETCH;
 
 	#if CLOUD_BASE == 0
@@ -107,7 +107,7 @@ float CloudSample(vec2 coord, vec2 wind, float cloudGradient, float sunCoverage,
 	float noiseDetail = CloudSampleDetail(detailCoord, cloudGradient);
 	float noiseCoverage = CloudCoverageDefault(cloudGradient);
 
-	float noise = CloudCombineDefault(noiseBase, noiseDetail, noiseCoverage, sunCoverage);
+	float noise = CloudCombineDefault(noiseBase, noiseDetail, noiseCoverage);
 	
 	return noise;
 	#elif CLOUD_BASE == 1
@@ -118,7 +118,7 @@ float CloudSample(vec2 coord, vec2 wind, float cloudGradient, float sunCoverage,
 	float noiseDetail = CloudSampleDetail(detailCoord, cloudGradient);
 	float noiseCoverage = CloudCoverageDefault(cloudGradient);
 
-	float noise = CloudCombineDefault(noiseBase, noiseDetail, noiseCoverage, sunCoverage);
+	float noise = CloudCombineDefault(noiseBase, noiseDetail, noiseCoverage);
 	
 	return noise;
 	#else
@@ -213,9 +213,6 @@ vec4 DrawCloudVolumetric(vec3 viewPos, vec3 cameraPos, float z, float dither, ve
 	float VoU = dot(nViewPos, upVec);
 	float VoL = dot(nViewPos, lightVec);
 
-	float sunCoverage = mix(abs(VoL), max(VoL, 0.0), shadowFade);
-	sunCoverage = pow(clamp(sunCoverage * 2.0 - 1.0, 0.0, 1.0), 12.0) * (1.0 - rainStrength);
-
 	float halfVoL = mix(abs(VoL) * 0.8, VoL, shadowFade) * 0.5 + 0.5;
 	float halfVoLSqr = halfVoL * halfVoL;
 
@@ -237,7 +234,7 @@ vec4 DrawCloudVolumetric(vec3 viewPos, vec3 cameraPos, float z, float dither, ve
 		float xzNormalizedDistance = length(samplePos.xz - cameraPos.xz) / CLOUD_VOLUMETRIC_SCALE;
 		vec2 cloudCoord = samplePos.xz / CLOUD_VOLUMETRIC_SCALE;
 
-		float noise = CloudSample(cloudCoord * 0.75, wind, cloudGradient, sunCoverage, dither);
+		float noise = CloudSample(cloudCoord * 0.75, wind, cloudGradient, dither);
 		noise *= step(lowerY, samplePos.y) * step(samplePos.y, upperY);
 
 		float sampleLighting = pow(cloudGradient, 1.125 * halfVoLSqr + 0.875) * 0.8 + 0.2;

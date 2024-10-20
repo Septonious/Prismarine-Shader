@@ -129,7 +129,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define CLOUD_OPACITY 1.0 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define CLOUD_BRIGHTNESS 1.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
   
-#define FOG_DENSITY 1.00 //[0.00 0.12 0.25 0.37 0.50 0.62 0.75 0.87 1.00 1.12 1.25 1.37 1.50 1.62 1.75 1.87 2.00 2.12 2.25 2.37 2.50 2.62 2.75 2.87 3.00 3.12 3.25 3.37 3.50 3.62 3.75 3.87 4.00]
+#define FOG_DENSITY 0.50 //[0.00 0.12 0.25 0.37 0.50 0.62 0.75 0.87 1.00 1.12 1.25 1.37 1.50 1.62 1.75 1.87 2.00]
 #define FOG_DENSITY_NETHER 1.00 //[0.00 0.12 0.25 0.37 0.50 0.62 0.75 0.87 1.00 1.12 1.25 1.37 1.50 1.62 1.75 1.87 2.00 2.12 2.25 2.37 2.50 2.62 2.75 2.87 3.00 3.12 3.25 3.37 3.50 3.62 3.75 3.87 4.00]
 #define FOG_DENSITY_END 1.00 //[0.00 0.12 0.25 0.37 0.50 0.62 0.75 0.87 1.00 1.12 1.25 1.37 1.50 1.62 1.75 1.87 2.00 2.12 2.25 2.37 2.50 2.62 2.75 2.87 3.00 3.12 3.25 3.37 3.50 3.62 3.75 3.87 4.00]
 #define FOG_HEIGHT
@@ -165,6 +165,20 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 #define LIGHT_SHAFT_DAY_FALLOFF 0.10 //[0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
 #define LIGHT_SHAFT_NIGHT_FALLOFF 0.50 //[0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
 #define LIGHT_SHAFT_WEATHER_FALLOFF 8.0 //[1.0 1.4 2.0 2.8 4.0 5.6 8.0 11.2 16.0]
+
+//PBR//
+#define GENERATED_EMISSION
+#define EMISSION_STRENGTH 3.00 //[1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+//#define EMISSIVE_CONCRETE
+#define EMISSIVE_FLOWERS
+#define EMISSIVE_ORES
+#define GENERATED_NORMALS
+#define GENERATED_SPECULAR
+#define RAIN_PUDDLES
+#define RAIN_PUDDLES_STRENGTH 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
+#define NORMAL_STRENGTH 3.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
+#define NORMAL_RESOLUTION 128.0 //[64.0 96.0 128.0 160.0 192.0]
+#define NORMAL_THRESHOLD 0.15 //[0.05 0.10 0.15 0.20 0.25]
 
 //Water//
 #define WATER_MODE 0 //[0 1 2 3]
@@ -419,16 +433,10 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 //Animations//
 //#define WORLD_TIME_ANIMATION
 #define ANIMATION_SPEED 1.00 //[0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.50 3.00 3.50 4.00 5.00 6.00 7.00 8.00]
-#define WAVING_GRASS
-#define WAVING_CROP
-#define WAVING_PLANT
-#define WAVING_TALL_PLANT
-#define WAVING_LEAF
-#define WAVING_VINE
-#define WAVING_WATER
-#define WAVING_LAVA
-#define WAVING_FIRE
-#define WAVING_LANTERN
+#define WAVING_PLANTS
+#define WAVING_LEAVES
+#define WAVING_AMPLITUDE 2.50 //[1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+#define WAVING_SPEED 1.2 //[0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
 
 //Undefine//
   #ifdef NETHER
@@ -500,6 +508,13 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
   #ifdef SKY_DEFERRED
   #endif
 
+#ifdef GENERATED_SPECULAR
+#define REFLECTION_SPECULAR
+#endif
+
+/////////////// STUFF //////////////////
+vec4 waterColorSqrt = vec4(vec3(WATER_R, WATER_G, WATER_B) / 255.0, 1.0) * WATER_I;
+vec4 waterColor = waterColorSqrt * waterColorSqrt;
 
 ////////////// F U N C T I O N S //////////////
 float pow2(float x) {return x*x;}

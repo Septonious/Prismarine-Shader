@@ -1,133 +1,48 @@
 const float pi = 3.1415927;
 float pi2wt = 6.2831854 * (frametime * 24.0);
 
-float GetNoise(vec2 pos) {
-	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
+vec3 calculateWaving(vec3 worldPos, float wind) {
+    float strength = sin(wind + worldPos.z + worldPos.y) * 0.25 + 0.05;
+
+    float d0 = sin(wind * 0.0125);
+    float d1 = sin(wind * 0.0090);
+    float d2 = sin(wind * 0.0105);
+
+    return vec3(sin(wind * 0.0065 + d0 + d1 - worldPos.x + worldPos.z + worldPos.y), 
+                sin(wind * 0.0225 + d1 + d2 + worldPos.x - worldPos.z + worldPos.y),
+                sin(wind * 0.0015 + d2 + d0 + worldPos.z + worldPos.y - worldPos.y)) * strength;
 }
 
-float Noise2D(vec2 pos) {
-    vec2 flr = floor(pos);
-    vec2 frc = fract(pos);
-    frc = frc * frc * (3.0 - 2.0 * frc);
+vec3 calculateMovement(vec3 worldPos, float density, float speed, vec2 mult, float viewLength) {
+    vec3 wave = calculateWaving(worldPos * density, frameTimeCounter * speed * WAVING_SPEED * viewLength);
 
-    float n00 = GetNoise(flr);
-    float n01 = GetNoise(flr + vec2(0.0, 1.0));
-    float n10 = GetNoise(flr + vec2(1.0, 0.0));
-    float n11 = GetNoise(flr + vec2(1.0, 1.0));
-
-    float n0 = mix(n00, n01, frc.y);
-    float n1 = mix(n10, n11, frc.y);
-
-    return mix(n0, n1, frc.x) - 0.5;
+    return wave * vec3(mult, mult.x) * WAVING_AMPLITUDE;
 }
 
-vec3 CalcMove(vec3 pos, float density, float speed, vec2 mult) {
-    pos = pos * density + frametime * speed;
-    vec3 wave = vec3(Noise2D(pos.yz), Noise2D(pos.xz + 0.333), Noise2D(pos.xy + 0.667));
-    return wave * vec3(mult, mult.x);
-}
-
-float CalcLilypadMove(vec3 worldpos) {
-    float wave = sin(2 * pi * (frametime * 0.7 + worldpos.x * 0.14 + worldpos.z * 0.07)) +
-                 sin(2 * pi * (frametime * 0.5 + worldpos.x * 0.10 + worldpos.z * 0.20));
-    return wave * 0.0125;
-}
-
-float CalcLavaMove(vec3 worldpos) {
-    float fy = fract(worldpos.y + 0.005);
-		
-    if (fy > 0.01) {
-    float wave = sin(pi * (frametime * 0.7 + worldpos.x * 0.14 + worldpos.z * 0.07)) +
-                 sin(pi * (frametime * 0.5 + worldpos.x * 0.10 + worldpos.z * 0.20));
-    return wave * 0.0125;
-    } else return 0.0;
-}
-
-vec3 CalcLanternMove(vec3 position) {
-    vec3 frc = fract(position);
-    frc = vec3(frc.x - 0.5, fract(frc.y - 0.001) - 1.0, frc.z - 0.5);
-    vec3 flr = position - frc;
-    float offset = flr.x * 2.4 + flr.y * 2.7 + flr.z * 2.2;
-
-    float rmult = pi * 0.016;
-    float rx = sin(frametime       + offset) * rmult;
-    float ry = sin(frametime * 1.7 + offset) * rmult;
-    float rz = sin(frametime * 1.4 + offset) * rmult;
-    mat3 rotx = mat3(
-               1,        0,        0,
-               0,  cos(rx), -sin(rx),
-               0,  sin(rx),  cos(rx)
-    );
-    mat3 roty = mat3(
-         cos(ry),        0,  sin(ry),
-               0,        1,        0,
-        -sin(ry),        0,  cos(ry)
-    );
-    mat3 rotz = mat3(
-         cos(rz), -sin(rz),        0,
-         sin(rz),  cos(rz),        0,
-               0,        0,        1
-    );
-    frc = rotx * roty * rotz * frc;
-    
-    return flr + frc - position;
-}
-
-vec3 WavingBlocks(vec3 position, int blockID, float istopv) {
+vec3 getWavingBlocks(vec3 worldPos, float istopv, float skyLightMap) {
     vec3 wave = vec3(0.0);
-    vec3 worldpos = position + cameraPosition;
 
-    #ifdef WAVING_GRASS
-    if (blockID == 100 && istopv > 0.9)
-        wave += CalcMove(worldpos, 0.35, 1.0, vec2(0.25, 0.06));
-    #endif
+    if (skyLightMap > 0.0) {
+        //float viewLength = clamp(length(worldPos) * 0.5, 0.0, 1.0);
+        float viewLength = 1.0;
+        vec3 pos = worldPos + cameraPosition;
 
-    #ifdef WAVING_CROP
-    if (blockID == 104 && (istopv > 0.9 || fract(worldpos.y + 0.0675) > 0.01))
-        wave += CalcMove(worldpos, 0.35, 1.0, vec2(0.15, 0.06));
-    #endif
+        #ifdef WAVING_PLANTS
+        if (istopv > 0.9 && (mc_Entity.x == 10304 || (mc_Entity.x >= 10035 && mc_Entity.x <= 10040))) { // Grass
+            wave += calculateMovement(pos, 1.5, 1.0, vec2(0.1, 0.04), viewLength) * (3.0 - pow(viewLength, 0.25) * 2.0);
+        } else if ((mc_Entity.x == 10305 || mc_Entity.x == 10307 || mc_Entity.x == 10309 || mc_Entity.x == 10311 || mc_Entity.x == 10318) && (istopv > 0.9 || fract(pos.y + 0.005) > 0.01) || mc_Entity.x == 10306 || mc_Entity.x == 10308 || mc_Entity.x == 10310 || mc_Entity.x == 10312 || mc_Entity.x == 10319) { // Large Flowers (real big)
+            wave += calculateMovement(pos, 0.85, 0.75, vec2(0.12, 0.06), viewLength);
+        } else if (mc_Entity.x == 10315) { // Vines
+            wave += calculateMovement(pos, 0.60, 0.95, vec2(0.04, 0.04), viewLength); 
+        }
+        #endif
 
-    #ifdef WAVING_PLANT
-    if (blockID == 101 && (istopv > 0.9 || fract(worldpos.y + 0.005) > 0.01))
-        wave += CalcMove(worldpos, 0.7, 1.35, vec2(0.12, 0.00));
-    if (blockID == 107 || blockID == 207)
-        wave += CalcMove(worldpos, 0.5, 1.25, vec2(0.06, 0.00));
-    if (blockID == 108)
-        wave.y += CalcLilypadMove(worldpos);
-    #endif
+        #ifdef WAVING_LEAVES
+        if (mc_Entity.x == 10314) wave += calculateMovement(pos, 0.75, 1.1, vec2(0.04, 0.04), viewLength);
+        #endif
 
-    #ifdef WAVING_TALL_PLANT
-    if (blockID == 102 && (istopv > 0.9 || fract(worldpos.y + 0.005) > 0.01) ||
-        blockID == 103)
-        wave += CalcMove(worldpos, 0.35, 1.15, vec2(0.15, 0.06));
-    #endif
+        return worldPos + wave * skyLightMap;
+    }
 
-    #ifdef WAVING_LEAF
-    if (blockID == 105)
-        wave += CalcMove(worldpos, 0.25, 1.0, vec2(0.08, 0.08));
-    #endif
-
-    #ifdef WAVING_VINE
-    if (blockID == 106)
-        wave += CalcMove(worldpos, 0.35, 1.25, vec2(0.06, 0.06));     
-    #endif
-    
-    #ifdef WAVING_LAVA
-    if (blockID == 203)
-        wave.y += CalcLavaMove(worldpos);
-    #endif
-
-    #ifdef WAVING_FIRE
-    if (blockID == 204 && istopv > 0.9)
-        wave += CalcMove(worldpos, 1.0, 1.5, vec2(0.0, 0.37));
-    #endif
-
-    #ifdef WAVING_LANTERN
-    if (blockID == 206)
-		wave += CalcLanternMove(worldpos);
-    #endif
-
-    position += wave;
-
-    return position;
+    return worldPos;
 }

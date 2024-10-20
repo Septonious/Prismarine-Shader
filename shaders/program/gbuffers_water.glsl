@@ -602,20 +602,7 @@ void main() {
 			#endif
 		}
 
-		#if WATER_FOG == 1
-		if((isEyeInWater == 0 && water > 0.5) || (isEyeInWater == 1 && water < 0.5)) {
-			float opaqueDepth = texture2D(depthtex1, screenPos.xy).r;
-			vec3 opaqueScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), opaqueDepth);
-			#ifdef TAA
-			vec3 opaqueViewPos = ToNDC(vec3(TAAJitter(opaqueScreenPos.xy, -0.5), opaqueScreenPos.z));
-			#else
-			vec3 opaqueViewPos = ToNDC(opaqueScreenPos);
-			#endif
 
-			vec4 waterFog = GetWaterFog(opaqueViewPos - viewPos.xyz) * lightmap.y;
-			albedo = mix(waterFog, vec4(albedo.rgb, 1.0), albedo.a);
-		}
-		#endif
 
 		Fog(albedo.rgb, viewPos);
 
@@ -751,10 +738,10 @@ void main() {
 	
 	mat = 0.0;
 	
-	if (blockID == 300 || blockID == 304) mat = 1.0;
-	if (blockID == 301)					  mat = 2.0;
-	if (blockID == 302) 				  mat = 3.0;
-	if (blockID == 303) 				  mat = 4.0;
+	if (blockID == 0) mat = 1.0; //water
+	if (blockID >= 201 && blockID <= 216) mat = 2.0; //glass
+	if (blockID == 1) mat = 3.0; //ice slime
+	if (blockID == 31) mat = 4.0; //portal
 
 	const vec2 sunRotationData = vec2(
 		 cos(sunPathRotation * 0.01745329251994),
