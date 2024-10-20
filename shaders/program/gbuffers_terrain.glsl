@@ -355,7 +355,7 @@ void main() {
 		#if (defined OVERWORLD || defined END) && (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR) && SPECULAR_HIGHLIGHT > 0
 		vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
 		
-		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
+		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, 0.2 + smoothness * 0.8, baseReflectance,
 										   specularColor, shadow * vanillaDiffuse, color.a);
 		#endif
 		
