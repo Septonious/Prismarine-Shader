@@ -243,7 +243,7 @@ void main() {
 		if (foliage > 0.5){
 			newNormal = upVec;
 			
-			#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
+			#ifdef ADVANCED_MATERIALS
 			newNormal = normalize(mix(outNormal, newNormal, normalMap.z * normalMap.z));
 			#endif
 		}
@@ -306,7 +306,7 @@ void main() {
 		#endif
 
 		vec3 shadow = vec3(0.0);
-		GetLighting(albedo.rgb, shadow, viewPos, worldPos, normal, lightmap, color.a, NoL, 
+		GetLighting(albedo.rgb, shadow, viewPos, worldPos, newNormal, lightmap, color.a, NoL, 
 					vanillaDiffuse, parallaxShadow, emission, subsurface, basicSubsurface);
 		
 		#if (defined ADVANCED_MATERIALS || defined GENERATED_EMISSION || defined GENERATED_SPECULAR)
