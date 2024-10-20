@@ -306,7 +306,7 @@ void main() {
 
 		GetMaterials(smoothness, skyOcclusion, normal, fresnel3, texCoord);
 
-		if (smoothness > 0.0) {
+		if (smoothness > 0.0 && z > 0.56) {
 			vec4 reflection = vec4(0.0);
 			vec3 skyReflection = vec3(0.0);
 			
