@@ -111,6 +111,10 @@ void main() {
 	if (moonVisibility > 0.0) DrawStars(albedo.rgb, viewPos.xyz);
 	#endif
 
+	#ifdef OVERWORLD_NEBULA
+	albedo += DrawNebula(viewPos.xyz);
+	#endif
+
 	float dither = Bayer8(gl_FragCoord.xy);
 
 	#ifdef AURORA

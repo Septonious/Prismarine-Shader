@@ -296,7 +296,7 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	
 	float VoU = clamp(dot(normalize(viewPos), upVec), 0.0, 1.0);
 	float VoL = dot(normalize(viewPos), sunVec);
-	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength) * moonVisibility;
+	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength);
 	
 	float star = 1.0;
 	if (VoU > 0.0) {
@@ -397,4 +397,81 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	return aurora * visibility;
 }
 #endif
+#endif
+
+#ifdef OVERWORLD_NEBULA
+float nebulaSample(vec2 coord, vec2 wind, float VoU) {
+	float noise = texture2D(noisetex, coord * 1.0000 - wind * 0.25).b * 2.5;
+		  noise-= texture2D(noisetex, coord * 0.5000 + wind * 0.20).b * 1.5;
+		  noise+= texture2D(noisetex, coord * 0.2500 - wind * 0.15).b * 3.0;
+		  noise+= texture2D(noisetex, coord * 0.1250 + wind * 0.10).b * 3.5;
+
+	noise *= NEBULA_AMOUNT;
+
+	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.5), 0.0);
+
+	return noise;
+}
+
+float InterleavedGradientNoise1() {
+	float n = 52.9829189 * fract(0.06711056 * gl_FragCoord.x + 0.00583715 * gl_FragCoord.y);
+
+	return fract(n);
+}
+
+void erodeCoord(inout vec2 coord, in float currentStep, in float erosionStrength){
+	coord += cos(mix(vec2(cos(currentStep * 1.00), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.0), sin(currentStep * 4.00)), currentStep) * erosionStrength);
+}
+
+vec3 DrawNebula(vec3 viewPos) {
+	float VoU = dot(normalize(viewPos.xyz), upVec);
+	float visFactor = (1.0 - rainStrength) * moonVisibility;
+
+	vec3 nebula = vec3(0.0);
+	vec3 nebulaColor = vec3(0.0);
+
+	if (visFactor > 0 && VoU > 0){
+		float dither = InterleavedGradientNoise1();
+
+		#ifdef TAA
+		dither = fract(16.0 * frameTimeCounter + dither);
+		#endif
+
+		int samples = 5;
+		float sampleStep = 1.0 / samples;
+		float currentStep = dither * sampleStep;
+
+		vec2 wind = vec2(
+			frametime * NEBULA_SPEED * 0.000125,
+			sin(frametime * NEBULA_SPEED * 0.05) * 0.00125
+		);
+
+		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
+		for(int i = 0; i < samples; i++) {
+			vec3 planeCoord = wpos * ((6.0 + currentStep * -2.0) / wpos.y) * 0.005 * NEBULA_STRETCHING;
+
+			vec2 coord = (cameraPosition.xz * 0.000005 + planeCoord.xz);
+
+			erodeCoord(coord, currentStep, 0.1);
+			erodeCoord(coord, currentStep, 0.2);
+
+			float noise = nebulaSample(coord, wind, VoU);
+				 noise *= texture2D(noisetex, coord * 0.25 + wind * 0.25).r;
+				 noise *= texture2D(noisetex, coord + wind * 16.0).r + 0.75;
+				 noise = noise * noise * 2.0 * sampleStep;
+				 noise *= max(sqrt(1.0 - length(planeCoord.xz) * 4.0), 0.0);
+
+			nebulaColor = mix(nebulaLowCol, nebulaHighCol, currentStep);
+
+			nebula += noise * nebulaColor * exp2(-4.0 * i * sampleStep);
+			currentStep += sampleStep;
+		}
+	}
+
+	#if defined UNDERGROUND_SKY && defined OVERWORLD
+	nebula *= mix(clamp((cameraPosition.y - 48.0) / 16.0, 0.0, 1.0), 1.0, eBS);
+	#endif
+
+	return nebula * NEBULA_BRIGHTNESS * visFactor;
+}
 #endif

@@ -403,6 +403,10 @@ void main() {
 		if (moonVisibility > 0.0) DrawStars(color.rgb, viewPos.xyz);
 		#endif
 
+		#ifdef OVERWORLD_NEBULA
+		color.rgb += DrawNebula(viewPos.xyz);
+		#endif
+
 		#ifdef AURORA
 		color.rgb += DrawAurora(viewPos.xyz, dither, 24);
 		#endif
