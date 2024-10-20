@@ -161,5 +161,9 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		if(dot(vl, vl) > 0.0) vl += (dither - 0.25) / 128.0;
 	}
 	
+		#ifdef OVERWORLD
+		vl *= pow(lightCol, vec3(1.0 - VoL * 0.33));
+		#endif
+
 	return vl;
 }

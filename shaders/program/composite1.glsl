@@ -54,7 +54,7 @@ void main() {
 		 vl*= vl * 0.0625;
 
 	#ifdef OVERWORLD
-    vl *= lightCol * 0.25;
+    vl *= 0.25;
 	#endif
 
 	#ifdef END
