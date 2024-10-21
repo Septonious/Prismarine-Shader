@@ -325,11 +325,11 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 #ifdef AURORA
 #include "/lib/color/auroraColor.glsl"
 
-float AuroraSample(vec2 coord, vec2 wind, float VoU) {
-	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 3.0;
-		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 3.0;
+float AuroraSample(vec2 coord, vec2 wind) {
+	float noise = texture2D(noisetex, coord * 0.04 + wind * 0.25).b * 3.0;
+		  noise+= texture2D(noisetex, coord * 0.02 + wind * 0.15).b * 3.0;
 
-	noise = max(1.0 - 4.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
+	noise = max(1.0 - 2.0 * abs(noise - 3.0), 0.0);
 
 	return noise;
 }
@@ -364,21 +364,21 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	if (VoU > 0.0 && visibility > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((8.0 + currentStep * 7.0) / wpos.y) * 0.004;
+			vec3 planeCoord = wpos * ((6.0 + currentStep * 16.0) / wpos.y) * 0.003;
 
 			vec2 coord = cameraPosition.xz * 0.00004 + planeCoord.xz;
-			coord += vec2(coord.y, -coord.x) * 0.3;
+				 coord += vec2(coord.y, -coord.x) * 0.6;
 
-			float noise = AuroraSample(coord, wind, VoU);
+			float noise = AuroraSample(coord, wind);
 			
 			if (noise > 0.0) {
 				noise *= texture2D(noisetex, coord * 0.125 + wind * 0.25).b;
-				noise *= 0.5 * texture2D(noisetex, coord + wind * 16.0).b + 0.75;
+				noise *= texture2D(noisetex, coord + wind * 16.0).b * 0.5 + 0.75;
 				noise = noise * noise * 3.0 * sampleStep;
-				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 3.75), 0.0);
+				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 3.0), 0.0);
 
 				vec3 auroraColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4));
-				aurora += noise * auroraColor * exp2(-6.0 * i * sampleStep);
+				aurora += noise * auroraColor * exp2(-8.0 * i * sampleStep);
 			}
 			currentStep += sampleStep;
 		}
