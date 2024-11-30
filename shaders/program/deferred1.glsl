@@ -389,7 +389,7 @@ void main() {
 	#endif
 	} else {
 		#if defined OVERWORLD && defined SKY_DEFERRED
-		color.rgb += atmosphere;
+		color.rgb = atmosphere;
 	
 		#ifdef SHADER_SUN_MOON
 		vec3 lightMA = mix(lightMorning, lightEvening, mefade);
