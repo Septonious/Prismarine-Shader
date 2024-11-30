@@ -78,7 +78,7 @@ float CloudApplyDensity(float noise) {
 float CloudCombineDefault(float noiseBase, float noiseDetail, float noiseCoverage) {
 	float noise = mix(noiseBase, noiseDetail, 0.0476 * CLOUD_DETAIL) * 21.0;
 
-	noise = mix(noise - noiseCoverage, 21.0 - noiseCoverage * 2.5, 0.33 * rainStrength);
+	noise = mix(noise - noiseCoverage, 18.0 - noiseCoverage * 2.5, 0.33 * rainStrength);
 	noise = max(noise - CLOUD_AMOUNT, 0.0);
 
 	noise = CloudApplyDensity(noise);

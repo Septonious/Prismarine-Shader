@@ -441,6 +441,25 @@ void main() {
 		
 		float fresnel = pow(clamp(1.0 + dot(newNormal, normalize(viewPos)), 0.0, 1.0), 5.0);
 
+		if (water > 0.5) {
+			#ifdef WATER_FOG
+			float oDepth = texture2D(depthtex1, screenPos.xy).r;
+			vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
+			vec3 oViewPos = ToNDC(oScreenPos);
+
+			vec4 waterFog = GetWaterFog(viewPos.xyz - oViewPos);
+
+			albedo.rgb = mix(sqrt(albedo.rgb), sqrt(waterFog.rgb), waterFog.a);
+			albedo.rgb *= albedo.rgb * (1.0 - pow(waterFog.a, 1.5));
+
+			#ifdef OVERWORLD
+			albedo.rgb *= 0.5 + timeBrightness * 0.5;
+			#endif
+
+			albedo.a = clamp(albedo.a * mix(0.5, 2.0, waterFog.a), 0.05, 0.95);
+			#endif
+		}
+
 		if (water > 0.5 || ((translucent + glass) > 0.5 && albedo.a < 0.95)) {
 			#if REFLECTION > 0
 			vec4 reflection = vec4(0.0);
@@ -601,8 +620,6 @@ void main() {
 										   	   specularColor, shadow * vanillaDiffuse, color.a);
 			#endif
 		}
-
-
 
 		Fog(albedo.rgb, viewPos);
 

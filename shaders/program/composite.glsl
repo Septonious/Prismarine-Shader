@@ -287,7 +287,7 @@ void main() {
 	
     /*DRAWBUFFERS:01*/
 	gl_FragData[0] = color;
-	gl_FragData[1] = vec4(vl, 1.0);
+	gl_FragData[1] = vec4(vl * vl, 1.0);
 
 	#ifdef MULTICOLORED_BLOCKLIGHT
 		/*DRAWBUFFERS:019*/

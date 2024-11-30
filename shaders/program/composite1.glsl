@@ -51,7 +51,7 @@ void main() {
 		 vl+= texture2D(colortex1, texCoord.xy + vlOffsets[1] / vec2(viewWidth, viewHeight)).rgb;
 		 vl+= texture2D(colortex1, texCoord.xy + vlOffsets[2] / vec2(viewWidth, viewHeight)).rgb;
 		 vl+= texture2D(colortex1, texCoord.xy + vlOffsets[3] / vec2(viewWidth, viewHeight)).rgb;
-		 vl*= vl * 0.0625;
+		 vl*=  0.0625;
 
 	#ifdef OVERWORLD
     vl *= 0.25;

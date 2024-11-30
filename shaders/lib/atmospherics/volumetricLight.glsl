@@ -50,7 +50,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	
 	vec3 screenPos = vec3(texCoord, pixeldepth0);
 	vec4 viewPos = gbufferProjectionInverse * (vec4(screenPos, 1.0) * 2.0 - 1.0);
-	viewPos /= viewPos.w;
+		 viewPos /= viewPos.w;
 	
 	vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
@@ -64,9 +64,9 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	float invvisfactor = 1.0 - visfactor;
 
 	float visibility = clamp(VoL * 0.5 + 0.5, 0.0, 1.0);
-	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
-	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility = mix(1.0, visibility, 0.03125 * eBS + 0.96875);
+		  visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
+		  visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
+		  visibility = mix(1.0, visibility, 0.03125 * eBS + 0.96875);
 	#endif
 	
 	#ifdef END
@@ -123,13 +123,6 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(16.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) {
-					#ifdef WATER_SHADOW_COLOR
-					shadow *= 0.125 * (1.0 + eBS);
-					#else
-					shadow *= watercol * 0.01 * (1.0 + eBS);
-					#endif
-				}
 
 				#ifdef END
 				vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0);
@@ -141,9 +134,6 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				#endif
 				
 				vl += shadow;
-			}
-			else{
-				vl += 1.0;
 			}
 		}
 		
@@ -161,9 +151,10 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		if(dot(vl, vl) > 0.0) vl += (dither - 0.25) / 128.0;
 	}
 	
-		#ifdef OVERWORLD
-		vl *= pow(lightCol, vec3(1.0 - VoL * 0.33));
-		#endif
+	#ifdef OVERWORLD
+	if (isEyeInWater == 0) vl *= pow(lightCol, vec3(1.0 - VoL * 0.25));
+	else vl *= waterColorSqrt.rgb * 8.0;
+	#endif
 
 	return vl;
 }
