@@ -152,7 +152,7 @@ const float shadowMapBias = 1.0 - 25.6 / shadowDistance;
 
 #define SHADER_SUN_MOON
 #define SHADER_SUN_MOON_SHAPE 0 //[0 1]
-#define SHADER_SUN_MOON_SIZE 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50]
+#define SHADER_SUN_MOON_SIZE 0.50 //[0.25 0.50 0.75 1.00 1.25 1.50]
 #define STARS
 #define AURORA
 #define SKYBOX_INTENSITY 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]

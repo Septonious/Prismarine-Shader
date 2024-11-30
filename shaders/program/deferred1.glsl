@@ -391,7 +391,7 @@ void main() {
 		#if defined OVERWORLD && defined SKY_DEFERRED
 		color.rgb += atmosphere;
 	
-		#ifdef ROUND_SUN_MOON
+		#ifdef SHADER_SUN_MOON
 		vec3 lightMA = mix(lightMorning, lightEvening, mefade);
 		vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);
 		vec3 moonColor = sqrt(lightNight);
