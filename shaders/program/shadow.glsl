@@ -216,11 +216,7 @@ void main() {
 	
 	mat = 0;
 	if (blockID == 301 || blockID == 302) mat = 1;
-	if (blockID == 300 || blockID == 304) mat = 2;
-	
-	#ifndef SHADOW_VEGETATION
-	if (blockID >= 100 && blockID <= 104) mat = 3;
-	#endif
+	if (blockID == 0) mat = 2;
 	
 	vec4 position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 

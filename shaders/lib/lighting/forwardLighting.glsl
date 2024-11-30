@@ -75,7 +75,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #ifdef OVERWORLD
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
     vec3 sceneLighting = mix(ambientCol * lightmap.y, lightCol, fullShadow * shadowMult);
-    sceneLighting *= skylightSqr * (1.0 + scattering * shadow);
+    sceneLighting *= lightmap.y * (1.0 + scattering * shadow);
 
     #ifdef CLASSIC_EXPOSURE
     sceneLighting *= 4.0 - 3.0 * eBS;
