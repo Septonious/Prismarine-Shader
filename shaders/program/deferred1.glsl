@@ -400,7 +400,7 @@ void main() {
 		#endif
 
 		#ifdef STARS
-		if (moonVisibility > 0.0) DrawStars(color.rgb, viewPos.xyz);
+		DrawStars(color.rgb, viewPos.xyz);
 		#endif
 
 		#ifdef OVERWORLD_NEBULA
@@ -422,8 +422,12 @@ void main() {
 		color.rgb = netherCol.rgb * 0.0425;
 		#endif
 		#ifdef END
-		#ifdef SHADER_END_SKY
-		color.rgb = GetEndSkyColor(viewPos.xyz);
+		#ifdef END_STARS
+		DrawEndStars(color.rgb, viewPos.xyz);
+		#endif
+
+		#ifdef END_NEBULA
+		color.rgb += DrawEndNebula(viewPos.xyz);
 		#endif
 
 		#ifndef LIGHT_SHAFT

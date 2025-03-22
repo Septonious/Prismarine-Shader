@@ -110,13 +110,9 @@ void main() {
 	#endif
 
 	#ifdef END
-	albedo.rgb = pow(albedo.rgb, vec3(2.2));
+	albedo.rgb = endCol.rgb * 0.01;
 
-	#ifdef SKY_DESATURATION
-	albedo.rgb = GetLuminance(albedo.rgb) * endCol.rgb;
-	#endif
-
-	albedo.rgb *= SKYBOX_INTENSITY * 0.02 * 16.0 / 16.0;
+	albedo.rgb *= SKYBOX_INTENSITY;
 	#endif
 
 	#if ALPHA_BLEND == 0

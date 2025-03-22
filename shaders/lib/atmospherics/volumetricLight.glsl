@@ -71,7 +71,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	
 	#ifdef END
 	VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
-	float visibility = VoL;
+	float visibility = VoL * 4.0;
 	#endif
 
 	visibility *= 0.14285 * float(pixeldepth0 > 0.56);
